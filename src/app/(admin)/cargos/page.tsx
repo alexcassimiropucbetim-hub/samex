@@ -1,0 +1,138 @@
+import { getRoleTypes, createRoleType, updateRoleType, deleteRoleType } from "@/actions/roleType";
+import { Briefcase, Plus, Trash2, Pencil, X } from "lucide-react";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+
+export default async function CargosPage({
+  searchParams,
+}: {
+  searchParams: { edit?: string };
+}) {
+  const cargos = await getRoleTypes();
+  
+  const editingId = searchParams.edit;
+  const editingRole = editingId ? cargos.find(c => c.id === editingId) : null;
+
+  return (
+    <div className="space-y-8 animate-in fade-in duration-500">
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+          <Briefcase className="text-indigo-500" /> Cargos
+        </h1>
+        <p className="text-slate-500 mt-2">Gerenciamento dos tipos de cargo (ex: Músico, Organista, Instrutor).</p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Form */}
+        <div className="glass-card h-fit lg:col-span-1">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-slate-900">
+              {editingRole ? "Editar Cargo" : "Novo Cargo"}
+            </h2>
+            {editingRole && (
+              <Link href="/cargos" className="text-slate-500 hover:text-slate-900 transition-colors">
+                <X className="w-5 h-5" />
+              </Link>
+            )}
+          </div>
+          
+          <form action={async (formData) => {
+            "use server";
+            if (editingRole) {
+              await updateRoleType(editingRole.id, formData);
+              redirect("/cargos");
+            } else {
+              await createRoleType(formData);
+            }
+          }} className="space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
+                Nome do Cargo
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                defaultValue={editingRole?.name || ""}
+                placeholder="Ex: Músico Oficial..."
+                className="input-glass focus:ring-indigo-500"
+              />
+            </div>
+
+            <button type="submit" className="btn-primary w-full flex justify-center items-center gap-2">
+              {editingRole ? (
+                <>
+                  <Pencil className="w-5 h-5" /> Salvar Alterações
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" /> Cadastrar Cargo
+                </>
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* Table List */}
+        <div className="lg:col-span-3 space-y-4 overflow-hidden">
+          <h2 className="text-xl font-semibold text-slate-900 mb-4">Cargos Cadastrados ({cargos.length})</h2>
+          
+          {cargos.length === 0 ? (
+            <div className="glass-card text-center text-slate-500 py-10">
+              Nenhum cargo cadastrado ainda.
+            </div>
+          ) : (
+            <div className="glass-card overflow-x-auto p-0">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="border-b border-slate-200 bg-slate-100">
+                    <th className="p-4 text-sm font-semibold text-slate-600">Tipo de Cargo</th>
+                    <th className="p-4 text-sm font-semibold text-slate-600 text-center w-32">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {cargos.map((cargo) => (
+                    <tr key={cargo.id} className="hover:bg-slate-100 transition-colors">
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-400 shrink-0">
+                            <Briefcase className="w-4 h-4" />
+                          </div>
+                          <span className="font-medium text-slate-900">{cargo.name}</span>
+                        </div>
+                      </td>
+                      <td className="p-4 text-center">
+                        <div className="flex justify-center items-center gap-2">
+                          <Link 
+                            href={`/cargos?edit=${cargo.id}`}
+                            className="text-slate-500 hover:text-indigo-400 p-2 rounded-lg hover:bg-indigo-400/10 transition-colors"
+                            title="Editar Cargo"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Link>
+                          <form action={async () => {
+                            "use server";
+                            await deleteRoleType(cargo.id);
+                          }}>
+                            <button 
+                              type="submit" 
+                              className="text-slate-500 hover:text-red-400 p-2 rounded-lg hover:bg-red-400/10 transition-colors"
+                              title="Excluir Cargo"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </form>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

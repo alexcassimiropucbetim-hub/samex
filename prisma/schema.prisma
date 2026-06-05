@@ -1,0 +1,197 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Sector {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  churches       Church[]
+  preEvaluations PreEvaluation[]
+}
+
+model Church {
+  id                       String           @id @default(cuid())
+  name                     String
+  sectorId                 String
+  createdAt                DateTime         @default(now())
+  updatedAt                DateTime         @updatedAt
+  sector                   Sector           @relation(fields: [sectorId], references: [id], onDelete: Cascade)
+  ministry                 Ministry?
+  personInCharges          PersonInCharge[]
+  instructorPreEvaluations PreEvaluation[]  @relation("InstructorChurch")
+  preEvaluations           PreEvaluation[]
+  testSchedules            TestSchedule[]
+}
+
+model Ministry {
+  id             String   @id @default(cuid())
+  elderName      String
+  cooperatorName String
+  churchId       String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  church         Church   @relation(fields: [churchId], references: [id], onDelete: Cascade)
+}
+
+model InstrumentCategory {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  instruments Instrument[]
+}
+
+model Instrument {
+  id                    String             @id @default(cuid())
+  name                  String
+  categoryId            String
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+  category              InstrumentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  currentPreEvaluations PreEvaluation[]    @relation("CurrentInstrument")
+  preEvaluations        PreEvaluation[]
+}
+
+model PersonInCharge {
+  id                   String                @id @default(cuid())
+  login                String                @unique
+  fullName             String
+  gender               String
+  cardNumber           String                @unique
+  churchId             String
+  roleTypeId           String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  roleType             RoleType?             @relation(fields: [roleTypeId], references: [id], onDelete: Cascade)
+  church               Church                @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  testEvaluations      PreEvaluation[]       @relation("TestEvaluator")
+  preEvaluations       PreEvaluation[]
+  preEvaluationResults PreEvaluationResult[] @relation("PreEvaluator")
+  allowedTestTypes     TestType[]            @relation("PersonInChargeToTestType")
+}
+
+model Evaluator {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model RoleType {
+  id              String           @id @default(cuid())
+  name            String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  personInCharges PersonInCharge[]
+}
+
+model TestType {
+  id              String           @id @default(cuid())
+  name            String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  preEvaluations  PreEvaluation[]
+  personInCharges PersonInCharge[] @relation("PersonInChargeToTestType")
+}
+
+model PreEvaluation {
+  id                      String               @id @default(cuid())
+  candidateName           String
+  gender                  String
+  sectorId                String
+  churchId                String
+  instructorName          String?
+  instructorChurchId      String?
+  instrumentId            String
+  personInChargeId        String
+  testTypeId              String
+  msaStatus               String
+  msaJustification        String?
+  status                  String               @default("PENDENTE")
+  testScheduleId          String?
+  testEvaluatorId         String?
+  finalTestStatus         String?              @default("PENDENTE")
+  currentInstrumentId     String?
+  currentTonality         String?
+  desiredTonality         String?
+  officializationDate     String?
+  candidateLevel          String?
+  orchestraNeed           Boolean?
+  illness                 Boolean?
+  approvedInSectorMeeting Boolean?
+  createdAt               DateTime             @default(now())
+  updatedAt               DateTime             @updatedAt
+  meetingDate             String?
+  meetingElderName        String?
+  meetingLocality         String?
+  currentInstrument       Instrument?          @relation("CurrentInstrument", fields: [currentInstrumentId], references: [id])
+  testEvaluator           PersonInCharge?      @relation("TestEvaluator", fields: [testEvaluatorId], references: [id])
+  testSchedule            TestSchedule?        @relation(fields: [testScheduleId], references: [id])
+  testType                TestType             @relation(fields: [testTypeId], references: [id])
+  personInCharge          PersonInCharge       @relation(fields: [personInChargeId], references: [id])
+  instrument              Instrument           @relation(fields: [instrumentId], references: [id])
+  instructorChurch        Church?              @relation("InstructorChurch", fields: [instructorChurchId], references: [id])
+  church                  Church               @relation(fields: [churchId], references: [id])
+  sector                  Sector               @relation(fields: [sectorId], references: [id])
+  evaluationResult        PreEvaluationResult?
+}
+
+model PreEvaluationResult {
+  id              String          @id @default(cuid())
+  preEvaluationId String          @unique
+  evaluatorId     String?
+  q1Leitura       String
+  q2Pulso         String
+  q3Afinacao      String
+  q4Escalas       String
+  q5Postura       String
+  q6Timbre        String
+  q7Voz           String
+  q8Dinamica      String
+  observacao      String?
+  msaLessons      String?
+  methodLessons   String?
+  hymns           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  evaluator       PersonInCharge? @relation("PreEvaluator", fields: [evaluatorId], references: [id])
+  preEvaluation   PreEvaluation   @relation(fields: [preEvaluationId], references: [id], onDelete: Cascade)
+}
+
+model TestSchedule {
+  id         String          @id @default(cuid())
+  testDate   DateTime
+  churchId   String
+  masterKey  String?
+  isClosed   Boolean         @default(false)
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+  elderName  String?
+  candidates PreEvaluation[]
+  church     Church          @relation(fields: [churchId], references: [id])
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

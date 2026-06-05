@@ -10,7 +10,7 @@ import SearchInput from "@/components/SearchInput";
 export default async function EncarregadosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ edit?: string, page?: string, q?: string }>;
+  searchParams: Promise<{ edit?: string, page?: string, q?: string, error?: string }>;
 }) {
   const churches = await getChurches();
   const cargos = await getRoleTypes();

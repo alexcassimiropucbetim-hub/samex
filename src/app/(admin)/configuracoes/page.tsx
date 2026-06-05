@@ -1,17 +1,29 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { saveConfig } from "@/actions/config-actions";
-import { Upload, Image as ImageIcon, Save, Check, Loader2 } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { saveConfig, getConfig } from "@/actions/config-actions";
+import { Upload, Image as ImageIcon, Save, Check, Loader2, Cloud } from "lucide-react";
 
 export default function ConfiguracoesPage() {
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
   const [faviconBase64, setFaviconBase64] = useState<string | null>(null);
+  const [driveFolderId, setDriveFolderId] = useState("");
+  const [driveServiceAccount, setDriveServiceAccount] = useState("");
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 
   const logoInputRef = useRef<HTMLInputElement>(null);
   const faviconInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    async function loadConfigs() {
+      const folderId = await getConfig("google_drive_folder_id");
+      const serviceAccount = await getConfig("google_drive_service_account");
+      if (folderId) setDriveFolderId(folderId);
+      if (serviceAccount) setDriveServiceAccount(serviceAccount);
+    }
+    loadConfigs();
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "logo" | "favicon") => {
     const file = e.target.files?.[0];
@@ -42,10 +54,10 @@ export default function ConfiguracoesPage() {
         await saveConfig("favicon", faviconBase64);
       }
       
+      await saveConfig("google_drive_folder_id", driveFolderId);
+      await saveConfig("google_drive_service_account", driveServiceAccount);
+
       setSuccessMsg("Configurações salvas com sucesso! Recarregue a página para ver todas as alterações.");
-      
-      // Limpar os previews se quiser, ou deixar lá
-      // Para forçar a imagem a recarregar onde ela já está sendo exibida, a API Next fará revalidate
     } catch (error) {
       console.error(error);
       alert("Erro ao salvar configurações.");
@@ -60,7 +72,7 @@ export default function ConfiguracoesPage() {
         <div>
           <h1 className="text-3xl font-bold text-slate-900">Configurações do Sistema</h1>
           <p className="text-slate-500 mt-2">
-            Personalize a aparência do sistema fazendo o upload da sua própria Logo e Favicon.
+            Personalize a aparência do sistema e configure integrações externas (Google Drive).
           </p>
         </div>
       </div>
@@ -136,18 +148,51 @@ export default function ConfiguracoesPage() {
             </div>
           </div>
         </div>
+      </div>
 
+      <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-6 mb-6">
+        <h2 className="text-xl font-semibold text-slate-900 mb-6 flex items-center gap-2">
+          <Cloud className="w-5 h-5 text-blue-500" />
+          Backup no Google Drive
+        </h2>
+        <div className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">ID da Pasta do Google Drive</label>
+            <p className="text-xs text-slate-500 mb-2">Exemplo: 1A2b3C4d5E6f... (encontrado na URL da pasta no navegador)</p>
+            <input 
+              type="text" 
+              value={driveFolderId}
+              onChange={(e) => setDriveFolderId(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Cole o ID da pasta do Drive"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">JSON da Service Account</label>
+            <p className="text-xs text-slate-500 mb-2">Conteúdo do arquivo JSON gerado no Google Cloud (Service Accounts).</p>
+            <textarea 
+              rows={6}
+              value={driveServiceAccount}
+              onChange={(e) => setDriveServiceAccount(e.target.value)}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
+              placeholder='{\n  "type": "service_account",\n  "project_id": "...",\n  ...\n}'
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="bg-white p-6 shadow-sm rounded-2xl border border-slate-200">
         {successMsg && (
-          <div className="mt-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 text-sm font-medium">
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg flex items-center gap-2 text-sm font-medium">
             <Check className="w-4 h-4" />
             {successMsg}
           </div>
         )}
 
-        <div className="mt-8 pt-6 border-t border-slate-200 flex justify-end">
+        <div className="flex justify-end">
           <button
             onClick={handleSave}
-            disabled={loading || (!logoBase64 && !faviconBase64)}
+            disabled={loading}
             className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all disabled:opacity-50 shadow-md shadow-blue-500/20"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}

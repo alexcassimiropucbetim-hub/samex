@@ -26,6 +26,7 @@ model Church {
   sector                   Sector           @relation(fields: [sectorId], references: [id], onDelete: Cascade)
   ministry                 Ministry?
   personInCharges          PersonInCharge[]
+  managedBy                PersonInCharge[] @relation("ManagedChurches")
   instructorPreEvaluations PreEvaluation[]  @relation("InstructorChurch")
   preEvaluations           PreEvaluation[]
   testSchedules            TestSchedule[]
@@ -72,6 +73,7 @@ model PersonInCharge {
   updatedAt            DateTime              @updatedAt
   roleType             RoleType?             @relation(fields: [roleTypeId], references: [id], onDelete: Cascade)
   church               Church                @relation(fields: [churchId], references: [id], onDelete: Cascade)
+  managedChurches      Church[]              @relation("ManagedChurches")
   testEvaluations      PreEvaluation[]       @relation("TestEvaluator")
   preEvaluations       PreEvaluation[]
   preEvaluationResults PreEvaluationResult[] @relation("PreEvaluator")

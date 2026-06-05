@@ -11,24 +11,37 @@ export async function createPersonInCharge(formData: FormData) {
   const churchId = formData.get("churchId") as string;
   const roleTypeId = formData.get("roleTypeId") as string;
   const testTypeIds = formData.getAll("testTypeIds") as string[];
+  const managedChurchIds = formData.getAll("managedChurchIds") as string[];
   
   if (!login || !fullName || !gender || !cardNumber || !churchId || !roleTypeId) return;
 
-  await prisma.personInCharge.create({
-    data: { 
-      login, fullName, gender, cardNumber, churchId, roleTypeId,
-      allowedTestTypes: {
-        connect: testTypeIds.map(id => ({ id }))
-      }
-    },
-  });
+  try {
+    await prisma.personInCharge.create({
+      data: { 
+        login, fullName, gender, cardNumber, churchId, roleTypeId,
+        allowedTestTypes: {
+          connect: testTypeIds.map(id => ({ id }))
+        },
+        managedChurches: {
+          connect: managedChurchIds.map(id => ({ id }))
+        }
+      },
+    });
 
-  revalidatePath("/encarregados");
+    revalidatePath("/encarregados");
+    return { success: true };
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { success: false, error: "O Login ou a Carteirinha informados já estão em uso." };
+    }
+    console.error(error);
+    return { success: false, error: "Ocorreu um erro ao cadastrar o encarregado." };
+  }
 }
 
 export async function getPeopleInCharge() {
   return await prisma.personInCharge.findMany({
-    include: { church: true, roleType: true, allowedTestTypes: true },
+    include: { church: true, roleType: true, allowedTestTypes: true, managedChurches: true },
     orderBy: { createdAt: "desc" },
   });
 }
@@ -50,7 +63,7 @@ export async function getPeopleInChargePaginated(page: number = 1, pageSize: num
     prisma.personInCharge.count({ where }),
     prisma.personInCharge.findMany({
       where,
-      include: { church: true, roleType: true, allowedTestTypes: true },
+      include: { church: true, roleType: true, allowedTestTypes: true, managedChurches: true },
       orderBy: { fullName: "asc" },
       skip,
       take: pageSize,
@@ -69,7 +82,7 @@ export async function getPersonInChargeById(id: string) {
   if (!id) return null;
   return await prisma.personInCharge.findUnique({
     where: { id },
-    include: { church: true, roleType: true, allowedTestTypes: true },
+    include: { church: true, roleType: true, allowedTestTypes: true, managedChurches: true },
   });
 }
 
@@ -89,19 +102,33 @@ export async function updatePersonInCharge(id: string, formData: FormData) {
   const churchId = formData.get("churchId") as string;
   const roleTypeId = formData.get("roleTypeId") as string;
   const testTypeIds = formData.getAll("testTypeIds") as string[];
+  const managedChurchIds = formData.getAll("managedChurchIds") as string[];
   
   if (!login || !fullName || !gender || !cardNumber || !churchId || !roleTypeId) return;
 
-  await prisma.personInCharge.update({
-    where: { id },
-    data: { 
-      login, fullName, gender, cardNumber, churchId, roleTypeId,
-      allowedTestTypes: {
-        set: [], // Clear existing
-        connect: testTypeIds.map(tid => ({ id: tid }))
-      }
-    },
-  });
+  try {
+    await prisma.personInCharge.update({
+      where: { id },
+      data: { 
+        login, fullName, gender, cardNumber, churchId, roleTypeId,
+        allowedTestTypes: {
+          set: [], // Clear existing
+          connect: testTypeIds.map(tid => ({ id: tid }))
+        },
+        managedChurches: {
+          set: [], // Clear existing
+          connect: managedChurchIds.map(id => ({ id }))
+        }
+      },
+    });
 
-  revalidatePath("/encarregados");
+    revalidatePath("/encarregados");
+    return { success: true };
+  } catch (error: any) {
+    if (error.code === 'P2002') {
+      return { success: false, error: "O Login ou a Carteirinha informados já estão em uso." };
+    }
+    console.error(error);
+    return { success: false, error: "Ocorreu um erro ao atualizar o encarregado." };
+  }
 }

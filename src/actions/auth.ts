@@ -8,6 +8,7 @@ import { redirect } from "next/navigation";
 export async function loginEncarregado(formData: FormData) {
   const cardNumber = formData.get("cardNumber") as string;
   const login = formData.get("login") as string;
+  const selectedChurchId = formData.get("selectedChurchId") as string;
 
   if (!cardNumber || !login) {
     return { error: "Preencha a carteirinha e o login." };
@@ -15,12 +16,27 @@ export async function loginEncarregado(formData: FormData) {
 
   const encarregado = await prisma.personInCharge.findUnique({
     where: { cardNumber },
-    include: { roleType: true },
+    include: { roleType: true, church: true, managedChurches: true },
   });
 
   if (!encarregado || encarregado.login !== login) {
     return { error: "Credenciais inválidas. Verifique sua carteirinha e login." };
   }
+
+  // Combine primary church and managed churches, removing duplicates
+  const allChurchesMap = new Map();
+  allChurchesMap.set(encarregado.churchId, encarregado.church);
+  encarregado.managedChurches.forEach(c => allChurchesMap.set(c.id, c));
+  
+  const allChurches = Array.from(allChurchesMap.values());
+
+  // If there are multiple churches and the user hasn't selected one yet, return the list to UI
+  if (allChurches.length > 1 && !selectedChurchId) {
+    return { requireChurchSelection: true, churches: allChurches };
+  }
+
+  // If there's only 1 church, or the user has already selected one, proceed to create session
+  const finalChurchId = selectedChurchId || encarregado.churchId;
 
   // Create session
   await createSession({
@@ -28,7 +44,7 @@ export async function loginEncarregado(formData: FormData) {
     type: "encarregado",
     name: encarregado.fullName,
     roleName: encarregado.roleType?.name || "Sem Cargo",
-    churchId: encarregado.churchId,
+    churchId: finalChurchId,
   });
 
   // Redirect based on role? For now, everyone goes to /portal

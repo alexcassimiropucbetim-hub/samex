@@ -28,6 +28,7 @@ export default async function EncarregadosPage({
   const allowedTestTypeIds = editingPerson ? editingPerson.allowedTestTypes.map(t => t.id) : [];
   
   const editParam = editingId ? `&edit=${editingId}` : "";
+  const errorMsg = resolvedParams?.error;
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -52,13 +53,23 @@ export default async function EncarregadosPage({
             )}
           </div>
           
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-lg">
+              {errorMsg}
+            </div>
+          )}
+
           <form key={editingPerson?.id || "new"} action={async (formData) => {
             "use server";
+            let result;
             if (editingPerson) {
-              await updatePersonInCharge(editingPerson.id, formData);
-              redirect(`/encarregados?page=${page}&q=${q}`);
+              result = await updatePersonInCharge(editingPerson.id, formData);
             } else {
-              await createPersonInCharge(formData);
+              result = await createPersonInCharge(formData);
+            }
+            if (result && !result.success) {
+              redirect(`/encarregados?page=${page}&q=${q}${editParam}&error=${encodeURIComponent(result.error || "")}`);
+            } else {
               redirect(`/encarregados?page=${page}&q=${q}`);
             }
           }} className="space-y-4">
@@ -170,7 +181,7 @@ export default async function EncarregadosPage({
               {tiposTeste.length === 0 ? (
                 <p className="text-xs text-amber-500">Cadastre "Tipos de Teste" primeiro.</p>
               ) : (
-                <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar border border-slate-100 rounded-lg p-2 bg-slate-50/50">
                   {tiposTeste.map(tipo => (
                     <label key={tipo.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
                       <input 
@@ -181,6 +192,31 @@ export default async function EncarregadosPage({
                         className="rounded border-slate-300 bg-slate-100 text-blue-500 focus:ring-blue-500/50"
                       />
                       {tipo.name}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-2">
+              <label className="block text-sm font-medium text-slate-600 mb-2">
+                Igrejas de Atuação (Opcional - Múltiplas)
+              </label>
+              {churches.length === 0 ? (
+                <p className="text-xs text-amber-500">Cadastre Igrejas primeiro.</p>
+              ) : (
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar border border-slate-100 rounded-lg p-2 bg-slate-50/50">
+                  <p className="text-[11px] text-slate-400 mb-2">Selecione além da Comum Congregação, quais outras igrejas ele gerencia.</p>
+                  {churches.map(church => (
+                    <label key={church.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
+                      <input 
+                        type="checkbox" 
+                        name="managedChurchIds" 
+                        value={church.id}
+                        defaultChecked={editingPerson?.managedChurches?.some((mc: any) => mc.id === church.id) || false}
+                        className="rounded border-slate-300 bg-slate-100 text-blue-500 focus:ring-blue-500/50"
+                      />
+                      {church.name}
                     </label>
                   ))}
                 </div>

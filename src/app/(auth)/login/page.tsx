@@ -9,12 +9,38 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [churchSelectionOptions, setChurchSelectionOptions] = useState<any[]>([]);
+  const [tempCredentials, setTempCredentials] = useState<{login: string, cardNumber: string} | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
+
+    // Se estivermos na etapa de selecionar a igreja
+    if (churchSelectionOptions.length > 0 && tempCredentials) {
+      const finalFormData = new FormData();
+      finalFormData.append("cardNumber", tempCredentials.cardNumber);
+      finalFormData.append("login", tempCredentials.login);
+      finalFormData.append("selectedChurchId", formData.get("selectedChurchId") as string);
+      
+      const result = await loginEncarregado(finalFormData);
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+      }
+      return;
+    }
+
     const result = await loginEncarregado(formData);
-    if (result?.error) {
+    
+    if (result?.requireChurchSelection) {
+      setChurchSelectionOptions(result.churches || []);
+      setTempCredentials({
+        cardNumber: formData.get("cardNumber") as string,
+        login: formData.get("login") as string
+      });
+      setLoading(false);
+    } else if (result?.error) {
       setError(result.error);
       setLoading(false);
     }
@@ -53,37 +79,77 @@ export default function LoginPage() {
           </div>
         )}
 
-        <form action={handleSubmit} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1.5">Número da Carteirinha</label>
-            <input 
-              type="text" 
-              name="cardNumber"
-              placeholder="Digite o número da sua carteirinha"
-              required 
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
-            />
-          </div>
+        {churchSelectionOptions.length > 0 ? (
+          <form action={handleSubmit} className="space-y-5 animate-in slide-in-from-right-8 duration-500">
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1.5">Selecione a Igreja de Atuação</label>
+              <select 
+                name="selectedChurchId"
+                required 
+                defaultValue=""
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
+              >
+                <option value="" disabled>Selecione uma igreja...</option>
+                {churchSelectionOptions.map((church) => (
+                  <option key={church.id} value={church.id}>{church.name}</option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-500 mt-2">Você possui acesso a múltiplas igrejas. Selecione qual deseja administrar nesta sessão.</p>
+            </div>
+            
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 mt-4"
+            >
+              {loading ? "Acessando..." : "Confirmar Acesso"}
+            </button>
+            <button 
+              type="button" 
+              disabled={loading}
+              onClick={() => {
+                setChurchSelectionOptions([]);
+                setTempCredentials(null);
+                setError(null);
+              }}
+              className="w-full bg-transparent hover:bg-slate-50 text-slate-600 font-medium py-2 rounded-xl transition-all mt-2"
+            >
+              Voltar
+            </button>
+          </form>
+        ) : (
+          <form action={handleSubmit} className="space-y-5 animate-in slide-in-from-left-8 duration-500">
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1.5">Número da Carteirinha</label>
+              <input 
+                type="text" 
+                name="cardNumber"
+                placeholder="Digite o número da sua carteirinha"
+                required 
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-600 mb-1.5">Nome de Login</label>
-            <input 
-              type="text" 
-              name="login"
-              placeholder="Digite seu nome de login"
-              required 
-              className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-slate-600 mb-1.5">Nome de Login</label>
+              <input 
+                type="text" 
+                name="login"
+                placeholder="Digite seu nome de login"
+                required 
+                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
+              />
+            </div>
 
-          <button 
-            type="submit" 
-            disabled={loading}
-            className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 mt-4"
-          >
-            {loading ? "Acessando..." : "Entrar no Portal"}
-          </button>
-        </form>
+            <button 
+              type="submit" 
+              disabled={loading}
+              className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 mt-4"
+            >
+              {loading ? "Acessando..." : "Entrar no Portal"}
+            </button>
+          </form>
+        )}
 
         <div className="mt-8 pt-6 border-t border-slate-200 text-center">
           <Link href="/admin-login" className="text-xs text-slate-500 hover:text-slate-600 transition-colors">

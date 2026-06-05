@@ -20,7 +20,7 @@ export default async function PortalLayout({
   return (
     <>
       {isAdmin ? <Sidebar /> : <PortalSidebar isRegional={!!isRegional} />}
-      <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 w-full max-w-[100vw] overflow-x-hidden">
+      <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 min-h-screen">
         {!isAdmin && (
           <div className="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-2">
             <h2 className="text-xl font-medium text-slate-600">

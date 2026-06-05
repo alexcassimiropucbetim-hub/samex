@@ -10,7 +10,7 @@ export default function AdminLayout({
   return (
     <>
       <Sidebar />
-      <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 w-full max-w-[100vw] overflow-x-hidden">
+      <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 min-h-screen">
         {children}
       </div>
     </>

@@ -11,6 +11,7 @@ export async function createPreEvaluation(formData: FormData) {
   
   const instructorName = formData.get("instructorName") as string | null;
   const instructorChurchId = formData.get("instructorChurchId") as string | null;
+  const instructorChurchName = formData.get("instructorChurchName") as string | null;
   
   const instrumentId = formData.get("instrumentId") as string;
   const personInChargeId = formData.get("personInChargeId") as string;
@@ -44,7 +45,8 @@ export async function createPreEvaluation(formData: FormData) {
       sectorId,
       churchId,
       instructorName: gender === "F" ? instructorName : null,
-      instructorChurchId: gender === "F" ? instructorChurchId : null,
+      instructorChurchId: gender === "F" ? (instructorChurchId === "OUTRA" ? null : instructorChurchId) : null,
+      instructorChurchName: gender === "F" ? (instructorChurchId === "OUTRA" ? instructorChurchName : null) : null,
       instrumentId,
       personInChargeId,
       testTypeId,
@@ -100,6 +102,7 @@ export async function updatePreEvaluation(id: string, formData: FormData) {
   
   const instructorName = formData.get("instructorName") as string | null;
   const instructorChurchId = formData.get("instructorChurchId") as string | null;
+  const instructorChurchName = formData.get("instructorChurchName") as string | null;
   
   const instrumentId = formData.get("instrumentId") as string;
   const personInChargeId = formData.get("personInChargeId") as string;
@@ -134,7 +137,8 @@ export async function updatePreEvaluation(id: string, formData: FormData) {
       sectorId,
       churchId,
       instructorName: gender === "F" ? instructorName : null,
-      instructorChurchId: gender === "F" ? instructorChurchId : null,
+      instructorChurchId: gender === "F" ? (instructorChurchId === "OUTRA" ? null : instructorChurchId) : null,
+      instructorChurchName: gender === "F" ? (instructorChurchId === "OUTRA" ? instructorChurchName : null) : null,
       instrumentId,
       personInChargeId,
       testTypeId,

@@ -112,6 +112,7 @@ model PreEvaluation {
   churchId                String
   instructorName          String?
   instructorChurchId      String?
+  instructorChurchName    String?
   instrumentId            String
   personInChargeId        String
   testTypeId              String

@@ -57,6 +57,7 @@ export default async function PreEvaluationPage({
     gender: rawEditingReq.gender,
     instructorName: rawEditingReq.instructorName || "",
     instructorChurchId: rawEditingReq.instructorChurchId || "",
+    instructorChurchName: rawEditingReq.instructorChurchName || "",
     instrumentId: rawEditingReq.instrumentId,
     personInChargeId: rawEditingReq.personInChargeId,
     testTypeId: rawEditingReq.testTypeId,

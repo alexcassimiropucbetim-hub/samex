@@ -99,7 +99,7 @@ export async function generateOrganistaLetter(preEvaluation: any): Promise<Uint8
   page.drawText(preEvaluation.church.name.toUpperCase(), { x: 45, y: 655, size: fontSize, color });
   
   const instructorName = preEvaluation.instructorName?.toUpperCase() || "";
-  const instructorChurchName = preEvaluation.instructorChurch?.name?.toUpperCase() || "";
+  const instructorChurchName = preEvaluation.instructorChurch?.name?.toUpperCase() || preEvaluation.instructorChurchName?.toUpperCase() || "";
   
   if (instructorName) {
     page.drawText(instructorName, { x: 45, y: 550, size: fontSize, color });

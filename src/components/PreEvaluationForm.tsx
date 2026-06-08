@@ -19,6 +19,7 @@ type Props = {
     gender: string;
     instructorName: string;
     instructorChurchId: string;
+    instructorChurchName?: string;
     instrumentId: string;
     personInChargeId: string;
     testTypeId: string;
@@ -49,7 +50,8 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
     candidateName: initialData?.candidateName || "",
     gender: initialData?.gender || "",
     instructorName: initialData?.instructorName || "",
-    instructorChurchId: initialData?.instructorChurchId || "",
+    instructorChurchId: initialData?.instructorChurchName ? "OUTRA" : (initialData?.instructorChurchId || ""),
+    instructorChurchName: initialData?.instructorChurchName || "",
     instrumentId: initialData?.instrumentId || "",
     personInChargeId: initialData?.personInChargeId || "",
     testTypeId: initialData?.testTypeId || "",
@@ -78,7 +80,8 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         candidateName: initialData.candidateName || "",
         gender: initialData.gender || "",
         instructorName: initialData.instructorName || "",
-        instructorChurchId: initialData.instructorChurchId || "",
+        instructorChurchId: initialData.instructorChurchName ? "OUTRA" : (initialData.instructorChurchId || ""),
+        instructorChurchName: initialData.instructorChurchName || "",
         instrumentId: initialData.instrumentId || "",
         personInChargeId: initialData.personInChargeId || "",
         testTypeId: initialData.testTypeId || "",
@@ -274,8 +277,15 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
                   <select value={formData.instructorChurchId} onChange={e => updateForm("instructorChurchId", e.target.value)} className="input-glass">
                     <option value="">Selecione a igreja...</option>
                     {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    <option value="OUTRA">OUTRA (Digitar Manualmente)</option>
                   </select>
                 </div>
+                {formData.instructorChurchId === "OUTRA" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-600 mb-1">Nome da Congregação (Instrutora)</label>
+                    <input type="text" value={formData.instructorChurchName || ""} onChange={e => updateForm("instructorChurchName", e.target.value)} className="input-glass" placeholder="Digite o nome da comum da instrutora" />
+                  </div>
+                )}
               </div>
             )}
 
@@ -508,8 +518,12 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
                     <p className="text-slate-600 font-medium">{formData.instructorName || "-"}</p>
                   </div>
                   <div>
-                    <p className="text-slate-500">Cong. Instrutora</p>
-                    <p className="text-slate-600 font-medium">{churches.find(c => c.id === formData.instructorChurchId)?.name || "-"}</p>
+                    <p className="text-xs text-slate-500 uppercase tracking-wider">Igreja da Instrutora</p>
+                    <p className="text-slate-600 font-medium">
+                      {formData.instructorChurchId === "OUTRA" 
+                        ? formData.instructorChurchName 
+                        : churches.find(c => c.id === formData.instructorChurchId)?.name || "-"}
+                    </p>
                   </div>
                 </div>
               )}

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
@@ -16,9 +16,15 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Sistema de Agendamento Musical",
   description: "Gerenciamento de testes musicais premium",
+  manifest: "/manifest.json",
   icons: {
     icon: "/api/config/favicon",
+    apple: "/icon-192x192.png",
   },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
 };
 
 export default function RootLayout({

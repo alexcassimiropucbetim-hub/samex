@@ -78,6 +78,7 @@ model PersonInCharge {
   preEvaluations       PreEvaluation[]
   preEvaluationResults PreEvaluationResult[] @relation("PreEvaluator")
   allowedTestTypes     TestType[]            @relation("PersonInChargeToTestType")
+  accessLogs           AccessLog[]
 }
 
 model Evaluator {
@@ -197,4 +198,16 @@ model SystemConfig {
   value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AccessLog {
+  id               String          @id @default(cuid())
+  personInChargeId String?
+  adminUsername    String?
+  action           String
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime        @default(now())
+  
+  personInCharge   PersonInCharge? @relation(fields: [personInChargeId], references: [id], onDelete: SetNull)
 }

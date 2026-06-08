@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { createSession } from "@/lib/auth";
 import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 
 export async function loginEncarregado(formData: FormData) {
   const cardNumber = formData.get("cardNumber") as string;
@@ -47,6 +48,20 @@ export async function loginEncarregado(formData: FormData) {
     churchId: finalChurchId,
   });
 
+  // Log the access
+  const headersList = await headers();
+  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Desconhecido";
+  const userAgent = headersList.get("user-agent") || "Desconhecido";
+
+  await prisma.accessLog.create({
+    data: {
+      personInChargeId: encarregado.id,
+      action: "LOGIN",
+      ipAddress,
+      userAgent,
+    }
+  });
+
   // Redirect based on role? For now, everyone goes to /portal
   redirect("/portal");
 }
@@ -77,6 +92,20 @@ export async function loginAdmin(formData: FormData) {
     id: admin.id,
     type: "admin",
     name: admin.name,
+  });
+
+  // Log the access
+  const headersList = await headers();
+  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Desconhecido";
+  const userAgent = headersList.get("user-agent") || "Desconhecido";
+
+  await prisma.accessLog.create({
+    data: {
+      adminUsername: admin.username,
+      action: "LOGIN_ADMIN",
+      ipAddress,
+      userAgent,
+    }
   });
 
   // Admins go to the dashboard (base registrations)

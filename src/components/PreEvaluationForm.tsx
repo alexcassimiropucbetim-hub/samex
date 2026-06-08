@@ -182,7 +182,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         <div className="w-20 h-20 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
           <Check className="w-10 h-10" />
         </div>
-        <h2 className="text-2xl font-bold text-slate-900">Pedido de Pré-Avaliação {initialData?.id ? "Atualizado" : "Enviado"}!</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Pedido de Pré-Avaliação {initialData?.id ? "Atualizado" : "Enviado"}!</h2>
         <p className="text-slate-500">O cadastro foi realizado com sucesso.</p>
         <Link 
           href="/pre-avaliacao"
@@ -205,19 +205,19 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
       )}
 
       {/* Stepper */}
-      <div className="flex flex-col sm:flex-row justify-between mb-8 relative">
-        <div className="absolute left-0 top-5 w-full h-0.5 bg-slate-200 hidden sm:block"></div>
+      <div className="flex flex-row justify-between items-start mb-8 relative">
+        <div className="absolute left-0 top-4 sm:top-5 w-full h-0.5 bg-slate-200"></div>
         {steps.map((s) => {
           const Icon = s.icon;
           const isActive = step >= s.id;
           return (
-            <div key={s.id} className="flex flex-col items-center gap-2 mb-4 sm:mb-0 relative z-10">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors ${
+            <div key={s.id} className="flex flex-col items-center gap-1 sm:gap-2 relative z-10 w-1/4">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 shrink-0 rounded-full flex items-center justify-center border-2 transition-colors ${
                 isActive ? "bg-[#e95931] border-[#e95931] text-white shadow-lg shadow-[#e95931]/30" : "bg-white border-slate-200 text-slate-400"
               }`}>
-                <Icon className="w-5 h-5" />
+                <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${isActive ? "text-[#e95931] bg-[#e95931]/10" : "text-slate-500 bg-white/80"}`}>
+              <span className={`text-[10px] sm:text-sm font-medium px-1 sm:px-2 py-0.5 rounded-full text-center leading-tight ${isActive ? "text-[#e95931] bg-[#e95931]/10" : "text-slate-500 bg-white/80"}`}>
                 {s.title}
               </span>
             </div>
@@ -229,7 +229,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         {/* Etapa 1: Candidato */}
         {step === 1 && (
           <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">Dados do Candidato(a)</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4 sm:mb-6">Dados do Candidato(a)</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
@@ -264,7 +264,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
 
             {formData.gender === "F" && (
               <div className="p-4 bg-slate-100 border border-slate-200 rounded-xl space-y-4 mt-4">
-                <h4 className="text-orange-400 font-medium">Dados da Instrutora</h4>
+                <h4 className="text-sm sm:text-base text-orange-400 font-medium">Dados da Instrutora</h4>
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-1">Nome completo da Instrutora</label>
                   <input type="text" value={formData.instructorName} onChange={e => updateForm("instructorName", e.target.value)} className="input-glass" placeholder="Nome sem abreviações" />
@@ -303,7 +303,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         {/* Etapa 2: Tipo de Teste */}
         {step === 2 && (
           <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">Tipo de Teste</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4 sm:mb-6">Tipo de Teste</h3>
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Qual teste será realizado?</label>
               <select value={formData.testTypeId} onChange={e => updateForm("testTypeId", e.target.value)} className="input-glass">
@@ -314,7 +314,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
 
             {testTypes.find(t => t.id === formData.testTypeId)?.name.toUpperCase().includes('TROCA DE INSTRUMENTO') && (
               <div className="mt-8 space-y-6 pt-6 border-t border-slate-200 animate-in fade-in zoom-in-95 duration-200">
-                <h4 className="text-lg font-semibold text-orange-400">Informações sobre troca de instrumento</h4>
+                <h4 className="text-base sm:text-lg font-semibold text-orange-400">Informações sobre troca de instrumento</h4>
                 
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-1">Instrumento atual</label>
@@ -426,7 +426,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         {/* Etapa 3: MSA */}
         {step === 3 && (
           <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">Programa Mínimo (Hinário, Método e MSA)</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4 sm:mb-6">Programa Mínimo (Hinário, Método e MSA)</h3>
             
             <div className="space-y-3">
               <label className="flex items-center gap-3 p-4 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors">
@@ -471,7 +471,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         {/* Etapa 4: Confirmação */}
         {step === 4 && (
           <div className="space-y-6 animate-in slide-in-from-right-4 duration-300">
-            <h3 className="text-xl font-semibold text-slate-900 mb-6">Confirmação de Dados</h3>
+            <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4 sm:mb-6">Confirmação de Dados</h3>
             
             <div className="bg-slate-100 border border-slate-200 rounded-xl p-6 space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">

@@ -89,10 +89,10 @@ export default async function PreEvaluationPage({
   return (
     <div className="space-y-12 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-          <FileSignature className="text-orange-500" /> Pedido de Pré-Avaliação
+        <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2 sm:gap-3">
+          <FileSignature className="text-orange-500 w-6 h-6 sm:w-8 sm:h-8" /> Pedido de Pré-Avaliação
         </h1>
-        <p className="text-slate-500 mt-2">Preencha o formulário em etapas para registrar um novo pedido.</p>
+        <p className="text-sm sm:text-base text-slate-500 mt-1 sm:mt-2">Preencha o formulário em etapas para registrar um novo pedido.</p>
       </div>
 
       <PreEvaluationForm 

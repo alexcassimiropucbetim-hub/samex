@@ -12,14 +12,9 @@ const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), { ssr: false }
 export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [logoError, setLogoError] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
-  const [siteKey, setSiteKey] = useState<string | null>(null);
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeQkxUtAAAAAMo1Qv5ZcYC3FfDtYrusy2Ivrfgh";
   const router = useRouter();
-
-  useEffect(() => {
-    getRecaptchaSiteKey().then(setSiteKey);
-  }, []);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
@@ -103,20 +98,11 @@ export default function AdminLoginPage() {
             {loading ? "Autenticando..." : "Acessar Sistema"}
           </button>
           <div className="mt-4 flex justify-center w-full overflow-hidden min-h-[78px]">
-            {siteKey ? (
-              <ReCAPTCHA
-                sitekey={siteKey}
-                onChange={(token) => setRecaptchaToken(token)}
-                theme="light"
-              />
-            ) : siteKey === "" ? (
-              <div className="text-xs text-red-500 bg-red-50 p-2 rounded border border-red-200 text-center">
-                ⚠️ A variável NEXT_PUBLIC_RECAPTCHA_SITE_KEY não foi encontrada.<br/>
-                Verifique o arquivo .env e reinicie o Next.js.
-              </div>
-            ) : (
-              <div className="text-xs text-gray-500">Carregando verificação...</div>
-            )}
+            <ReCAPTCHA
+              sitekey={siteKey}
+              onChange={(token) => setRecaptchaToken(token)}
+              theme="light"
+            />
           </div>
         </form>
 

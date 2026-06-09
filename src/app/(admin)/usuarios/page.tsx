@@ -36,7 +36,7 @@ export default async function UsuariosAdminPage({
             )}
           </div>
           
-          <form action={async (formData) => {
+          <form key={editingId || "new"} action={async (formData) => {
             "use server";
             const id = formData.get("id") as string;
             if (id) {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { loginEncarregado } from "@/actions/auth";
 import { UserCheck, ShieldAlert } from "lucide-react";
 import Link from "next/link";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -11,10 +12,20 @@ export default function LoginPage() {
   const [logoError, setLogoError] = useState(false);
   const [churchSelectionOptions, setChurchSelectionOptions] = useState<any[]>([]);
   const [tempCredentials, setTempCredentials] = useState<{login: string, cardNumber: string} | null>(null);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
+
+    if (churchSelectionOptions.length === 0) {
+      if (!recaptchaToken) {
+        setError("Confirme que você não é um robô.");
+        setLoading(false);
+        return;
+      }
+      formData.append("recaptchaToken", recaptchaToken);
+    }
 
     // Se estivermos na etapa de selecionar a igreja
     if (churchSelectionOptions.length > 0 && tempCredentials) {
@@ -149,6 +160,13 @@ export default function LoginPage() {
             >
               {loading ? "Acessando..." : "Entrar no Portal"}
             </button>
+            <div className="mt-4 flex justify-center w-full overflow-hidden">
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                onChange={(token) => setRecaptchaToken(token)}
+                theme="light"
+              />
+            </div>
           </form>
         )}
 

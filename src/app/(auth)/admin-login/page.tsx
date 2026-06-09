@@ -4,7 +4,9 @@ import { useState } from "react";
 import { loginAdmin } from "@/actions/auth";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
 import Link from "next/link";
-import ReCAPTCHA from "react-google-recaptcha";
+import dynamic from "next/dynamic";
+
+const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), { ssr: false });
 
 export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);

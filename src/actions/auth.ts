@@ -6,6 +6,10 @@ import bcrypt from "bcryptjs";
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 
+export async function getRecaptchaSiteKey() {
+  return process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "";
+}
+
 export async function loginEncarregado(formData: FormData) {
   const cardNumber = formData.get("cardNumber") as string;
   const login = formData.get("login") as string;

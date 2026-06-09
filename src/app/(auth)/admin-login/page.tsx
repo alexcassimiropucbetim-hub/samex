@@ -12,6 +12,7 @@ const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), { ssr: false }
 export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeQkxUtAAAAAMo1Qv5ZcYC3FfDtYrusy2Ivrfgh";
   const router = useRouter();

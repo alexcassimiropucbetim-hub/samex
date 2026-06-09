@@ -21,6 +21,30 @@ export async function loginEncarregado(formData: FormData) {
     return { error: "Preencha a carteirinha e o login." };
   }
 
+  const headersList = await headers();
+  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Desconhecido";
+  const userAgent = headersList.get("user-agent") || "Desconhecido";
+
+  // Verificação de Força Bruta
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const recentAttempts = await prisma.loginAttempt.findMany({
+    where: {
+      OR: [{ ipAddress }, { login }],
+      createdAt: { gte: fifteenMinutesAgo }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  let failedCount = 0;
+  for (const attempt of recentAttempts) {
+    if (attempt.success) break;
+    failedCount++;
+  }
+
+  if (failedCount >= 5) {
+    return { error: "Muitas tentativas falhas. O acesso foi bloqueado por 15 minutos por segurança." };
+  }
+
   if (!selectedChurchId) {
     if (!recaptchaToken) {
       return { error: "Confirme que você não é um robô." };
@@ -53,6 +77,7 @@ export async function loginEncarregado(formData: FormData) {
   });
 
   if (!encarregado || encarregado.login !== login) {
+    await prisma.loginAttempt.create({ data: { ipAddress, login, success: false } });
     return { error: "Credenciais inválidas. Verifique sua carteirinha e login." };
   }
 
@@ -80,10 +105,7 @@ export async function loginEncarregado(formData: FormData) {
     churchId: finalChurchId,
   });
 
-  // Log the access
-  const headersList = await headers();
-  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Desconhecido";
-  const userAgent = headersList.get("user-agent") || "Desconhecido";
+  await prisma.loginAttempt.create({ data: { ipAddress, login, success: true } });
 
   await prisma.accessLog.create({
     data: {
@@ -106,6 +128,30 @@ export async function loginAdmin(formData: FormData) {
 
   if (!username || !password) {
     return { error: "Preencha o usuário e a senha." };
+  }
+
+  const headersList = await headers();
+  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Desconhecido";
+  const userAgent = headersList.get("user-agent") || "Desconhecido";
+
+  // Verificação de Força Bruta
+  const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
+  const recentAttempts = await prisma.loginAttempt.findMany({
+    where: {
+      OR: [{ ipAddress }, { login: username }],
+      createdAt: { gte: fifteenMinutesAgo }
+    },
+    orderBy: { createdAt: "desc" }
+  });
+
+  let failedCount = 0;
+  for (const attempt of recentAttempts) {
+    if (attempt.success) break;
+    failedCount++;
+  }
+
+  if (failedCount >= 5) {
+    return { error: "Muitas tentativas falhas. O acesso foi bloqueado por 15 minutos por segurança." };
   }
 
   if (!recaptchaToken) {
@@ -137,11 +183,13 @@ export async function loginAdmin(formData: FormData) {
   });
 
   if (!admin) {
+    await prisma.loginAttempt.create({ data: { ipAddress, login: username, success: false } });
     return { error: "Usuário não encontrado." };
   }
 
   const isValidPassword = await bcrypt.compare(password, admin.password);
   if (!isValidPassword) {
+    await prisma.loginAttempt.create({ data: { ipAddress, login: username, success: false } });
     return { error: "Senha incorreta." };
   }
 
@@ -152,10 +200,7 @@ export async function loginAdmin(formData: FormData) {
     name: admin.name,
   });
 
-  // Log the access
-  const headersList = await headers();
-  const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "Desconhecido";
-  const userAgent = headersList.get("user-agent") || "Desconhecido";
+  await prisma.loginAttempt.create({ data: { ipAddress, login: username, success: true } });
 
   await prisma.accessLog.create({
     data: {

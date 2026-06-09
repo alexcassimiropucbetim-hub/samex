@@ -1,5 +1,6 @@
 import { PortalSidebar } from "@/components/PortalSidebar";
 import { Sidebar } from "@/components/Sidebar";
+import { InactivityTimer } from "@/components/InactivityTimer";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 
@@ -19,6 +20,7 @@ export default async function PortalLayout({
 
   return (
     <>
+      <InactivityTimer />
       {isAdmin ? <Sidebar /> : <PortalSidebar isRegional={!!isRegional} />}
       <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 min-h-screen">
         {!isAdmin && (

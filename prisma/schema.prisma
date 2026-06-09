@@ -211,3 +211,11 @@ model AccessLog {
   
   personInCharge   PersonInCharge? @relation(fields: [personInChargeId], references: [id], onDelete: SetNull)
 }
+
+model LoginAttempt {
+  id        String   @id @default(cuid())
+  ipAddress String
+  login     String
+  success   Boolean
+  createdAt DateTime @default(now())
+}

@@ -38,13 +38,17 @@ export default async function UsuariosAdminPage({
           
           <form action={async (formData) => {
             "use server";
-            if (editingAdmin) {
-              await updateAdmin(editingAdmin.id, formData);
+            const id = formData.get("id") as string;
+            if (id) {
+              await updateAdmin(id, formData);
               redirect("/usuarios");
             } else {
               await createAdmin(formData);
             }
           }} className="space-y-4">
+            {editingAdmin && (
+              <input type="hidden" name="id" value={editingAdmin.id} />
+            )}
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
                 Nome do Usuário
@@ -149,10 +153,12 @@ export default async function UsuariosAdminPage({
                           >
                             <KeyRound className="w-4 h-4" />
                           </Link>
-                          <form action={async () => {
+                          <form action={async (formData) => {
                             "use server";
-                            await deleteAdmin(admin.id);
+                            const id = formData.get("id") as string;
+                            if (id) await deleteAdmin(id);
                           }}>
+                            <input type="hidden" name="id" value={admin.id} />
                             <button 
                               type="submit" 
                               className="text-slate-500 hover:text-red-400 p-2 rounded-lg hover:bg-red-400/10 transition-colors"

@@ -96,11 +96,18 @@ export default function AdminLoginPage() {
             {loading ? "Autenticando..." : "Acessar Sistema"}
           </button>
           <div className="mt-4 flex justify-center w-full overflow-hidden">
-            <ReCAPTCHA
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
-              onChange={(token) => setRecaptchaToken(token)}
-              theme="light"
-            />
+            {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
+                onChange={(token) => setRecaptchaToken(token)}
+                theme="light"
+              />
+            ) : (
+              <div className="text-xs text-red-500 bg-red-50 p-2 rounded border border-red-200 text-center">
+                ⚠️ Variável de ambiente do reCAPTCHA não encontrada.<br/>
+                Se você acabou de adicionar no .env, <b>reinicie o terminal (npm run dev)</b>.
+              </div>
+            )}
           </div>
         </form>
 

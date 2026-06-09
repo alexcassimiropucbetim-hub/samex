@@ -7,7 +7,6 @@ import Link from "next/link";
 import dynamic from "next/dynamic";
 
 const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), { ssr: false });
-const SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
@@ -164,16 +163,16 @@ export default function LoginPage() {
               {loading ? "Acessando..." : "Entrar no Portal"}
             </button>
             <div className="mt-4 flex justify-center w-full overflow-hidden">
-              {SITE_KEY ? (
+              {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
                 <ReCAPTCHA
-                  sitekey={SITE_KEY}
+                  sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
                   onChange={(token) => setRecaptchaToken(token)}
                   theme="light"
                 />
               ) : (
                 <div className="text-xs text-red-500 bg-red-50 p-2 rounded border border-red-200 text-center">
-                  ⚠️ A variável NEXT_PUBLIC_RECAPTCHA_SITE_KEY não foi encontrada.<br/>
-                  Verifique o arquivo .env e reinicie o Next.js.
+                  ⚠️ A variável NEXT_PUBLIC_RECAPTCHA_SITE_KEY não foi injetada no navegador.<br/>
+                  Pare o terminal, apague a pasta .next e rode npm run dev novamente.
                 </div>
               )}
             </div>

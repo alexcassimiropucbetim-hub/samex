@@ -4,15 +4,25 @@ import { useState } from "react";
 import { loginAdmin } from "@/actions/auth";
 import { ShieldCheck, ShieldAlert } from "lucide-react";
 import Link from "next/link";
+import ReCAPTCHA from "react-google-recaptcha";
 
 export default function AdminLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [logoError, setLogoError] = useState(false);
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
+
+    if (!recaptchaToken) {
+      setError("Confirme que você não é um robô.");
+      setLoading(false);
+      return;
+    }
+    formData.append("recaptchaToken", recaptchaToken);
+
     const result = await loginAdmin(formData);
     if (result?.error) {
       setError(result.error);
@@ -83,6 +93,13 @@ export default function AdminLoginPage() {
           >
             {loading ? "Autenticando..." : "Acessar Sistema"}
           </button>
+          <div className="mt-4 flex justify-center w-full overflow-hidden">
+            <ReCAPTCHA
+              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+              onChange={(token) => setRecaptchaToken(token)}
+              theme="light"
+            />
+          </div>
         </form>
 
         <div className="mt-8 pt-6 border-t border-slate-200 text-center">

@@ -98,8 +98,34 @@ export async function loginAdmin(formData: FormData) {
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
+  const recaptchaToken = formData.get("recaptchaToken") as string;
+
   if (!username || !password) {
     return { error: "Preencha o usuário e a senha." };
+  }
+
+  if (!recaptchaToken) {
+    return { error: "Confirme que você não é um robô." };
+  }
+
+  const secretKey = process.env.RECAPTCHA_SECRET_KEY;
+  if (secretKey) {
+    try {
+      const recaptchaResponse = await fetch(`https://www.google.com/recaptcha/api/siteverify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${secretKey}&response=${recaptchaToken}`,
+      });
+      const recaptchaData = await recaptchaResponse.json();
+      
+      if (!recaptchaData.success) {
+        return { error: "Validação do reCAPTCHA falhou. Tente novamente." };
+      }
+    } catch (err) {
+      return { error: "Erro ao validar o reCAPTCHA. Tente novamente." };
+    }
+  } else {
+    console.warn("RECAPTCHA_SECRET_KEY não definida. Pulando validação (apenas para desenvolvimento).");
   }
 
   const admin = await prisma.admin.findUnique({

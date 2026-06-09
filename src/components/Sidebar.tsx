@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MapPin, Church, ListMusic, Music, Music2, Users, UserCheck, ChevronDown, FolderOpen, Briefcase, FileSignature, CalendarClock, LogOut, Settings, Menu, X, Activity } from "lucide-react";
+import { Home, MapPin, Church, ListMusic, Music, Music2, Users, UserCheck, ChevronDown, FolderOpen, Briefcase, FileSignature, CalendarClock, LogOut, Settings, Menu, X, Activity, UserCog } from "lucide-react";
 import clsx from "clsx";
 import { useState } from "react";
 import { logout } from "@/actions/auth-actions";
@@ -47,6 +47,7 @@ const menuGroups = [
     name: "Sistema",
     icon: Settings,
     items: [
+      { name: "Usuários (Admins)", href: "/usuarios", icon: UserCog },
       { name: "Configurações", href: "/configuracoes", icon: Settings },
       { name: "Logs de Acesso", href: "/logs", icon: Activity }
     ]

@@ -1,3 +1,5 @@
+"use server";
+
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { hash } from "bcryptjs";
@@ -20,7 +22,7 @@ export async function createAdmin(formData: FormData) {
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
-  if (!name || !username || !password) return;
+  if (!name || !username || !password) return { success: false, error: "Preencha todos os campos." };
 
   const hashedPassword = await hash(password, 10);
 
@@ -33,9 +35,13 @@ export async function createAdmin(formData: FormData) {
       },
     });
     revalidatePath("/usuarios");
-  } catch (error) {
+    return { success: true };
+  } catch (error: any) {
     console.error("Error creating admin:", error);
-    // Usually unique constraint on username
+    if (error.code === 'P2002') {
+      return { success: false, error: "O Login informado já está em uso." };
+    }
+    return { success: false, error: "Erro ao cadastrar usuário." };
   }
 }
 
@@ -61,10 +67,10 @@ export async function updateAdmin(id: string, formData: FormData) {
   const username = formData.get("username") as string;
   const password = formData.get("password") as string;
 
-  if (!name || !username) return;
+  if (!name || !username) return { success: false, error: "Nome e Login são obrigatórios." };
 
   const updateData: any = { name, username };
-  if (password) {
+  if (password && password.trim() !== "") {
     updateData.password = await hash(password, 10);
   }
 
@@ -74,8 +80,13 @@ export async function updateAdmin(id: string, formData: FormData) {
       data: updateData,
     });
     revalidatePath("/usuarios");
-  } catch (error) {
+    return { success: true };
+  } catch (error: any) {
     console.error("Error updating admin:", error);
+    if (error.code === 'P2002') {
+      return { success: false, error: "O Login informado já está em uso." };
+    }
+    return { success: false, error: "Erro ao atualizar usuário." };
   }
 }
 
@@ -85,7 +96,9 @@ export async function deleteAdmin(id: string) {
       where: { id },
     });
     revalidatePath("/usuarios");
+    return { success: true };
   } catch (error) {
     console.error("Error deleting admin:", error);
+    return { success: false, error: "Erro ao excluir usuário." };
   }
 }

@@ -40,10 +40,19 @@ export default async function UsuariosAdminPage({
             "use server";
             const id = formData.get("id") as string;
             if (id) {
-              await updateAdmin(id, formData);
-              redirect("/usuarios");
+              const res = await updateAdmin(id, formData);
+              if (res?.success) {
+                redirect("/usuarios");
+              } else {
+                console.error("Failed to update admin:", res?.error);
+              }
             } else {
-              await createAdmin(formData);
+              const res = await createAdmin(formData);
+              if (res?.success) {
+                redirect("/usuarios");
+              } else {
+                console.error("Failed to create admin:", res?.error);
+              }
             }
           }} className="space-y-4">
             {editingAdmin && (

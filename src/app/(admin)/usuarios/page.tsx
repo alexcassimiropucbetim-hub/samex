@@ -6,11 +6,13 @@ import { redirect } from "next/navigation";
 export default async function UsuariosAdminPage({
   searchParams,
 }: {
-  searchParams: { edit?: string };
+  searchParams: Promise<{ edit?: string, error?: string }>;
 }) {
+  const resolvedParams = await searchParams;
   const admins = await getAdmins();
   
-  const editingId = searchParams.edit;
+  const editingId = resolvedParams?.edit;
+  const errorMsg = resolvedParams?.error;
   const editingAdmin = editingId ? admins.find((a: any) => a.id === editingId) : null;
 
   return (
@@ -36,6 +38,12 @@ export default async function UsuariosAdminPage({
             )}
           </div>
           
+          {errorMsg && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm font-medium rounded-lg">
+              {errorMsg}
+            </div>
+          )}
+
           <form key={editingId || "new"} action={async (formData) => {
             "use server";
             const id = formData.get("id") as string;
@@ -44,14 +52,14 @@ export default async function UsuariosAdminPage({
               if (res?.success) {
                 redirect("/usuarios");
               } else {
-                console.error("Failed to update admin:", res?.error);
+                redirect(`/usuarios?edit=${id}&error=${encodeURIComponent(res?.error || "Erro ao atualizar")}`);
               }
             } else {
               const res = await createAdmin(formData);
               if (res?.success) {
                 redirect("/usuarios");
               } else {
-                console.error("Failed to create admin:", res?.error);
+                redirect(`/usuarios?error=${encodeURIComponent(res?.error || "Erro ao criar")}`);
               }
             }
           }} className="space-y-4">

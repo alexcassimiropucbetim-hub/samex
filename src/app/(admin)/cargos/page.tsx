@@ -6,11 +6,12 @@ import { redirect } from "next/navigation";
 export default async function CargosPage({
   searchParams,
 }: {
-  searchParams: { edit?: string };
+  searchParams: Promise<{ edit?: string }>;
 }) {
+  const resolvedParams = await searchParams;
   const cargos = await getRoleTypes();
   
-  const editingId = searchParams.edit;
+  const editingId = resolvedParams?.edit;
   const editingRole = editingId ? cargos.find(c => c.id === editingId) : null;
 
   return (

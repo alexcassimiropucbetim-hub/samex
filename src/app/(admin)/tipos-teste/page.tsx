@@ -6,11 +6,12 @@ import { redirect } from "next/navigation";
 export default async function TiposTestePage({
   searchParams,
 }: {
-  searchParams: { edit?: string };
+  searchParams: Promise<{ edit?: string }>;
 }) {
+  const resolvedParams = await searchParams;
   const tipos = await getTestTypes();
   
-  const editingId = searchParams.edit;
+  const editingId = resolvedParams?.edit;
   const editingTipo = editingId ? tipos.find(t => t.id === editingId) : null;
 
   return (

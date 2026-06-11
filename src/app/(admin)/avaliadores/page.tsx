@@ -6,11 +6,12 @@ import { redirect } from "next/navigation";
 export default async function AvaliadoresPage({
   searchParams,
 }: {
-  searchParams: { edit?: string };
+  searchParams: Promise<{ edit?: string }>;
 }) {
+  const resolvedParams = await searchParams;
   const avaliadores = await getEvaluators();
   
-  const editingId = searchParams.edit;
+  const editingId = resolvedParams?.edit;
   const editingPerson = editingId ? avaliadores.find(p => p.id === editingId) : null;
 
   return (

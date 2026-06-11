@@ -65,7 +65,7 @@ async function LogTableRows() {
       {logs.map((log) => (
         <tr key={log.id} className="hover:bg-slate-50/50 transition-colors group">
           <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-            {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium' }).format(new Date(log.createdAt))}
+            {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'medium', timeZone: 'America/Sao_Paulo' }).format(new Date(log.createdAt))}
           </td>
           <td className="px-6 py-4">
             <div className="flex items-center gap-3">

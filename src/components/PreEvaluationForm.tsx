@@ -188,7 +188,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Pedido de Pré-Avaliação {initialData?.id ? "Atualizado" : "Enviado"}!</h2>
         <p className="text-slate-500">O cadastro foi realizado com sucesso.</p>
         <Link 
-          href="/pre-avaliacao"
+          href="/portal/pre-avaliacao"
           className="btn-primary mt-8 inline-block"
         >
           {initialData?.id ? "Voltar aos Cadastros" : "Fazer Novo Pedido"}
@@ -201,7 +201,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
     <div className="glass-card max-w-4xl mx-auto relative">
       {initialData?.id && (
         <div className="absolute -top-4 -right-4">
-          <Link href="/pre-avaliacao" className="flex items-center gap-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border border-red-500/30">
+          <Link href="/portal/pre-avaliacao" className="flex items-center gap-1 bg-red-500/20 text-red-400 hover:bg-red-500/30 px-3 py-1.5 rounded-full text-sm font-medium transition-colors border border-red-500/30">
             <X className="w-4 h-4" /> Cancelar Edição
           </Link>
         </div>

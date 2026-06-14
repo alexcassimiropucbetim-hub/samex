@@ -22,11 +22,6 @@ export default async function PortalDashboard() {
   ]);
 
   let preEvaluations = allPreEvaluations;
-  if (isExaminadora) {
-    preEvaluations = allPreEvaluations.filter(p => p.gender === "F");
-  } else if (isRegional) {
-    preEvaluations = allPreEvaluations.filter(p => p.gender === "M");
-  }
 
   const pendentes = preEvaluations.filter(p => !p.status || p.status === "PENDENTE");
   const alocados = preEvaluations.filter(p => p.testScheduleId !== null);

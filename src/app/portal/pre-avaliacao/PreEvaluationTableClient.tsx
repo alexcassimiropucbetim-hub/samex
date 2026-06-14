@@ -11,11 +11,17 @@ import { deletePreEvaluation } from "@/actions/preEvaluation";
 export default function PreEvaluationTableClient({ 
   preEvaluations, 
   testSchedules, 
-  isLocal 
+  isLocal,
+  isRegional = false,
+  isExaminadora = false,
+  isAdmin = false
 }: { 
   preEvaluations: any[], 
   testSchedules: any[], 
-  isLocal: boolean 
+  isLocal: boolean,
+  isRegional?: boolean,
+  isExaminadora?: boolean,
+  isAdmin?: boolean
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
@@ -101,6 +107,14 @@ export default function PreEvaluationTableClient({
                                evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
                                evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
                                evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO');
+              
+              const canEvaluate = 
+                (!isLocal) && 
+                (
+                  isAdmin ||
+                  (isExaminadora && evalReq.gender === 'F') ||
+                  (isRegional && evalReq.gender === 'M')
+                );
               
               return (
                 <tr key={evalReq.id} className="hover:bg-slate-50/80 transition-colors group">
@@ -194,7 +208,7 @@ export default function PreEvaluationTableClient({
                           >
                             <BookOpen className="w-4 h-4" />
                           </Link>
-                          {!isLocal && (
+                          {canEvaluate && (
                             <Link
                               href={`/portal/pre-avaliacao/avaliar?id=${evalReq.id}`}
                               className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors"
@@ -202,6 +216,11 @@ export default function PreEvaluationTableClient({
                             >
                               <ClipboardCheck className="w-4 h-4" />
                             </Link>
+                          )}
+                          {!canEvaluate && !isLocal && (
+                            <div className="text-slate-300 p-2 rounded-lg cursor-not-allowed" title="Perfil sem permissão para avaliar este candidato">
+                              <ClipboardCheck className="w-4 h-4" />
+                            </div>
                           )}
                         </>
                       ) : (
@@ -213,13 +232,19 @@ export default function PreEvaluationTableClient({
                             <BookOpen className="w-4 h-4" />
                           </div>
                         ) : (
-                          <Link
-                            href={`/portal/pre-avaliacao/avaliar?id=${evalReq.id}`}
-                            className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors"
-                            title="Realizar Avaliação"
-                          >
-                            <ClipboardCheck className="w-4 h-4" />
-                          </Link>
+                          canEvaluate ? (
+                            <Link
+                              href={`/portal/pre-avaliacao/avaliar?id=${evalReq.id}`}
+                              className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors"
+                              title="Realizar Avaliação"
+                            >
+                              <ClipboardCheck className="w-4 h-4" />
+                            </Link>
+                          ) : (
+                            <div className="text-slate-300 p-2 rounded-lg cursor-not-allowed" title="Perfil sem permissão para avaliar este candidato">
+                              <ClipboardCheck className="w-4 h-4" />
+                            </div>
+                          )
                         )
                       )}
                       <Link 

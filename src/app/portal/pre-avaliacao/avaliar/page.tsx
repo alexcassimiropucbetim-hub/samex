@@ -11,10 +11,12 @@ export default async function AvaliarPreAvaliacaoPage({
   searchParams: Promise<{ id?: string }>;
 }) {
   const session = await getSession();
-  const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
+  const roleName = session?.roleName?.toLowerCase() || "";
+  const isRegional = roleName.includes("regional");
+  const isExaminadora = roleName.includes("examinadora");
   const isAdmin = session?.type === "admin";
 
-  if (!isRegional && !isAdmin) {
+  if (!isRegional && !isExaminadora && !isAdmin) {
     redirect("/portal/pre-avaliacao");
   }
 
@@ -32,6 +34,15 @@ export default async function AvaliarPreAvaliacaoPage({
 
   if (!evalReq) {
     redirect("/portal/pre-avaliacao");
+  }
+
+  if (!isAdmin) {
+    if (isExaminadora && evalReq.gender !== 'F') {
+      redirect("/portal/pre-avaliacao");
+    }
+    if (isRegional && evalReq.gender !== 'M') {
+      redirect("/portal/pre-avaliacao");
+    }
   }
 
   return (

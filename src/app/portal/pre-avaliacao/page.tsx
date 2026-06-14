@@ -27,8 +27,8 @@ export default async function PreEvaluationPage({
     getTestSchedules(),
   ]);
 
-  const isRegional = session?.roleName?.toLowerCase().includes("regional");
-  const isExaminadora = session?.roleName?.toLowerCase().includes("examinadora");
+  const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
+  const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
   const isAdmin = session?.type === "admin";
   const isLocal = !isRegional && !isExaminadora && !isAdmin;
   
@@ -38,8 +38,8 @@ export default async function PreEvaluationPage({
     // Examinadora vê tudo, mas apenas do sexo feminino (F)
     preEvaluations = allPreEvaluations.filter(p => p.gender === 'F');
   } else if (isRegional) {
-    // Regional vê tudo, mas apenas do sexo masculino (M)
-    preEvaluations = allPreEvaluations.filter(p => p.gender === 'M');
+    // Regional vê tudo, de todos os sexos
+    preEvaluations = allPreEvaluations;
   } else if (!isAdmin) {
     // Encarregado Local vê apenas a sua igreja (ambos os sexos)
     preEvaluations = allPreEvaluations.filter(p => p.churchId === session?.churchId);
@@ -117,6 +117,9 @@ export default async function PreEvaluationPage({
             preEvaluations={preEvaluations} 
             testSchedules={testSchedules} 
             isLocal={isLocal} 
+            isRegional={isRegional}
+            isExaminadora={isExaminadora}
+            isAdmin={isAdmin}
           />
         )}
       </div>

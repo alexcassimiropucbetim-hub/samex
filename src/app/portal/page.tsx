@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getPreEvaluations } from "@/actions/preEvaluation";
 import { getTestSchedules } from "@/actions/testSchedule";
+import { prisma } from "@/lib/prisma";
+import DashboardCharts from "@/components/DashboardCharts";
 
 export default async function PortalDashboard() {
   const session = await getSession();
@@ -16,15 +18,64 @@ export default async function PortalDashboard() {
     redirect("/portal/pre-avaliacao");
   }
 
-  const [allPreEvaluations, testSchedules] = await Promise.all([
+  const [allPreEvaluations, testSchedules, categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations] = await Promise.all([
     getPreEvaluations(),
     getTestSchedules(),
+    prisma.instrumentCategory.findMany({
+      include: {
+        instruments: {
+          include: {
+            _count: {
+              select: { preEvaluations: true }
+            }
+          }
+        }
+      }
+    }),
+    prisma.sector.findMany({
+      include: {
+        _count: {
+          select: { preEvaluations: true }
+        }
+      }
+    }),
+    prisma.testType.findMany({
+      include: {
+        _count: {
+          select: { preEvaluations: true }
+        }
+      }
+    }),
   ]);
 
   let preEvaluations = allPreEvaluations;
 
   const pendentes = preEvaluations.filter(p => !p.status || p.status === "PENDENTE");
   const alocados = preEvaluations.filter(p => p.testScheduleId !== null);
+
+  const categoriesData = categoriesWithInstruments
+    .map(cat => ({
+      name: cat.name,
+      count: cat.instruments.reduce((acc, inst) => acc + inst._count.preEvaluations, 0)
+    }))
+    .filter(c => c.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  const sectorsData = sectorsWithEvaluations
+    .map(sec => ({
+      name: sec.name,
+      count: sec._count.preEvaluations
+    }))
+    .filter(s => s.count > 0)
+    .sort((a, b) => b.count - a.count);
+
+  const testTypesData = testTypesWithEvaluations
+    .map(tt => ({
+      name: tt.name,
+      count: tt._count.preEvaluations
+    }))
+    .filter(tt => tt.count > 0)
+    .sort((a, b) => b.count - a.count);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -91,6 +142,7 @@ export default async function PortalDashboard() {
         </Link>
 
       </div>
+      <DashboardCharts sectorsData={sectorsData} categoriesData={categoriesData} testTypesData={testTypesData} />
     </div>
   );
 }

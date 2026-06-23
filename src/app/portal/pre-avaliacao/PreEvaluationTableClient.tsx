@@ -77,6 +77,19 @@ export default function PreEvaluationTableClient({
         </div>
       )}
 
+      {!isLocal && preEvaluations.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <Link
+            href={`/api/pdf/lista-inscricoes`}
+            target="_blank"
+            className="flex items-center gap-2 bg-[#224465] hover:bg-[#1a334d] text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm"
+          >
+            <Printer className="w-4 h-4" />
+            Imprimir Lista em Tabela (A4)
+          </Link>
+        </div>
+      )}
+
       {schedulingItem && (
         <SchedulePreEvaluationModal 
           preEvaluationId={schedulingItem.id}

@@ -79,6 +79,7 @@ model PersonInCharge {
   preEvaluationResults PreEvaluationResult[] @relation("PreEvaluator")
   allowedTestTypes     TestType[]            @relation("PersonInChargeToTestType")
   accessLogs           AccessLog[]
+  notifications        Notification[]
 }
 
 model Evaluator {
@@ -218,4 +219,14 @@ model LoginAttempt {
   login     String
   success   Boolean
   createdAt DateTime @default(now())
+}
+
+model Notification {
+  id               String          @id @default(cuid())
+  personInChargeId String
+  message          String
+  isRead           Boolean         @default(false)
+  createdAt        DateTime        @default(now())
+  
+  personInCharge   PersonInCharge  @relation(fields: [personInChargeId], references: [id], onDelete: Cascade)
 }

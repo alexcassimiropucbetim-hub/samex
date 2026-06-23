@@ -2,9 +2,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileSignature, CalendarClock, LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, X } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
+import { NotificationBell } from "./NotificationBell";
 
 export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
   const pathname = usePathname();
@@ -42,9 +43,12 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
            )}
            <span className="font-bold text-slate-800 text-sm">Portal</span>
         </div>
-        <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
-          <Menu className="w-6 h-6" />
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationBell />
+          <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 hover:bg-slate-100 rounded-lg transition-colors">
+            <Menu className="w-6 h-6" />
+          </button>
+        </div>
       </div>
 
       {/* Mobile Overlay */}
@@ -57,12 +61,7 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
         "w-64 h-screen fixed left-0 top-0 bg-white border-r border-slate-200 flex flex-col z-50 transition-transform duration-300",
         isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
-        <div className="p-6 flex items-center justify-center border-b border-slate-200 h-24 relative">
-          <div className="md:hidden absolute top-4 right-4 z-50">
-            <button onClick={closeSidebar} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+        <div className="p-6 flex items-center justify-between border-b border-slate-200 h-24 relative">
           <div className="w-full h-full flex items-center justify-center relative">
             {!logoError && (
               <img 
@@ -79,6 +78,16 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
                 </div>
               </div>
             )}
+          </div>
+          
+          <div className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2">
+            <NotificationBell />
+          </div>
+
+          <div className="md:hidden absolute right-4 top-1/2 -translate-y-1/2">
+            <button onClick={closeSidebar} className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg transition-colors">
+              <X className="w-5 h-5" />
+            </button>
           </div>
         </div>
 

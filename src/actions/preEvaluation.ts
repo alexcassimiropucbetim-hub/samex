@@ -66,6 +66,34 @@ export async function createPreEvaluation(formData: FormData) {
     },
   });
 
+  try {
+    const peopleToNotify = await prisma.personInCharge.findMany({
+      where: {
+        OR: [
+          { church: { sectorId } },
+          { managedChurches: { some: { sectorId } } }
+        ]
+      },
+      include: { roleType: true }
+    });
+
+    const targets = peopleToNotify.filter(p => {
+      const role = p.roleType?.name?.toLowerCase() || "";
+      return role.includes("regional") || role.includes("examinadora") || role.includes("setor");
+    });
+
+    if (targets.length > 0) {
+      await prisma.notification.createMany({
+        data: targets.map(person => ({
+          personInChargeId: person.id,
+          message: `Novo pedido de pré-avaliação criado para o candidato(a) ${candidateName}.`
+        }))
+      });
+    }
+  } catch (error) {
+    console.error("Erro ao despachar notificações:", error);
+  }
+
   revalidatePath("/pre-avaliacao");
   // Se houver uma tela de listagem futura, revalidar a rota
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { User, MapPin, Church, Music, Calendar, Printer, BookOpen, ClipboardCheck, Pencil, Trash2 } from "lucide-react";
 import { AllocationButton } from "@/components/AllocationButton";
+import { SchedulePreEvaluationModal } from "@/components/SchedulePreEvaluationModal";
 
 // Assuming we pass deletePreEvaluation as a prop or handle it via router.refresh
 import { deletePreEvaluation } from "@/actions/preEvaluation";
@@ -24,6 +25,7 @@ export default function PreEvaluationTableClient({
   isAdmin?: boolean
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [schedulingItem, setSchedulingItem] = useState<{ id: string; name: string } | null>(null);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
@@ -75,6 +77,14 @@ export default function PreEvaluationTableClient({
         </div>
       )}
 
+      {schedulingItem && (
+        <SchedulePreEvaluationModal 
+          preEvaluationId={schedulingItem.id}
+          candidateName={schedulingItem.name}
+          onClose={() => setSchedulingItem(null)}
+        />
+      )}
+
       <div className="glass-card overflow-x-auto p-0">
         <table className="w-full text-left border-collapse min-w-[1000px]">
           <thead>
@@ -96,7 +106,8 @@ export default function PreEvaluationTableClient({
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Setor / Congregação</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Encarregado</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo de Teste</th>
-              <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Data</th>
+              <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Data Inscrição</th>
+              <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Agendamento</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Status</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider text-right">Ações</th>
             </tr>
@@ -152,8 +163,31 @@ export default function PreEvaluationTableClient({
                   </td>
                   <td className="p-4">
                     <span className="text-xs text-slate-500 flex items-center gap-1.5 font-medium">
-                      <Calendar className="w-3.5 h-3.5 text-[#e95931]" /> {new Date(evalReq.createdAt).toLocaleDateString('pt-BR')}
+                      <Calendar className="w-3.5 h-3.5 text-slate-400" /> {new Date(evalReq.createdAt).toLocaleDateString('pt-BR')}
                     </span>
+                  </td>
+                  <td className="p-4">
+                    {evalReq.scheduledDate ? (
+                      <div className="flex flex-col gap-1 text-xs">
+                        <span className="flex items-center gap-1.5 font-medium text-slate-700">
+                          <Calendar className="w-3.5 h-3.5 text-[#e95931]" />
+                          {new Date(evalReq.scheduledDate).toLocaleDateString('pt-BR')} às {new Date(evalReq.scheduledDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                        <span className="text-slate-500 text-[10px] uppercase">
+                          Agendado por: <span className="font-semibold">{evalReq.scheduler?.fullName || "Desconhecido"}</span>
+                        </span>
+                      </div>
+                    ) : canEvaluate ? (
+                      <button 
+                        onClick={() => setSchedulingItem({ id: evalReq.id, name: evalReq.candidateName })}
+                        className="flex items-center gap-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-1.5 rounded-lg transition-colors border border-slate-200"
+                      >
+                        <Calendar className="w-3.5 h-3.5" />
+                        Agendar Data
+                      </button>
+                    ) : (
+                      <span className="text-xs text-slate-400 italic">Não agendado</span>
+                    )}
                   </td>
                   <td className="p-4">
                     <div className="flex flex-col gap-1.5 w-fit">

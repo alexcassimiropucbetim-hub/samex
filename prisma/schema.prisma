@@ -76,8 +76,9 @@ model PersonInCharge {
   managedChurches      Church[]              @relation("ManagedChurches")
   testEvaluations      PreEvaluation[]       @relation("TestEvaluator")
   preEvaluations       PreEvaluation[]
-  preEvaluationResults PreEvaluationResult[] @relation("PreEvaluator")
-  allowedTestTypes     TestType[]            @relation("PersonInChargeToTestType")
+  preEvaluationResults    PreEvaluationResult[] @relation("PreEvaluator")
+  scheduledPreEvaluations PreEvaluation[]       @relation("PreEvaluationScheduler")
+  allowedTestTypes        TestType[]            @relation("PersonInChargeToTestType")
   accessLogs           AccessLog[]
   notifications        Notification[]
 }
@@ -137,6 +138,9 @@ model PreEvaluation {
   meetingDate             String?
   meetingElderName        String?
   meetingLocality         String?
+  scheduledDate           DateTime?
+  schedulerId             String?
+  scheduler               PersonInCharge?      @relation("PreEvaluationScheduler", fields: [schedulerId], references: [id])
   currentInstrument       Instrument?          @relation("CurrentInstrument", fields: [currentInstrumentId], references: [id])
   testEvaluator           PersonInCharge?      @relation("TestEvaluator", fields: [testEvaluatorId], references: [id])
   testSchedule            TestSchedule?        @relation(fields: [testScheduleId], references: [id])

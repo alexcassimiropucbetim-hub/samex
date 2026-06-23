@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getSession } from "@/lib/auth";
 
 export async function createPreEvaluation(formData: FormData) {
   const candidateName = formData.get("candidateName") as string;
@@ -105,6 +106,7 @@ export async function getPreEvaluations() {
       church: true,
       personInCharge: true,
       testType: true,
+      scheduler: true,
       evaluationResult: {
         include: {
           evaluator: true,
@@ -119,6 +121,23 @@ export async function deletePreEvaluation(id: string) {
   await prisma.preEvaluation.delete({
     where: { id },
   });
+  revalidatePath("/pre-avaliacao");
+}
+
+export async function schedulePreEvaluationDate(id: string, date: Date) {
+  const session = await getSession();
+  if (!session || session.type !== "encarregado") {
+    throw new Error("Não autorizado");
+  }
+
+  await prisma.preEvaluation.update({
+    where: { id },
+    data: {
+      scheduledDate: date,
+      schedulerId: session.id
+    }
+  });
+
   revalidatePath("/pre-avaliacao");
 }
 

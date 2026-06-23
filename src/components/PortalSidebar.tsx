@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, X } from "lucide-react";
+import { FileSignature, CalendarClock, LogOut, Menu, X } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
 import { NotificationBell } from "./NotificationBell";

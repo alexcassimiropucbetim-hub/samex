@@ -17,9 +17,18 @@ export async function allocateToTest(preEvaluationId: string, testScheduleId: st
       throw new Error("Chave do Teste inválida.");
     }
 
-    await prisma.preEvaluation.update({
+    const evaluation = await prisma.preEvaluation.update({
       where: { id: preEvaluationId },
       data: { testScheduleId }
+    });
+
+    const dateStr = new Date(testSchedule.testDate).toLocaleString("pt-BR", { dateStyle: "short" });
+
+    await prisma.notification.create({
+      data: {
+        personInChargeId: evaluation.personInChargeId,
+        message: `O candidato ${evaluation.candidateName} foi alocado no exame do dia ${dateStr}.`
+      }
     });
 
     revalidatePath("/portal");

@@ -8,6 +8,8 @@ import {
   markAllAsRead 
 } from "@/actions/notification";
 
+import clsx from "clsx";
+
 type NotificationType = {
   id: string;
   message: string;
@@ -15,12 +17,38 @@ type NotificationType = {
   isRead: boolean;
 };
 
-export function NotificationBell() {
+export function NotificationBell({ align = "right" }: { align?: "left" | "right" }) {
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [permissionState, setPermissionState] = useState<NotificationPermission | "default">("default");
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const previousCountRef = useRef<number>(0);
   const isFirstLoad = useRef(true);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setPermissionState(Notification.permission);
+    }
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      const perm = await Notification.requestPermission();
+      setPermissionState(perm);
+      
+      // Unlocks audio context on user interaction
+      if (audioRef.current) {
+        audioRef.current.volume = 0.01;
+        audioRef.current.play().then(() => {
+          if (audioRef.current) {
+            audioRef.current.pause();
+            audioRef.current.currentTime = 0;
+            audioRef.current.volume = 1;
+          }
+        }).catch(() => {});
+      }
+    }
+  };
 
   const loadNotifications = async () => {
     try {
@@ -28,10 +56,29 @@ export function NotificationBell() {
       if (Array.isArray(data)) {
         setNotifications(data);
         
-        // Toca o som apenas se o número de notificações aumentou E não for o primeiro carregamento
+        // Check for new notifications
         if (!isFirstLoad.current && data.length > previousCountRef.current) {
+          const newCount = data.length - previousCountRef.current;
+          
+          // Play sound
           if (audioRef.current) {
             audioRef.current.play().catch(e => console.log("Audio play prevented:", e));
+          }
+
+          // Vibrate if supported (mobile)
+          if (typeof navigator !== "undefined" && navigator.vibrate) {
+            navigator.vibrate([200, 100, 200]);
+          }
+
+          // Show native notification
+          if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
+            const newNotifs = data.slice(0, newCount);
+            newNotifs.forEach(notif => {
+              new Notification("SAMEX - Nova Notificação", {
+                body: notif.message,
+                icon: "/icon-192x192.png",
+              });
+            });
           }
         }
         
@@ -68,6 +115,16 @@ export function NotificationBell() {
     <div className="relative">
       <audio ref={audioRef} src="/notification.wav" preload="auto" />
       
+      {permissionState === "default" && (
+        <div className="absolute right-0 top-12 w-64 bg-orange-500 text-white text-xs p-3 rounded-xl shadow-lg z-50 flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+          <p className="font-medium">Ative as notificações para receber alertas sonoros e visuais.</p>
+          <div className="flex justify-end gap-2 mt-1">
+            <button onClick={() => setPermissionState("denied")} className="px-2 py-1 bg-orange-600 hover:bg-orange-700 rounded transition-colors">Agora não</button>
+            <button onClick={requestNotificationPermission} className="px-2 py-1 bg-white text-orange-600 font-bold rounded hover:bg-orange-50 transition-colors">Ativar</button>
+          </div>
+        </div>
+      )}
+
       <button 
         onClick={() => setIsOpen(!isOpen)}
         className="relative p-2 text-slate-500 hover:bg-slate-100 hover:text-slate-700 rounded-full transition-colors flex items-center justify-center"
@@ -84,7 +141,10 @@ export function NotificationBell() {
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden z-50">
+          <div className={clsx(
+            "absolute mt-2 w-80 bg-white rounded-xl shadow-lg shadow-slate-200/50 border border-slate-200 overflow-hidden z-50",
+            align === "right" ? "right-0" : "left-0"
+          )}>
             <div className="p-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
               <h3 className="font-semibold text-slate-800 text-sm">Notificações</h3>
               {notifications.length > 0 && (

@@ -81,7 +81,7 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
           </div>
           
           <div className="hidden md:block absolute right-4 top-1/2 -translate-y-1/2">
-            <NotificationBell />
+            <NotificationBell align="left" />
           </div>
 
           <div className="md:hidden absolute right-4 top-1/2 -translate-y-1/2">

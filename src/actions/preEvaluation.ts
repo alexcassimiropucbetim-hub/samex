@@ -132,12 +132,30 @@ export async function schedulePreEvaluationDate(id: string, date: Date, evaluato
     throw new Error("Não autorizado");
   }
 
+  const preEvaluation = await prisma.preEvaluation.findUnique({
+    where: { id },
+    select: { personInChargeId: true, candidateName: true }
+  });
+
+  if (!preEvaluation) {
+    throw new Error("Pré-avaliação não encontrada");
+  }
+
   await prisma.preEvaluation.update({
     where: { id },
     data: {
       scheduledDate: date,
       schedulerId: session.type === "encarregado" ? session.id : undefined,
       testEvaluatorId: session.type === "admin" && evaluatorId ? evaluatorId : undefined,
+    }
+  });
+
+  // Criar notificação para o encarregado que solicitou
+  const dateStr = new Date(date).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" });
+  await prisma.notification.create({
+    data: {
+      personInChargeId: preEvaluation.personInChargeId,
+      message: `A pré-avaliação de ${preEvaluation.candidateName} foi agendada para ${dateStr}.`
     }
   });
 

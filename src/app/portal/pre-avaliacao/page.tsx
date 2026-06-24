@@ -87,6 +87,11 @@ export default async function PreEvaluationPage({
 
   const initialDataToPass = editingReq || (defaultData as any);
 
+  const evaluators = personInCharges.filter(p => {
+    const role = p.roleType?.name?.toLowerCase() || '';
+    return role.includes('regional') || role.includes('examinadora');
+  });
+
   return (
     <div className="space-y-12 animate-in fade-in duration-500">
       <div>
@@ -120,6 +125,7 @@ export default async function PreEvaluationPage({
             isRegional={isRegional}
             isExaminadora={isExaminadora}
             isAdmin={isAdmin}
+            evaluators={evaluators}
           />
         )}
       </div>

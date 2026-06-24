@@ -220,7 +220,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
               }`}>
                 <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
-              <span className={`text-[10px] sm:text-sm font-medium px-1 sm:px-2 py-0.5 rounded-full text-center leading-tight ${isActive ? "text-[#e95931] bg-[#e95931]/10" : "text-slate-500 bg-white/80"}`}>
+              <span className={`text-[9px] sm:text-sm font-medium px-1 sm:px-2 py-0.5 rounded-full text-center leading-tight truncate w-full sm:w-auto ${isActive ? "text-[#e95931] bg-[#e95931]/10" : "text-slate-500 bg-white/80"}`}>
                 {s.title}
               </span>
             </div>
@@ -484,7 +484,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
             <h3 className="text-lg sm:text-xl font-semibold text-slate-900 mb-4 sm:mb-6">Confirmação de Dados</h3>
             
             <div className="bg-slate-100 border border-slate-200 rounded-xl p-6 space-y-4 text-sm">
-              <div className="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <p className="text-slate-500">Candidato(a)</p>
                   <p className="text-slate-600 font-medium">{formData.candidateName || "-"}</p>
@@ -512,7 +512,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
               </div>
 
               {formData.gender === "F" && (
-                <div className="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-200 pb-4">
                   <div>
                     <p className="text-slate-500">Instrutora</p>
                     <p className="text-slate-600 font-medium">{formData.instructorName || "-"}</p>
@@ -528,7 +528,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-4 border-b border-slate-200 pb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <p className="text-slate-500">Tipo de Teste</p>
                   <p className="text-slate-600 font-medium">{testTypes.find(t => t.id === formData.testTypeId)?.name || "-"}</p>
@@ -557,7 +557,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
       </div>
 
       {/* Navigation */}
-      <div className="flex justify-between mt-10 pt-6 border-t border-slate-200">
+      <div className="flex flex-col-reverse sm:flex-row justify-between mt-10 pt-6 border-t border-slate-200 gap-4">
         <button 
           onClick={handleBack} 
           disabled={step === 1 || isLoading}
@@ -569,7 +569,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         {step < 4 ? (
           <button 
             onClick={handleNext}
-            className="btn-primary flex items-center gap-2 px-8"
+            className="btn-primary flex items-center justify-center gap-2 w-full sm:w-auto px-8"
           >
             Próximo <ChevronRight className="w-5 h-5" />
           </button>
@@ -577,7 +577,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
           <button 
             onClick={handleSubmit}
             disabled={isLoading}
-            className="btn-primary bg-green-600 hover:bg-green-700 shadow-green-500/30 flex items-center gap-2 px-8"
+            className="btn-primary bg-green-600 hover:bg-green-700 shadow-green-500/30 flex items-center justify-center gap-2 w-full sm:w-auto px-8"
           >
             {isLoading ? "Salvando..." : (
               <>Confirmar Cadastro <CheckCircle2 className="w-5 h-5" /></>

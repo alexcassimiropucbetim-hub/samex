@@ -253,7 +253,7 @@ export default async function EncarregadosPage({
               {q ? "Nenhum encarregado encontrado para a busca." : "Nenhum encarregado cadastrado ainda."}
             </div>
           ) : (
-            <div className="glass-card overflow-hidden !p-0">
+            <div className="hidden lg:block glass-card overflow-hidden !p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-slate-600 border-collapse min-w-[800px]">
                   <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
@@ -364,6 +364,106 @@ export default async function EncarregadosPage({
                       </span>
                     )}
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mobile Cards */}
+          {encarregados.length > 0 && (
+            <div className="lg:hidden flex flex-col gap-4 mt-4">
+              {encarregados.map((person) => (
+                <div key={person.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-500 shrink-0">
+                        <UserCheck className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-900 uppercase text-sm">{person.fullName}</span>
+                        <span className="text-xs text-slate-500 uppercase flex items-center gap-1 mt-0.5">
+                          <Briefcase className="w-3 h-3" /> {person.roleType?.name || "Sem Cargo"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <div>
+                      <p className="text-slate-400 font-medium mb-0.5">Login</p>
+                      <p className="font-bold text-blue-500">@{person.login}</p>
+                    </div>
+                    <div>
+                      <p className="text-slate-400 font-medium mb-0.5">Nº Carteirinha</p>
+                      <p className="font-bold text-slate-700 uppercase">{person.cardNumber}</p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-slate-400 font-medium mb-0.5">Igreja</p>
+                      <p className="font-bold text-slate-700 uppercase flex items-center gap-1.5">
+                        <Church className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        {person.church.name}
+                      </p>
+                    </div>
+                    <div className="col-span-2">
+                      <p className="text-slate-400 font-medium mb-0.5">Pode Aplicar</p>
+                      <div className="flex flex-wrap gap-1 mt-0.5">
+                        {person.allowedTestTypes.length === 0 ? (
+                          <span className="text-xs text-slate-500 italic">Nenhum</span>
+                        ) : (
+                          person.allowedTestTypes.map(t => (
+                            <span key={t.id} className="text-[10px] bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full flex items-center gap-1 uppercase">
+                              <FileSignature className="w-3 h-3 text-slate-400" /> {t.name}
+                            </span>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 justify-end pt-2 border-t border-slate-100">
+                    <Link href={`/encarregados?page=${page}&q=${q}&edit=${person.id}`} className="text-slate-500 hover:text-blue-500 p-2.5 rounded-xl hover:bg-blue-50 transition-colors">
+                      <Pencil className="w-5 h-5" />
+                    </Link>
+                    <form action={async () => {
+                      "use server";
+                      await deletePersonInCharge(person.id);
+                    }}>
+                      <button 
+                        type="submit" 
+                        className="text-slate-500 hover:text-red-500 p-2.5 rounded-xl hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              ))}
+              
+              {/* Pagination (Mobile) */}
+              {totalPages > 1 && (
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center justify-between">
+                    {page > 1 ? (
+                      <Link href={`/encarregados?page=${page - 1}&q=${q}${editParam}`} className="px-4 py-2 text-sm border border-slate-200 bg-white rounded-xl shadow-sm text-slate-600 font-medium w-full text-center hover:bg-slate-50">
+                        Anterior
+                      </Link>
+                    ) : (
+                      <span className="px-4 py-2 text-sm border border-slate-100 bg-slate-50 rounded-xl text-slate-400 font-medium w-full text-center opacity-50 cursor-not-allowed">
+                        Anterior
+                      </span>
+                    )}
+                    <div className="w-4 shrink-0"></div>
+                    {page < totalPages ? (
+                      <Link href={`/encarregados?page=${page + 1}&q=${q}${editParam}`} className="px-4 py-2 text-sm border border-slate-200 bg-white rounded-xl shadow-sm text-slate-600 font-medium w-full text-center hover:bg-slate-50">
+                        Próxima
+                      </Link>
+                    ) : (
+                      <span className="px-4 py-2 text-sm border border-slate-100 bg-slate-50 rounded-xl text-slate-400 font-medium w-full text-center opacity-50 cursor-not-allowed">
+                        Próxima
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-center text-xs text-slate-500 mt-1">Página {page} de {totalPages}</div>
                 </div>
               )}
             </div>

@@ -100,7 +100,7 @@ export default async function MinistriesPage({
               {q ? "Nenhum ministério encontrado para a busca." : "Nenhum ministério cadastrado ainda."}
             </div>
           ) : (
-            <div className="glass-card overflow-hidden !p-0">
+            <div className="hidden lg:block glass-card overflow-hidden !p-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm text-slate-600">
                   <thead className="bg-slate-50 text-slate-500 border-b border-slate-200">
@@ -235,6 +235,122 @@ export default async function MinistriesPage({
                       </span>
                     )}
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Mobile Cards */}
+          {ministries.length > 0 && (
+            <div className="lg:hidden flex flex-col gap-4 mt-4">
+              {ministries.map((ministry) => {
+                const isEditing = editId === ministry.id;
+                return isEditing ? (
+                  <div key={ministry.id} className="bg-blue-50 rounded-xl p-4 shadow-sm border border-blue-100 flex flex-col gap-3">
+                    <form action={async (formData: FormData) => {
+                      "use server";
+                      await updateMinistry(ministry.id, formData);
+                      redirect(`/ministerios?page=${page}&q=${q}`);
+                    }} className="flex flex-col gap-3 w-full">
+                      <select
+                        name="churchId"
+                        defaultValue={ministry.churchId}
+                        required
+                        className="input-glass py-1.5 px-3 uppercase text-sm"
+                      >
+                        {churches.map(church => (
+                          <option key={church.id} value={church.id}>{church.name}</option>
+                        ))}
+                      </select>
+                      <input 
+                        type="text" 
+                        name="elderName" 
+                        defaultValue={ministry.elderName} 
+                        className="input-glass py-1.5 px-3 uppercase text-sm" 
+                        required 
+                        placeholder="Ancião"
+                      />
+                      <input 
+                        type="text" 
+                        name="cooperatorName" 
+                        defaultValue={ministry.cooperatorName} 
+                        className="input-glass py-1.5 px-3 uppercase text-sm" 
+                        required 
+                        placeholder="Cooperador"
+                      />
+                      <div className="flex items-center gap-2 justify-end pt-2 border-t border-blue-200/50 mt-1">
+                        <button type="submit" className="text-green-600 bg-green-100 hover:bg-green-200 p-2.5 rounded-xl transition-colors" title="Salvar">
+                          <Save className="w-5 h-5" />
+                        </button>
+                        <Link href={`/ministerios?page=${page}&q=${q}`} className="text-slate-500 bg-slate-200 hover:bg-slate-300 p-2.5 rounded-xl transition-colors" title="Cancelar">
+                          <X className="w-5 h-5" />
+                        </Link>
+                      </div>
+                    </form>
+                  </div>
+                ) : (
+                  <div key={ministry.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 shrink-0">
+                          <Church className="w-5 h-5" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-900 uppercase text-sm">{ministry.church.name}</span>
+                          <span className="text-xs text-slate-500 uppercase flex items-center gap-1 mt-0.5">
+                            <User className="w-3 h-3" /> A. {ministry.elderName}
+                          </span>
+                          <span className="text-xs text-slate-500 uppercase flex items-center gap-1 mt-0.5">
+                            <User className="w-3 h-3" /> C. {ministry.cooperatorName}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 justify-end pt-2 border-t border-slate-100">
+                      <Link href={`/ministerios?page=${page}&q=${q}&edit=${ministry.id}`} className="text-slate-500 hover:text-blue-500 p-2.5 rounded-xl hover:bg-blue-50 transition-colors">
+                        <Edit2 className="w-5 h-5" />
+                      </Link>
+                      <form action={async () => {
+                        "use server";
+                        await deleteMinistry(ministry.id);
+                      }}>
+                        <button 
+                          type="submit" 
+                          className="text-slate-500 hover:text-red-500 p-2.5 rounded-xl hover:bg-red-50 transition-colors"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </form>
+                    </div>
+                  </div>
+                )
+              })}
+              
+              {/* Pagination (Mobile) */}
+              {totalPages > 1 && (
+                <div className="flex flex-col gap-2 mt-2">
+                  <div className="flex items-center justify-between">
+                    {page > 1 ? (
+                      <Link href={`/ministerios?page=${page - 1}&q=${q}`} className="px-4 py-2 text-sm border border-slate-200 bg-white rounded-xl shadow-sm text-slate-600 font-medium w-full text-center hover:bg-slate-50">
+                        Anterior
+                      </Link>
+                    ) : (
+                      <span className="px-4 py-2 text-sm border border-slate-100 bg-slate-50 rounded-xl text-slate-400 font-medium w-full text-center opacity-50 cursor-not-allowed">
+                        Anterior
+                      </span>
+                    )}
+                    <div className="w-4 shrink-0"></div>
+                    {page < totalPages ? (
+                      <Link href={`/ministerios?page=${page + 1}&q=${q}`} className="px-4 py-2 text-sm border border-slate-200 bg-white rounded-xl shadow-sm text-slate-600 font-medium w-full text-center hover:bg-slate-50">
+                        Próxima
+                      </Link>
+                    ) : (
+                      <span className="px-4 py-2 text-sm border border-slate-100 bg-slate-50 rounded-xl text-slate-400 font-medium w-full text-center opacity-50 cursor-not-allowed">
+                        Próxima
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-center text-xs text-slate-500 mt-1">Página {page} de {totalPages}</div>
                 </div>
               )}
             </div>

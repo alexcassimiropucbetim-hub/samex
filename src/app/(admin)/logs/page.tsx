@@ -61,7 +61,7 @@ export default async function LogsPage({
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="hidden lg:block overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50/50 text-slate-500 font-medium border-b border-slate-200">
               <tr>
@@ -129,6 +129,63 @@ export default async function LogsPage({
             </tbody>
           </table>
         </div>
+
+        {/* Mobile Cards */}
+        {logs.length > 0 && (
+          <div className="lg:hidden flex flex-col gap-4 p-4 bg-slate-50/50">
+            {logs.map(log => (
+              <div key={log.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <span className="text-xs text-slate-500 font-medium">
+                    {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(log.createdAt))}
+                  </span>
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-700 border border-green-200">
+                    {log.action}
+                  </span>
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  {log.adminUsername ? (
+                    <div className="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                      <ShieldCheck className="w-5 h-5" />
+                    </div>
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <User className="w-5 h-5" />
+                    </div>
+                  )}
+                  
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">
+                      {log.adminUsername || log.personInCharge?.fullName || "Usuário Removido"}
+                    </p>
+                    {log.personInCharge && (
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        {log.personInCharge.roleType?.name || "Sem cargo"} • {log.personInCharge.church?.name}
+                      </p>
+                    )}
+                    {log.adminUsername && (
+                      <p className="text-xs text-purple-500 mt-0.5 font-medium">Administrador</p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-2.5 rounded-lg border border-slate-100 mt-1">
+                  <div>
+                    <p className="text-slate-400 font-medium mb-0.5">Endereço IP</p>
+                    <p className="font-mono text-slate-600">{log.ipAddress}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400 font-medium mb-0.5">Navegador</p>
+                    <p className="text-slate-600 truncate" title={log.userAgent || ""}>
+                      {log.userAgent ? log.userAgent.split(' ')[0] : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Pagination */}
         {totalPages > 1 && (

@@ -133,7 +133,7 @@ export default async function UsuariosAdminPage({
               Nenhum usuário administrador encontrado.
             </div>
           ) : (
-            <div className="glass-card overflow-x-auto p-0">
+            <div className="hidden lg:block glass-card overflow-x-auto p-0">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-100">
@@ -190,6 +190,58 @@ export default async function UsuariosAdminPage({
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Mobile Cards */}
+          {admins.length > 0 && (
+            <div className="lg:hidden flex flex-col gap-4 mt-4">
+              {admins.map((admin: any) => (
+                <div key={admin.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 shrink-0">
+                        <UserCog className="w-5 h-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-slate-900 text-sm">{admin.name}</span>
+                        <span className="text-xs text-slate-500">Cadastrado: {new Date(admin.createdAt).toLocaleDateString("pt-BR")}</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100 flex items-center justify-between">
+                    <span className="text-xs text-slate-500">Login</span>
+                    <span className="text-xs font-mono font-medium text-slate-700 bg-white px-2 py-1 rounded border border-slate-200">
+                      {admin.username}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 justify-end pt-2 border-t border-slate-100">
+                    <Link 
+                      href={`/usuarios?edit=${admin.id}`}
+                      className="text-slate-500 hover:text-orange-400 p-2.5 rounded-xl hover:bg-orange-400/10 transition-colors"
+                      title="Editar e Alterar Senha"
+                    >
+                      <KeyRound className="w-5 h-5" />
+                    </Link>
+                    <form action={async (formData) => {
+                      "use server";
+                      const id = formData.get("id") as string;
+                      if (id) await deleteAdmin(id);
+                    }}>
+                      <input type="hidden" name="id" value={admin.id} />
+                      <button 
+                        type="submit" 
+                        className="text-slate-500 hover:text-red-400 p-2.5 rounded-xl hover:bg-red-400/10 transition-colors"
+                        title="Excluir Usuário"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

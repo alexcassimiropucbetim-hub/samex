@@ -107,6 +107,8 @@ export async function getPreEvaluations() {
       personInCharge: true,
       testType: true,
       scheduler: true,
+      instrument: true,
+      currentInstrument: true,
       evaluationResult: {
         include: {
           evaluator: true,
@@ -124,9 +126,9 @@ export async function deletePreEvaluation(id: string) {
   revalidatePath("/pre-avaliacao");
 }
 
-export async function schedulePreEvaluationDate(id: string, date: Date) {
+export async function schedulePreEvaluationDate(id: string, date: Date, evaluatorId?: string) {
   const session = await getSession();
-  if (!session || session.type !== "encarregado") {
+  if (!session || (session.type !== "encarregado" && session.type !== "admin")) {
     throw new Error("Não autorizado");
   }
 
@@ -134,7 +136,8 @@ export async function schedulePreEvaluationDate(id: string, date: Date) {
     where: { id },
     data: {
       scheduledDate: date,
-      schedulerId: session.id
+      schedulerId: session.type === "encarregado" ? session.id : undefined,
+      testEvaluatorId: session.type === "admin" && evaluatorId ? evaluatorId : undefined,
     }
   });
 

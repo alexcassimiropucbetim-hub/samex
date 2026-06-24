@@ -84,7 +84,7 @@ export default async function AvaliadoresPage({
               Nenhum avaliador cadastrado ainda.
             </div>
           ) : (
-            <div className="glass-card overflow-x-auto p-0">
+            <div className="hidden lg:block glass-card overflow-x-auto p-0">
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-slate-200 bg-slate-100">
@@ -130,6 +130,43 @@ export default async function AvaliadoresPage({
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Mobile Cards */}
+          {avaliadores.length > 0 && (
+            <div className="lg:hidden flex flex-col gap-4 mt-4">
+              {avaliadores.map((person) => (
+                <div key={person.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center text-orange-400 shrink-0">
+                      <Users className="w-5 h-5" />
+                    </div>
+                    <span className="font-bold text-slate-900">{person.name}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Link 
+                      href={`/avaliadores?edit=${person.id}`}
+                      className="text-slate-500 hover:text-orange-400 p-2.5 rounded-xl hover:bg-orange-400/10 transition-colors"
+                      title="Editar Avaliador"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </Link>
+                    <form action={async () => {
+                      "use server";
+                      await deleteEvaluator(person.id);
+                    }}>
+                      <button 
+                        type="submit" 
+                        className="text-slate-500 hover:text-red-400 p-2.5 rounded-xl hover:bg-red-400/10 transition-colors"
+                        title="Excluir Avaliador"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

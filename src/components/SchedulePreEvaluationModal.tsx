@@ -8,10 +8,13 @@ interface Props {
   preEvaluationId: string;
   candidateName: string;
   onClose: () => void;
+  isAdmin?: boolean;
+  evaluators?: any[];
 }
 
-export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, onClose }: Props) {
+export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, onClose, isAdmin, evaluators = [] }: Props) {
   const [dateStr, setDateStr] = useState("");
+  const [evaluatorId, setEvaluatorId] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +24,7 @@ export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, onC
     try {
       setIsSubmitting(true);
       const date = new Date(dateStr);
-      await schedulePreEvaluationDate(preEvaluationId, date);
+      await schedulePreEvaluationDate(preEvaluationId, date, isAdmin ? evaluatorId : undefined);
       onClose();
     } catch (error) {
       console.error("Erro ao agendar data:", error);
@@ -66,6 +69,27 @@ export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, onC
             />
           </div>
 
+          {isAdmin && (
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700 block">
+                Selecione o Avaliador (Regional/Examinadora)
+              </label>
+              <select
+                required
+                value={evaluatorId}
+                onChange={(e) => setEvaluatorId(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-white focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 transition-all text-slate-700"
+              >
+                <option value="">Selecione um avaliador...</option>
+                {evaluators.map((ev) => (
+                  <option key={ev.id} value={ev.id}>
+                    {ev.fullName} ({ev.roleType?.name || 'Sem cargo'})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="flex justify-end gap-3 pt-2">
             <button
               type="button"
@@ -77,7 +101,7 @@ export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, onC
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !dateStr}
+              disabled={isSubmitting || !dateStr || (isAdmin && !evaluatorId)}
               className="px-5 py-2.5 text-sm font-bold text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isSubmitting ? "Salvando..." : "Confirmar Agendamento"}

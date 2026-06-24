@@ -15,14 +15,16 @@ export default function PreEvaluationTableClient({
   isLocal,
   isRegional = false,
   isExaminadora = false,
-  isAdmin = false
+  isAdmin = false,
+  evaluators = []
 }: { 
   preEvaluations: any[], 
   testSchedules: any[], 
   isLocal: boolean,
   isRegional?: boolean,
   isExaminadora?: boolean,
-  isAdmin?: boolean
+  isAdmin?: boolean,
+  evaluators?: any[]
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [schedulingItem, setSchedulingItem] = useState<{ id: string; name: string } | null>(null);
@@ -62,16 +64,17 @@ export default function PreEvaluationTableClient({
   return (
     <div className="relative">
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300">
-          <div className="bg-slate-900 text-white px-6 py-3 rounded-full shadow-2xl flex items-center gap-4">
-            <span className="text-sm font-medium">{selectedIds.size} selecionados</span>
-            <div className="w-px h-4 bg-slate-700"></div>
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 fade-in duration-300 w-[90%] sm:w-auto">
+          <div className="bg-slate-900 text-white px-4 sm:px-6 py-3 rounded-full shadow-2xl flex items-center justify-between sm:justify-center gap-2 sm:gap-4">
+            <span className="text-xs sm:text-sm font-medium whitespace-nowrap">{selectedIds.size} sel.</span>
+            <div className="w-px h-4 bg-slate-700 hidden sm:block"></div>
             <button
               onClick={handlePrintBatch}
-              className="flex items-center gap-2 bg-[#e95931] hover:bg-[#d64e28] text-white px-4 py-1.5 rounded-full text-sm font-bold transition-colors"
+              className="flex items-center gap-2 bg-[#e95931] hover:bg-[#d64e28] text-white px-3 sm:px-4 py-1.5 rounded-full text-xs sm:text-sm font-bold transition-colors whitespace-nowrap"
             >
-              <Printer className="w-4 h-4" />
-              Imprimir Selecionados (A4 Paisagem)
+              <Printer className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Imprimir Selecionados (A4 Paisagem)</span>
+              <span className="sm:hidden">Imprimir</span>
             </button>
           </div>
         </div>
@@ -95,10 +98,12 @@ export default function PreEvaluationTableClient({
           preEvaluationId={schedulingItem.id}
           candidateName={schedulingItem.name}
           onClose={() => setSchedulingItem(null)}
+          isAdmin={isAdmin}
+          evaluators={evaluators}
         />
       )}
 
-      <div className="glass-card overflow-x-auto p-0">
+      <div className="hidden lg:block glass-card overflow-x-auto p-0">
         <table className="w-full text-left border-collapse min-w-[1000px]">
           <thead>
             <tr className="border-b border-slate-200 bg-slate-50">
@@ -116,6 +121,7 @@ export default function PreEvaluationTableClient({
                 />
               </th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Candidato(a)</th>
+              <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Instrumento</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Setor / Congregação</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Encarregado</th>
               <th className="p-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo de Teste</th>
@@ -159,6 +165,18 @@ export default function PreEvaluationTableClient({
                       </div>
                       <span className="font-semibold text-slate-900 uppercase text-sm">{evalReq.candidateName}</span>
                     </div>
+                  </td>
+                  <td className="p-4 text-xs text-slate-600 font-bold uppercase">
+                    {evalReq.testType?.name?.toUpperCase().includes('TROCA DE INSTRUMENTO') ? (
+                      <span className="flex flex-col gap-0.5">
+                        <span className="text-slate-400 line-through text-[10px]">{evalReq.currentInstrument?.name || 'Não informado'}</span>
+                        <span className="text-[#e95931] flex items-center gap-1">
+                           ➔ {evalReq.instrument?.name}
+                        </span>
+                      </span>
+                    ) : (
+                      evalReq.instrument?.name
+                    )}
                   </td>
                   <td className="p-4">
                     <div className="flex flex-col gap-1 text-xs text-slate-600 uppercase">
@@ -319,6 +337,215 @@ export default function PreEvaluationTableClient({
             })}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Cards */}
+      <div className="lg:hidden flex flex-col gap-4 mt-4">
+        {/* Select All Checkbox for Mobile */}
+        {preEvaluations.length > 0 && (
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex items-center justify-between">
+             <span className="text-sm font-semibold text-slate-700">Selecionar Todos (Imprimíveis)</span>
+             <input 
+                type="checkbox" 
+                className="rounded border-slate-300 w-5 h-5 text-[#e95931] focus:ring-[#e95931]"
+                onChange={handleSelectAll}
+                checked={selectedIds.size > 0 && selectedIds.size === preEvaluations.filter(evalReq => 
+                  evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+                  evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
+                  evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
+                  evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')
+                ).length}
+              />
+          </div>
+        )}
+
+        {preEvaluations.map((evalReq) => {
+          const canPrint = evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+                           evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
+                           evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
+                           evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO');
+          
+          const canEvaluate = 
+            (!isLocal) && 
+            (
+              isAdmin ||
+              (isExaminadora && evalReq.gender === 'F') ||
+              (isRegional && evalReq.gender === 'M')
+            );
+
+          return (
+            <div key={evalReq.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-4">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  {canPrint && (
+                    <div className="mt-1">
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-slate-300 w-5 h-5 text-[#e95931] focus:ring-[#e95931]"
+                        checked={selectedIds.has(evalReq.id)}
+                        onChange={(e) => handleSelect(evalReq.id, e.target.checked)}
+                      />
+                    </div>
+                  )}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${evalReq.gender === 'F' ? 'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'}`}>
+                    <User className="w-5 h-5" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-slate-900 uppercase text-sm">{evalReq.candidateName}</span>
+                    <span className="text-[10px] font-bold bg-[#e95931]/10 text-[#e95931] border border-[#e95931]/20 px-2 py-0.5 rounded-full flex items-center gap-1 w-fit uppercase mt-1">
+                      <Music className="w-3 h-3" /> {evalReq.testType.name}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-lg border border-slate-100">
+                <div className="col-span-2">
+                  <p className="text-slate-400 font-medium mb-0.5">Instrumento</p>
+                  <div className="font-bold text-slate-700 uppercase">
+                    {evalReq.testType?.name?.toUpperCase().includes('TROCA DE INSTRUMENTO') ? (
+                      <span className="flex items-center gap-1">
+                        <span className="text-slate-400 line-through">{evalReq.currentInstrument?.name || 'Não informado'}</span>
+                        <span className="text-[#e95931]">➔ {evalReq.instrument?.name}</span>
+                      </span>
+                    ) : (
+                      evalReq.instrument?.name
+                    )}
+                  </div>
+                </div>
+                
+                <div className="col-span-2">
+                  <p className="text-slate-400 font-medium mb-0.5">Congregação / Setor</p>
+                  <p className="font-bold text-slate-700 uppercase">{evalReq.church.name} ({evalReq.sector.name})</p>
+                </div>
+
+                <div>
+                  <p className="text-slate-400 font-medium mb-0.5">Encarregado</p>
+                  <p className="font-bold text-slate-700 uppercase">{evalReq.personInCharge.fullName}</p>
+                </div>
+                
+                <div>
+                  <p className="text-slate-400 font-medium mb-0.5">Status</p>
+                  <div className="flex flex-col gap-1 w-fit mt-0.5">
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full border uppercase tracking-wider flex items-center w-fit ${
+                      (!evalReq.status || evalReq.status === 'PENDENTE') 
+                        ? 'bg-amber-50 text-amber-600 border-amber-200'
+                        : evalReq.status === 'APROVADO'
+                          ? 'bg-green-50 text-green-600 border-green-200'
+                          : 'bg-red-50 text-red-600 border-red-200'
+                    }`}>
+                      {!evalReq.status ? 'PENDENTE' : evalReq.status === 'APROVADO' ? 'ENCAMINHADO' : evalReq.status === 'REPROVADO' ? 'ESTUDAR MAIS' : evalReq.status}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="col-span-2">
+                  <p className="text-slate-400 font-medium mb-0.5">Agendamento</p>
+                  <div>
+                    {evalReq.scheduledDate ? (
+                      <div className="flex flex-col gap-0.5">
+                        <span className="flex items-center gap-1.5 font-bold text-slate-700">
+                          <Calendar className="w-3 h-3 text-[#e95931]" />
+                          {new Date(evalReq.scheduledDate).toLocaleDateString('pt-BR')} às {new Date(evalReq.scheduledDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                        </span>
+                        <span className="text-slate-500 text-[9px] uppercase font-medium">
+                          Por: {evalReq.scheduler?.fullName || "Desconhecido"}
+                        </span>
+                      </div>
+                    ) : canEvaluate ? (
+                      <button 
+                        onClick={() => setSchedulingItem({ id: evalReq.id, name: evalReq.candidateName })}
+                        className="flex items-center gap-1.5 text-xs font-bold bg-slate-200 hover:bg-slate-300 text-slate-700 px-3 py-1.5 rounded-lg transition-colors border border-slate-300 w-fit"
+                      >
+                        <Calendar className="w-3.5 h-3.5" /> Agendar Data
+                      </button>
+                    ) : (
+                      <span className="text-slate-400 italic font-medium">Não agendado</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-slate-100 flex justify-end gap-2 items-center flex-wrap">
+                {evalReq.status === 'APROVADO' && !evalReq.testScheduleId && (
+                  <AllocationButton preEvaluationId={evalReq.id} testSchedules={testSchedules} />
+                )}
+
+                {canPrint && (
+                  <a
+                    href={evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO') 
+                            ? `/api/pdf/troca-instrumento?id=${evalReq.id}` 
+                            : evalReq.gender === 'M' ? `/api/pdf/musico?id=${evalReq.id}` : `/api/pdf/organista?id=${evalReq.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[#e95931] bg-[#e95931]/10 hover:bg-[#e95931]/20 p-2.5 rounded-xl transition-colors"
+                  >
+                    <Printer className="w-4 h-4" />
+                  </a>
+                )}
+                
+                {evalReq.evaluationResult ? (
+                  <>
+                    <Link
+                      href={`/portal/pre-avaliacao/resultado?id=${evalReq.id}`}
+                      className="text-[#224465] bg-[#224465]/10 hover:bg-[#224465]/20 p-2.5 rounded-xl transition-colors"
+                    >
+                      <BookOpen className="w-4 h-4" />
+                    </Link>
+                    {canEvaluate && (
+                      <Link
+                        href={`/portal/pre-avaliacao/avaliar?id=${evalReq.id}`}
+                        className="text-green-600 bg-green-100 hover:bg-green-200 p-2.5 rounded-xl transition-colors"
+                      >
+                        <ClipboardCheck className="w-4 h-4" />
+                      </Link>
+                    )}
+                    {!canEvaluate && !isLocal && (
+                      <div className="text-slate-400 bg-slate-100 p-2.5 rounded-xl opacity-50 cursor-not-allowed">
+                        <ClipboardCheck className="w-4 h-4" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  isLocal ? (
+                    <div className="text-slate-400 bg-slate-100 p-2.5 rounded-xl opacity-50 cursor-not-allowed">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    canEvaluate ? (
+                      <Link
+                        href={`/portal/pre-avaliacao/avaliar?id=${evalReq.id}`}
+                        className="text-green-600 bg-green-100 hover:bg-green-200 p-2.5 rounded-xl transition-colors"
+                      >
+                        <ClipboardCheck className="w-4 h-4" />
+                      </Link>
+                    ) : (
+                      <div className="text-slate-400 bg-slate-100 p-2.5 rounded-xl opacity-50 cursor-not-allowed">
+                        <ClipboardCheck className="w-4 h-4" />
+                      </div>
+                    )
+                  )
+                )}
+                <Link 
+                  href={`/portal/pre-avaliacao?edit=${evalReq.id}#lista`}
+                  className="text-[#224465] bg-[#224465]/10 hover:bg-[#224465]/20 p-2.5 rounded-xl transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </Link>
+                <button 
+                  onClick={async () => {
+                    if (confirm("Tem certeza que deseja excluir esta pré-avaliação?")) {
+                      await deletePreEvaluation(evalReq.id);
+                    }
+                  }} 
+                  className="text-red-500 bg-red-100 hover:bg-red-200 p-2.5 rounded-xl transition-colors"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

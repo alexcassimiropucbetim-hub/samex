@@ -7,14 +7,18 @@ import { schedulePreEvaluationDate } from "@/actions/preEvaluation";
 interface Props {
   preEvaluationId: string;
   candidateName: string;
+  initialDate?: Date | null;
+  initialEvaluatorId?: string | null;
   onClose: () => void;
   isAdmin?: boolean;
   evaluators?: any[];
 }
 
-export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, onClose, isAdmin, evaluators = [] }: Props) {
-  const [dateStr, setDateStr] = useState("");
-  const [evaluatorId, setEvaluatorId] = useState("");
+export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, initialDate, initialEvaluatorId, onClose, isAdmin, evaluators = [] }: Props) {
+  const [dateStr, setDateStr] = useState(
+    initialDate ? new Date(initialDate.getTime() - initialDate.getTimezoneOffset() * 60000).toISOString().slice(0, 16) : ""
+  );
+  const [evaluatorId, setEvaluatorId] = useState(initialEvaluatorId || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -27,7 +27,7 @@ export default function PreEvaluationTableClient({
   evaluators?: any[]
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [schedulingItem, setSchedulingItem] = useState<{ id: string; name: string } | null>(null);
+  const [schedulingItem, setSchedulingItem] = useState<{ id: string; name: string; initialDate?: Date | null; initialEvaluatorId?: string | null } | null>(null);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
@@ -97,6 +97,8 @@ export default function PreEvaluationTableClient({
         <SchedulePreEvaluationModal 
           preEvaluationId={schedulingItem.id}
           candidateName={schedulingItem.name}
+          initialDate={schedulingItem.initialDate}
+          initialEvaluatorId={schedulingItem.initialEvaluatorId}
           onClose={() => setSchedulingItem(null)}
           isAdmin={isAdmin}
           evaluators={evaluators}
@@ -199,10 +201,25 @@ export default function PreEvaluationTableClient({
                   </td>
                   <td className="p-4">
                     {evalReq.scheduledDate ? (
-                      <div className="flex flex-col gap-1 text-xs">
+                      <div className="flex flex-col gap-1 text-xs relative group">
                         <span className="flex items-center gap-1.5 font-medium text-slate-700">
                           <Calendar className="w-3.5 h-3.5 text-[#e95931]" />
                           {new Date(evalReq.scheduledDate).toLocaleDateString('pt-BR')} às {new Date(evalReq.scheduledDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                          
+                          {canEvaluate && (
+                            <button 
+                              onClick={() => setSchedulingItem({ 
+                                id: evalReq.id, 
+                                name: evalReq.candidateName,
+                                initialDate: new Date(evalReq.scheduledDate!),
+                                initialEvaluatorId: evalReq.testEvaluatorId
+                              })}
+                              className="ml-1 text-slate-400 hover:text-[#e95931] transition-colors"
+                              title="Editar Agendamento"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </span>
                         <span className="text-slate-500 text-[10px] uppercase">
                           Agendado por: <span className="font-semibold">{evalReq.scheduler?.fullName || "Desconhecido"}</span>
@@ -447,6 +464,21 @@ export default function PreEvaluationTableClient({
                         <span className="flex items-center gap-1.5 font-bold text-slate-700">
                           <Calendar className="w-3 h-3 text-[#e95931]" />
                           {new Date(evalReq.scheduledDate).toLocaleDateString('pt-BR')} às {new Date(evalReq.scheduledDate).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})}
+                          
+                          {canEvaluate && (
+                            <button 
+                              onClick={() => setSchedulingItem({ 
+                                id: evalReq.id, 
+                                name: evalReq.candidateName,
+                                initialDate: new Date(evalReq.scheduledDate!),
+                                initialEvaluatorId: evalReq.testEvaluatorId
+                              })}
+                              className="ml-1 text-slate-400 hover:text-[#e95931] transition-colors"
+                              title="Editar Agendamento"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                          )}
                         </span>
                         <span className="text-slate-500 text-[9px] uppercase font-medium">
                           Por: {evalReq.scheduler?.fullName || "Desconhecido"}

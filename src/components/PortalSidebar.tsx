@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileSignature, CalendarClock, LogOut, Menu, X } from "lucide-react";
+import { FileSignature, CalendarClock, LogOut, Menu, X, BookOpen } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
 import { NotificationBell } from "./NotificationBell";
@@ -16,7 +16,8 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
   const allItems = [
     ...(isRegional ? [{ name: "Início", href: "/portal", icon: CalendarClock }] : []),
     ...(isRegional ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
-    { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature }
+    { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
+    { name: "Manual", href: "/portal/manual", icon: BookOpen }
   ];
 
   const menuGroups = [

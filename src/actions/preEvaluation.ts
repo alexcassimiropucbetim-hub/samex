@@ -107,6 +107,7 @@ export async function getPreEvaluations() {
       personInCharge: true,
       testType: true,
       scheduler: true,
+      testEvaluator: true,
       instrument: true,
       currentInstrument: true,
       evaluationResult: {

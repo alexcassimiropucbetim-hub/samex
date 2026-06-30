@@ -222,7 +222,7 @@ export default function PreEvaluationTableClient({
                           )}
                         </span>
                         <span className="text-slate-500 text-[10px] uppercase">
-                          Agendado por: <span className="font-semibold">{evalReq.scheduler?.fullName || "Desconhecido"}</span>
+                          Agendado por: <span className="font-semibold">{evalReq.scheduler?.fullName || evalReq.testEvaluator?.fullName || "Administração"}</span>
                         </span>
                       </div>
                     ) : canEvaluate ? (
@@ -481,7 +481,7 @@ export default function PreEvaluationTableClient({
                           )}
                         </span>
                         <span className="text-slate-500 text-[9px] uppercase font-medium">
-                          Por: {evalReq.scheduler?.fullName || "Desconhecido"}
+                          Por: {evalReq.scheduler?.fullName || evalReq.testEvaluator?.fullName || "Administração"}
                         </span>
                       </div>
                     ) : canEvaluate ? (

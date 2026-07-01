@@ -140,7 +140,9 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
                         if (typeof l === 'string' && l.startsWith('{')) {
                           try {
                             const obj = JSON.parse(l);
-                            text = `${obj.methodName} - ${obj.lesson}`;
+                            text = obj.page 
+                              ? `${obj.methodName} - Pág ${obj.page} - Lição ${obj.lesson}`
+                              : `${obj.methodName} - Lição ${obj.lesson}`;
                           } catch {}
                         }
                         return (
@@ -164,7 +166,9 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
                         if (typeof l === 'string' && l.startsWith('{')) {
                           try {
                             const obj = JSON.parse(l);
-                            text = `${obj.methodName} - ${obj.lesson}`;
+                            text = obj.page 
+                              ? `${obj.methodName} - Pág ${obj.page} - Lição ${obj.lesson}`
+                              : `${obj.methodName} - Lição ${obj.lesson}`;
                           } catch {}
                         }
                         return (

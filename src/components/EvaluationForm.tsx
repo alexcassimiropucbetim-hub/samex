@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { saveEvaluation } from "@/actions/evaluation";
 import { useRouter } from "next/navigation";
-import { ClipboardCheck, ArrowRight, XCircle, CheckCircle2 } from "lucide-react";
+import { ClipboardCheck, ArrowRight, XCircle, CheckCircle2, Plus } from "lucide-react";
 import type { TheoryMethod, PracticalMethod } from "@prisma/client";
 
 type QuestionId = 'q1Leitura' | 'q2Pulso' | 'q3Afinacao' | 'q4Escalas' | 'q5Postura' | 'q6Timbre' | 'q7Voz' | 'q8Dinamica';
@@ -42,14 +42,26 @@ export function EvaluationForm({
   const [isLoading, setIsLoading] = useState(false);
 
   // Program state
-  type LessonInput = { methodId: string, methodName: string, lesson: string };
-  const [msaLessons, setMsaLessons] = useState<LessonInput[]>(
-    Array.from({ length: 8 }, () => ({ methodId: "", methodName: "", lesson: "" }))
-  );
-  const [methodLessons, setMethodLessons] = useState<LessonInput[]>(
-    Array.from({ length: 8 }, () => ({ methodId: "", methodName: "", lesson: "" }))
-  );
+  type LessonInput = { methodId: string, methodName: string, page: string, lesson: string };
+  const [msaLessons, setMsaLessons] = useState<LessonInput[]>([
+    { methodId: "", methodName: "", page: "", lesson: "" }
+  ]);
+  const [methodLessons, setMethodLessons] = useState<LessonInput[]>([
+    { methodId: "", methodName: "", page: "", lesson: "" }
+  ]);
   const [hymns, setHymns] = useState<string[]>(Array(10).fill(""));
+
+  const addMsaLesson = () => {
+    if (msaLessons.length < 8) {
+      setMsaLessons([...msaLessons, { methodId: "", methodName: "", page: "", lesson: "" }]);
+    }
+  };
+
+  const addMethodLesson = () => {
+    if (methodLessons.length < 8) {
+      setMethodLessons([...methodLessons, { methodId: "", methodName: "", page: "", lesson: "" }]);
+    }
+  };
 
   const allAnswered = Object.values(answers).every(val => val !== '');
 
@@ -182,13 +194,13 @@ export function EvaluationForm({
             {/* Métodos de Teoria */}
             <div>
               <h3 className="text-slate-600 font-medium mb-3">Métodos de Teoria (até 8 lições)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {msaLessons.map((item, i) => (
                   <div key={`msa-${i}`} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
                     <select
                       value={item.methodId}
                       onChange={(e) => handleMsaChange(i, 'methodId', e.target.value)}
-                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="flex-[2] bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     >
                       <option value="">Selecione o método...</option>
                       {theoryMethods.map(m => (
@@ -197,11 +209,28 @@ export function EvaluationForm({
                     </select>
                     <input
                       type="text"
+                      placeholder={`Pág ${i + 1}`}
+                      value={item.page}
+                      onChange={(e) => handleMsaChange(i, 'page', e.target.value)}
+                      className="flex-1 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    />
+                    <input
+                      type="text"
                       placeholder={`Lição ${i + 1}`}
                       value={item.lesson}
                       onChange={(e) => handleMsaChange(i, 'lesson', e.target.value)}
-                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="flex-[2] bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     />
+                    {i === msaLessons.length - 1 && msaLessons.length < 8 && (
+                      <button
+                        type="button"
+                        onClick={addMsaLesson}
+                        title="Adicionar mais lição"
+                        className="flex-shrink-0 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white p-2.5 rounded-lg transition-colors"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -210,13 +239,13 @@ export function EvaluationForm({
             {/* Método Prático */}
             <div>
               <h3 className="text-slate-600 font-medium mb-3">Métodos de Prática (até 8 lições)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 {methodLessons.map((item, i) => (
                   <div key={`met-${i}`} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
                     <select
                       value={item.methodId}
                       onChange={(e) => handleMethodChange(i, 'methodId', e.target.value)}
-                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="flex-[2] bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     >
                       <option value="">Selecione o método...</option>
                       {practicalMethods.map(m => (
@@ -225,17 +254,34 @@ export function EvaluationForm({
                     </select>
                     <input
                       type="text"
+                      placeholder={`Pág ${i + 1}`}
+                      value={item.page}
+                      onChange={(e) => handleMethodChange(i, 'page', e.target.value)}
+                      className="flex-1 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                    />
+                    <input
+                      type="text"
                       placeholder={`Lição ${i + 1}`}
                       value={item.lesson}
                       onChange={(e) => handleMethodChange(i, 'lesson', e.target.value)}
-                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                      className="flex-[2] bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
                     />
+                    {i === methodLessons.length - 1 && methodLessons.length < 8 && (
+                      <button
+                        type="button"
+                        onClick={addMethodLesson}
+                        title="Adicionar mais lição"
+                        className="flex-shrink-0 flex items-center justify-center bg-orange-500 hover:bg-orange-600 text-white p-2.5 rounded-lg transition-colors"
+                      >
+                        <Plus className="w-5 h-5" />
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Hinário */}
+            {/* Hinos */}
             <div>
               <h3 className="text-slate-600 font-medium mb-3">Hinário (até 10 hinos)</h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

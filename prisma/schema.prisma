@@ -116,12 +116,11 @@ model TheoryMethod {
 }
 
 model PracticalMethod {
-  id           String      @id @default(cuid())
-  name         String
-  instrumentId String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-  instrument   Instrument  @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  instruments Instrument[]
 }
 
 model PreEvaluation {

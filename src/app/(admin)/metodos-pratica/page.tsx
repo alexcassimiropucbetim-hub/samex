@@ -64,21 +64,26 @@ export default async function MetodosPraticaPage({
             </div>
 
             <div>
-              <label htmlFor="instrumentId" className="block text-sm font-medium text-slate-600 mb-1">
-                Instrumento
+              <label className="block text-sm font-medium text-slate-600 mb-2">
+                Instrumentos Vinculados
               </label>
-              <select
-                id="instrumentId"
-                name="instrumentId"
-                required
-                defaultValue={editingMethod?.instrumentId || ""}
-                className="input-glass focus:ring-blue-500"
-              >
-                <option value="">Selecione um instrumento...</option>
-                {instruments.map(inst => (
-                  <option key={inst.id} value={inst.id}>{inst.name}</option>
-                ))}
-              </select>
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 max-h-48 overflow-y-auto space-y-2">
+                {instruments.map(inst => {
+                  const isChecked = editingMethod?.instruments?.some(i => i.id === inst.id) || false;
+                  return (
+                    <label key={inst.id} className="flex items-center gap-2 cursor-pointer p-1 hover:bg-slate-100 rounded">
+                      <input 
+                        type="checkbox" 
+                        name="instrumentIds" 
+                        value={inst.id}
+                        defaultChecked={isChecked}
+                        className="rounded border-slate-300 text-blue-500 focus:ring-blue-500"
+                      />
+                      <span className="text-sm text-slate-700">{inst.name}</span>
+                    </label>
+                  );
+                })}
+              </div>
             </div>
 
             <button type="submit" className="btn-primary w-full flex justify-center items-center gap-2">
@@ -125,9 +130,17 @@ export default async function MetodosPraticaPage({
                         </div>
                       </td>
                       <td className="p-4">
-                        <span className="text-sm text-slate-600 bg-slate-200 px-2 py-1 rounded-md">
-                          {method.instrument?.name || "Desconhecido"}
-                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {method.instruments?.length > 0 ? (
+                            method.instruments.map(inst => (
+                              <span key={inst.id} className="text-xs font-medium text-slate-600 bg-slate-200 px-2 py-1 rounded-md whitespace-nowrap">
+                                {inst.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-slate-400">Nenhum</span>
+                          )}
+                        </div>
                       </td>
                       <td className="p-4 text-center">
                         <div className="flex justify-center items-center gap-2">
@@ -171,7 +184,17 @@ export default async function MetodosPraticaPage({
                       </div>
                       <div>
                         <span className="font-bold text-slate-900 block">{method.name}</span>
-                        <span className="text-xs text-slate-500">{method.instrument?.name}</span>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {method.instruments?.length > 0 ? (
+                            method.instruments.map(inst => (
+                              <span key={inst.id} className="text-[10px] font-medium text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                                {inst.name}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-slate-400">Nenhum</span>
+                          )}
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">

@@ -5,19 +5,28 @@ import { revalidatePath } from "next/cache";
 
 export async function getPracticalMethods(instrumentId?: string) {
   return await prisma.practicalMethod.findMany({
-    where: instrumentId ? { instrumentId } : undefined,
+    where: instrumentId ? { 
+      instruments: {
+        some: { id: instrumentId }
+      }
+    } : undefined,
     orderBy: { name: "asc" },
-    include: { instrument: true }
+    include: { instruments: true }
   });
 }
 
 export async function createPracticalMethod(formData: FormData) {
   const name = formData.get("name") as string;
-  const instrumentId = formData.get("instrumentId") as string;
-  if (!name || !instrumentId) throw new Error("Nome e Instrumento são obrigatórios");
+  const instrumentIds = formData.getAll("instrumentIds") as string[];
+  if (!name || instrumentIds.length === 0) throw new Error("Nome e ao menos um Instrumento são obrigatórios");
 
   await prisma.practicalMethod.create({
-    data: { name, instrumentId },
+    data: { 
+      name, 
+      instruments: {
+        connect: instrumentIds.map(id => ({ id }))
+      }
+    },
   });
 
   revalidatePath("/metodos-pratica");
@@ -26,12 +35,17 @@ export async function createPracticalMethod(formData: FormData) {
 
 export async function updatePracticalMethod(id: string, formData: FormData) {
   const name = formData.get("name") as string;
-  const instrumentId = formData.get("instrumentId") as string;
-  if (!name || !instrumentId) throw new Error("Nome e Instrumento são obrigatórios");
+  const instrumentIds = formData.getAll("instrumentIds") as string[];
+  if (!name || instrumentIds.length === 0) throw new Error("Nome e ao menos um Instrumento são obrigatórios");
 
   await prisma.practicalMethod.update({
     where: { id },
-    data: { name, instrumentId },
+    data: { 
+      name,
+      instruments: {
+        set: instrumentIds.map(id => ({ id }))
+      }
+    },
   });
 
   revalidatePath("/metodos-pratica");

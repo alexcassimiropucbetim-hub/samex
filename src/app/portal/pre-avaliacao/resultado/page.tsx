@@ -2,11 +2,19 @@ import { prisma } from "@/lib/prisma";
 import { BookOpen, CheckCircle, XCircle, ArrowLeft, ClipboardList, Music, Book } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getSession } from "@/lib/auth";
 
 export default async function ResultadoPreAvaliacaoPage({ searchParams }: { searchParams: Promise<{ id?: string }> }) {
   const resolvedParams = await searchParams;
   const id = resolvedParams.id;
   if (!id) return notFound();
+
+  const session = await getSession();
+  const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
+  const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
+  const isAdmin = session?.type === "admin";
+  const isLocal = !isRegional && !isExaminadora && !isAdmin;
+  const showGrades = !isLocal;
 
   const preEvaluation = await prisma.preEvaluation.findUnique({
     where: { id },
@@ -88,7 +96,7 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
               </div>
             </div>
 
-            {result.observacao && (
+            {result.observacao && showGrades && (
               <div className="bg-slate-100 border border-slate-200 p-4 rounded-xl">
                 <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Observações</h4>
                 <p className="text-slate-600 text-sm whitespace-pre-wrap">{result.observacao}</p>
@@ -96,19 +104,21 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
             )}
           </div>
           
-          <div className="glass-card p-6">
-            <h2 className="text-lg font-bold text-slate-900 mb-4">Notas</h2>
-            <div className="space-y-3">
-              {criteria.map((c, i) => (
-                <div key={i} className="flex justify-between items-center text-sm border-b border-slate-200 pb-2 last:border-0 last:pb-0">
-                  <span className="text-slate-500 truncate pr-4" title={c.label}>{c.label}</span>
-                  <span className={`font-semibold shrink-0 ${
-                    c.value === 'Ótimo' ? 'text-green-400' : c.value === 'Bom' ? 'text-blue-400' : 'text-red-400'
-                  }`}>{c.value}</span>
-                </div>
-              ))}
+          {showGrades && (
+            <div className="glass-card p-6">
+              <h2 className="text-lg font-bold text-slate-900 mb-4">Notas</h2>
+              <div className="space-y-3">
+                {criteria.map((c, i) => (
+                  <div key={i} className="flex justify-between items-center text-sm border-b border-slate-200 pb-2 last:border-0 last:pb-0">
+                    <span className="text-slate-500 truncate pr-4" title={c.label}>{c.label}</span>
+                    <span className={`font-semibold shrink-0 ${
+                      c.value === 'Ótimo' ? 'text-green-400' : c.value === 'Bom' ? 'text-blue-400' : 'text-red-400'
+                    }`}>{c.value}</span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="lg:col-span-2">

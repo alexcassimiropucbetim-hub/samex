@@ -17,8 +17,8 @@ export async function saveEvaluation(data: {
   q7Voz: string;
   q8Dinamica: string;
   observacao?: string;
-  msaLessons?: string[];
-  methodLessons?: string[];
+  msaLessons?: any[];
+  methodLessons?: any[];
   hymns?: string[];
 }) {
   try {

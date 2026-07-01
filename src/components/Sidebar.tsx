@@ -25,6 +25,8 @@ const menuGroups = [
       { name: "Cargos", href: "/cargos", icon: Briefcase },
       { name: "Tipos de Teste", href: "/tipos-teste", icon: FileSignature },
       { name: "Ministérios", href: "/ministerios", icon: Users },
+      { name: "Métodos de Teoria", href: "/metodos-teoria", icon: BookOpen },
+      { name: "Métodos de Prática", href: "/metodos-pratica", icon: Music },
     ]
   },
   {

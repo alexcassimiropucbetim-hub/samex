@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { EvaluationForm } from "@/components/EvaluationForm";
 import Link from "next/link";
 import { ArrowLeft, User, Music } from "lucide-react";
+import { getTheoryMethods } from "@/actions/theoryMethod";
+import { getPracticalMethods } from "@/actions/practicalMethod";
 
 export default async function AvaliarPreAvaliacaoPage({
   searchParams,
@@ -45,6 +47,9 @@ export default async function AvaliarPreAvaliacaoPage({
     }
   }
 
+  const theoryMethods = await getTheoryMethods();
+  const practicalMethods = await getPracticalMethods(evalReq.instrumentId);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
       <div>
@@ -77,7 +82,12 @@ export default async function AvaliarPreAvaliacaoPage({
         </div>
       </div>
 
-      <EvaluationForm preEvaluationId={evalReq.id} candidateName={evalReq.candidateName} />
+      <EvaluationForm 
+        preEvaluationId={evalReq.id} 
+        candidateName={evalReq.candidateName} 
+        theoryMethods={theoryMethods}
+        practicalMethods={practicalMethods}
+      />
     </div>
   );
 }

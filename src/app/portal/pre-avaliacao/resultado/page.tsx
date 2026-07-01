@@ -132,14 +132,23 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
                 {msaLessons.length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold text-slate-600 flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                      <BookOpen className="w-5 h-5 text-slate-500" /> Lições do MSA
+                      <BookOpen className="w-5 h-5 text-slate-500" /> Métodos de Teoria
                     </h3>
                     <ul className="space-y-2">
-                      {msaLessons.map((l: string, i: number) => (
-                        <li key={i} className="bg-slate-100 px-3 py-2 rounded-lg text-slate-600 flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-orange-500 before:rounded-full">
-                          {l}
-                        </li>
-                      ))}
+                      {msaLessons.map((l: any, i: number) => {
+                        let text = l;
+                        if (typeof l === 'string' && l.startsWith('{')) {
+                          try {
+                            const obj = JSON.parse(l);
+                            text = `${obj.methodName} - ${obj.lesson}`;
+                          } catch {}
+                        }
+                        return (
+                          <li key={i} className="bg-slate-100 px-3 py-2 rounded-lg text-slate-600 flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-orange-500 before:rounded-full">
+                            {text}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}
@@ -147,14 +156,23 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
                 {methodLessons.length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold text-slate-600 flex items-center gap-2 mb-4 pb-2 border-b border-slate-200">
-                      <Music className="w-5 h-5 text-slate-500" /> Lições do Método
+                      <Music className="w-5 h-5 text-slate-500" /> Métodos de Prática
                     </h3>
                     <ul className="space-y-2">
-                      {methodLessons.map((l: string, i: number) => (
-                        <li key={i} className="bg-slate-100 px-3 py-2 rounded-lg text-slate-600 flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:blue-500 before:rounded-full">
-                          {l}
-                        </li>
-                      ))}
+                      {methodLessons.map((l: any, i: number) => {
+                        let text = l;
+                        if (typeof l === 'string' && l.startsWith('{')) {
+                          try {
+                            const obj = JSON.parse(l);
+                            text = `${obj.methodName} - ${obj.lesson}`;
+                          } catch {}
+                        }
+                        return (
+                          <li key={i} className="bg-slate-100 px-3 py-2 rounded-lg text-slate-600 flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-blue-500 before:rounded-full">
+                            {text}
+                          </li>
+                        )
+                      })}
                     </ul>
                   </div>
                 )}

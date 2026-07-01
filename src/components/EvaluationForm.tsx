@@ -4,6 +4,7 @@ import { useState } from "react";
 import { saveEvaluation } from "@/actions/evaluation";
 import { useRouter } from "next/navigation";
 import { ClipboardCheck, ArrowRight, XCircle, CheckCircle2 } from "lucide-react";
+import type { TheoryMethod, PracticalMethod } from "@prisma/client";
 
 type QuestionId = 'q1Leitura' | 'q2Pulso' | 'q3Afinacao' | 'q4Escalas' | 'q5Postura' | 'q6Timbre' | 'q7Voz' | 'q8Dinamica';
 
@@ -20,7 +21,17 @@ const questions: { id: QuestionId, label: string }[] = [
 
 const options = ["Ruim", "Bom", "Ótimo"];
 
-export function EvaluationForm({ preEvaluationId, candidateName }: { preEvaluationId: string, candidateName: string }) {
+export function EvaluationForm({ 
+  preEvaluationId, 
+  candidateName,
+  theoryMethods = [],
+  practicalMethods = []
+}: { 
+  preEvaluationId: string; 
+  candidateName: string;
+  theoryMethods?: TheoryMethod[];
+  practicalMethods?: PracticalMethod[];
+}) {
   const router = useRouter();
   const [answers, setAnswers] = useState<Record<QuestionId, string>>({
     q1Leitura: '', q2Pulso: '', q3Afinacao: '', q4Escalas: '',
@@ -31,8 +42,13 @@ export function EvaluationForm({ preEvaluationId, candidateName }: { preEvaluati
   const [isLoading, setIsLoading] = useState(false);
 
   // Program state
-  const [msaLessons, setMsaLessons] = useState<string[]>(Array(8).fill(""));
-  const [methodLessons, setMethodLessons] = useState<string[]>(Array(8).fill(""));
+  type LessonInput = { methodId: string, methodName: string, lesson: string };
+  const [msaLessons, setMsaLessons] = useState<LessonInput[]>(
+    Array.from({ length: 8 }, () => ({ methodId: "", methodName: "", lesson: "" }))
+  );
+  const [methodLessons, setMethodLessons] = useState<LessonInput[]>(
+    Array.from({ length: 8 }, () => ({ methodId: "", methodName: "", lesson: "" }))
+  );
   const [hymns, setHymns] = useState<string[]>(Array(10).fill(""));
 
   const allAnswered = Object.values(answers).every(val => val !== '');
@@ -41,15 +57,23 @@ export function EvaluationForm({ preEvaluationId, candidateName }: { preEvaluati
     setAnswers(prev => ({ ...prev, [qId]: val }));
   };
 
-  const handleMsaChange = (index: number, val: string) => {
+  const handleMsaChange = (index: number, field: keyof LessonInput, val: string) => {
     const newArr = [...msaLessons];
-    newArr[index] = val;
+    newArr[index] = { ...newArr[index], [field]: val };
+    if (field === 'methodId') {
+      const method = theoryMethods.find(m => m.id === val);
+      newArr[index].methodName = method?.name || "";
+    }
     setMsaLessons(newArr);
   };
 
-  const handleMethodChange = (index: number, val: string) => {
+  const handleMethodChange = (index: number, field: keyof LessonInput, val: string) => {
     const newArr = [...methodLessons];
-    newArr[index] = val;
+    newArr[index] = { ...newArr[index], [field]: val };
+    if (field === 'methodId') {
+      const method = practicalMethods.find(m => m.id === val);
+      newArr[index].methodName = method?.name || "";
+    }
     setMethodLessons(newArr);
   };
 
@@ -68,8 +92,8 @@ export function EvaluationForm({ preEvaluationId, candidateName }: { preEvaluati
         ...answers,
         observacao,
         // filter out empty fields if approved
-        msaLessons: isApproved ? msaLessons.filter(l => l.trim() !== '') : undefined,
-        methodLessons: isApproved ? methodLessons.filter(l => l.trim() !== '') : undefined,
+        msaLessons: isApproved ? msaLessons.filter(l => l.lesson.trim() !== '' && l.methodId !== '') : undefined,
+        methodLessons: isApproved ? methodLessons.filter(l => l.lesson.trim() !== '' && l.methodId !== '') : undefined,
         hymns: isApproved ? hymns.filter(h => h.trim() !== '') : undefined,
       });
       router.push("/portal/pre-avaliacao");
@@ -155,36 +179,58 @@ export function EvaluationForm({ preEvaluationId, candidateName }: { preEvaluati
           </h2>
 
           <div className="space-y-8">
-            {/* MSA */}
+            {/* Métodos de Teoria */}
             <div>
-              <h3 className="text-slate-600 font-medium mb-3">MSA (até 8 lições)</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {msaLessons.map((val, i) => (
-                  <input
-                    key={`msa-${i}`}
-                    type="text"
-                    placeholder={`Lição ${i + 1}`}
-                    value={val}
-                    onChange={(e) => handleMsaChange(i, e.target.value)}
-                    className="w-full bg-slate-100 border border-slate-200 rounded-lg p-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
+              <h3 className="text-slate-600 font-medium mb-3">Métodos de Teoria (até 8 lições)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {msaLessons.map((item, i) => (
+                  <div key={`msa-${i}`} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <select
+                      value={item.methodId}
+                      onChange={(e) => handleMsaChange(i, 'methodId', e.target.value)}
+                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    >
+                      <option value="">Selecione o método...</option>
+                      {theoryMethods.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder={`Lição ${i + 1}`}
+                      value={item.lesson}
+                      onChange={(e) => handleMsaChange(i, 'lesson', e.target.value)}
+                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    />
+                  </div>
                 ))}
               </div>
             </div>
 
-            {/* Método */}
+            {/* Método Prático */}
             <div>
-              <h3 className="text-slate-600 font-medium mb-3">Método (até 8 lições)</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                {methodLessons.map((val, i) => (
-                  <input
-                    key={`met-${i}`}
-                    type="text"
-                    placeholder={`Lição ${i + 1}`}
-                    value={val}
-                    onChange={(e) => handleMethodChange(i, e.target.value)}
-                    className="w-full bg-slate-100 border border-slate-200 rounded-lg p-3 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                  />
+              <h3 className="text-slate-600 font-medium mb-3">Métodos de Prática (até 8 lições)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {methodLessons.map((item, i) => (
+                  <div key={`met-${i}`} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
+                    <select
+                      value={item.methodId}
+                      onChange={(e) => handleMethodChange(i, 'methodId', e.target.value)}
+                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    >
+                      <option value="">Selecione o método...</option>
+                      {practicalMethods.map(m => (
+                        <option key={m.id} value={m.id}>{m.name}</option>
+                      ))}
+                    </select>
+                    <input
+                      type="text"
+                      placeholder={`Lição ${i + 1}`}
+                      value={item.lesson}
+                      onChange={(e) => handleMethodChange(i, 'lesson', e.target.value)}
+                      className="w-full sm:w-1/2 bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                    />
+                  </div>
                 ))}
               </div>
             </div>

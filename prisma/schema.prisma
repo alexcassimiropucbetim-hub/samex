@@ -59,6 +59,7 @@ model Instrument {
   category              InstrumentCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   currentPreEvaluations PreEvaluation[]    @relation("CurrentInstrument")
   preEvaluations        PreEvaluation[]
+  practicalMethods      PracticalMethod[]
 }
 
 model PersonInCharge {
@@ -105,6 +106,22 @@ model TestType {
   updatedAt       DateTime         @updatedAt
   preEvaluations  PreEvaluation[]
   personInCharges PersonInCharge[] @relation("PersonInChargeToTestType")
+}
+
+model TheoryMethod {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PracticalMethod {
+  id           String      @id @default(cuid())
+  name         String
+  instrumentId String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  instrument   Instrument  @relation(fields: [instrumentId], references: [id], onDelete: Cascade)
 }
 
 model PreEvaluation {

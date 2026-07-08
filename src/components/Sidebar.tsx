@@ -11,7 +11,8 @@ const menuGroups = [
   {
     name: "Dashboard",
     items: [
-      { name: "Início", href: "/", icon: Home }
+      { name: "Início", href: "/", icon: Home },
+      { name: "Relatórios", href: "/relatorios", icon: Activity }
     ]
   },
   {
@@ -174,8 +175,7 @@ export function Sidebar() {
                   </div>
                   <ChevronDown className={clsx("w-4 h-4 transition-transform duration-300", isOpenGroup ? "rotate-180" : "")} />
                 </button>
-                
-                <div className={clsx("flex flex-col gap-1 overflow-hidden transition-all duration-300 origin-top", isOpenGroup ? "max-h-[500px] opacity-100 scale-y-100" : "max-h-0 opacity-0 scale-y-0")}>
+                <div className={clsx("flex flex-col gap-1 overflow-hidden transition-all duration-300 origin-top", isOpenGroup ? "max-h-[1000px] opacity-100 scale-y-100" : "max-h-0 opacity-0 scale-y-0")}>
                   {group.items.map(item => {
                     const Icon = item.icon;
                     const isActive = pathname === item.href;

@@ -8,6 +8,12 @@
   --color-card: #ffffff;
   --color-border: #e2e8f0;
   --radius-xl: 1rem;
+
+  --breakpoint-320: 320px;
+  --breakpoint-375: 375px;
+  --breakpoint-425: 425px;
+  --breakpoint-1440: 1440px;
+  --breakpoint-1920: 1920px;
 }
 
 @layer base {

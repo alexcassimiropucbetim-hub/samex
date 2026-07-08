@@ -33,10 +33,11 @@ export default function PreEvaluationTableClient({
     if (e.target.checked) {
       const validIds = preEvaluations
         .filter(evalReq => 
-          evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+          (evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
           evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
           evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
-          evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')
+          evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')) &&
+          evalReq.status === 'APROVADO'
         )
         .map(req => req.id);
       setSelectedIds(new Set(validIds));
@@ -115,10 +116,11 @@ export default function PreEvaluationTableClient({
                   className="rounded border-slate-300 text-[#e95931] focus:ring-[#e95931]"
                   onChange={handleSelectAll}
                   checked={selectedIds.size > 0 && selectedIds.size === preEvaluations.filter(evalReq => 
-                    evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+                    (evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
                     evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
                     evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
-                    evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')
+                    evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')) &&
+                    evalReq.status === 'APROVADO'
                   ).length}
                 />
               </th>
@@ -135,10 +137,12 @@ export default function PreEvaluationTableClient({
           </thead>
           <tbody className="divide-y divide-white/5">
             {preEvaluations.map((evalReq) => {
-              const canPrint = evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
-                               evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
-                               evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
-                               evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO');
+              const canPrint = (
+                evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+                evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
+                evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
+                evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')
+              ) && evalReq.status === 'APROVADO';
               
               const canEvaluate = 
                 (!isLocal) && 
@@ -367,20 +371,23 @@ export default function PreEvaluationTableClient({
                 className="rounded border-slate-300 w-5 h-5 text-[#e95931] focus:ring-[#e95931]"
                 onChange={handleSelectAll}
                 checked={selectedIds.size > 0 && selectedIds.size === preEvaluations.filter(evalReq => 
-                  evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+                  (evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
                   evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
                   evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
-                  evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')
+                  evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')) &&
+                  evalReq.status === 'APROVADO'
                 ).length}
               />
           </div>
         )}
 
         {preEvaluations.map((evalReq) => {
-          const canPrint = evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
-                           evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
-                           evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
-                           evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO');
+          const canPrint = (
+            evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
+            evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
+            evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
+            evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO')
+          ) && evalReq.status === 'APROVADO';
           
           const canEvaluate = 
             (!isLocal) && 

@@ -1,11 +1,22 @@
 import webpush from 'web-push';
 import { prisma } from '@/lib/prisma';
 
-webpush.setVapidDetails(
-  'mailto:contato@samex.app',
-  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || ''
-);
+const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || '';
+const privateKey = process.env.VAPID_PRIVATE_KEY || '';
+
+if (publicKey && privateKey) {
+  try {
+    webpush.setVapidDetails(
+      'mailto:contato@samex.app',
+      publicKey,
+      privateKey
+    );
+  } catch (e) {
+    console.warn("Failed to set VAPID details:", e);
+  }
+} else {
+  console.warn("VAPID keys are missing. Push notifications will not work.");
+}
 
 export async function sendNotificationToUser(personInChargeId: string, payload: any) {
   try {

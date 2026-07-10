@@ -3,7 +3,7 @@ import withPWAInit from "@ducanh2912/next-pwa";
 
 const withPWA = withPWAInit({
   dest: "public",
-  customWorkerDir: "worker",
+  customWorkerSrc: "worker",
   disable: false, // Desabilitar apenas se causar problemas de cache
 });
 

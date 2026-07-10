@@ -133,8 +133,8 @@ export function SettingsClient({ initialSettings }: { initialSettings: any }) {
       registration.showNotification("Notificação de Teste", {
         body: "O sistema de notificações Push está funcionando perfeitamente!",
         icon: "/icon-192x192.png",
-        vibrate: [200, 100, 200] as any
-      });
+        vibrate: [200, 100, 200]
+      } as any);
     }
   };
 

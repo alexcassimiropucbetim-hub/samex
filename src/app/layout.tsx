@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Sistema de Agendamento Musical",
+  title: "SAMEX - Sistema de Agendamento Musical e Exames",
   description: "Gerenciamento de testes musicais premium",
   manifest: "/manifest.json",
   icons: {
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0f172a",
+  themeColor: "#224465",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,

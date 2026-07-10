@@ -97,7 +97,7 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="Lote_Impressao_Cartas.pdf"`,
+        "Content-Disposition": `attachment; filename="Lote_Impressao_Cartas.pdf"`,
       },
     });
 

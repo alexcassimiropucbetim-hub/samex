@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 
 import { getSession } from "@/lib/auth";
+import { sendNotificationToUser } from "@/lib/webpush";
 
 export async function saveEvaluation(data: {
   preEvaluationId: string;
@@ -78,13 +79,28 @@ export async function saveEvaluation(data: {
     }
 
     const status = isApproved ? "APROVADO" : "REPROVADO";
-    await prisma.preEvaluation.update({
+    const updatedEval = await prisma.preEvaluation.update({
       where: { id: preEvaluationId },
       data: { 
         status,
         testScheduleId: autoAllocatedTestId 
       }
     });
+
+    await prisma.notification.create({
+      data: {
+        personInChargeId: updatedEval.personInChargeId,
+        title: "Resultado de Avaliação",
+        message: `O candidato ${updatedEval.candidateName} foi avaliado. Resultado: ${status}.`,
+        type: "RESULTADO"
+      }
+    });
+
+    sendNotificationToUser(updatedEval.personInChargeId, {
+      title: "Resultado de Avaliação",
+      message: `O candidato ${updatedEval.candidateName} foi avaliado. Resultado: ${status}.`,
+      link: "/portal/pre-avaliacao"
+    }).catch(e => console.error("Erro push RESULTADO", e));
 
     revalidatePath("/portal");
     revalidatePath("/portal/pre-avaliacao");

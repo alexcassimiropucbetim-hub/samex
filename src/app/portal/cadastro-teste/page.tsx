@@ -29,6 +29,9 @@ export default async function CadastroTestePage({
   const editingId = resolvedParams.edit;
   const editingSchedule = editingId ? testSchedules.find(t => t.id === editingId) : null;
 
+  const guarujaCentral = churches.find(c => c.name.toLowerCase().includes("guaruja central") || c.name.toLowerCase().includes("guarujá central"));
+  const defaultChurchId = editingSchedule?.churchId || (guarujaCentral ? guarujaCentral.id : "");
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
@@ -66,7 +69,7 @@ export default async function CadastroTestePage({
               <label className="block text-sm font-medium text-slate-600 mb-1">Igreja que será realizada o teste</label>
               <select
                 name="churchId"
-                defaultValue={editingSchedule?.churchId || ""}
+                defaultValue={defaultChurchId}
                 required
                 className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
               >

@@ -2,6 +2,7 @@ import { Music2, MapPin, Church, ListMusic, FileSignature, CalendarClock, Users,
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DashboardCharts from "@/components/DashboardCharts";
+import { getSession } from "@/lib/auth";
 
 export default async function Home() {
   const today = new Date();
@@ -143,13 +144,19 @@ export default async function Home() {
     { name: "Ministérios", value: ministriesCount, icon: Users, color: "text-yellow-600", bg: "bg-yellow-500/10", border: "border-yellow-500/20", hover: "hover:border-yellow-500/50 hover:bg-yellow-500/5" },
   ];
 
+  const session = await getSession();
+  
+  const diaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(today);
+  const dataExtenso = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }).format(today);
+  const diaSemanaCapitalized = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div>
-        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
-          Bem-vindo ao Sistema
+        <h1 className="text-2xl font-bold text-slate-800">
+          A Paz de Deus, {session?.name}!
         </h1>
-        <p className="text-slate-500 mt-2">Gerencie agendamentos e cadastros musicais de forma eficiente.</p>
+        <p className="text-sm text-slate-500 mt-1">Hoje é {diaSemanaCapitalized}, {dataExtenso}.</p>
       </div>
 
       {/* Cadastros Base Cards */}

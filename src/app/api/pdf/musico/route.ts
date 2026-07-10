@@ -35,7 +35,7 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="Pedido_Musico_${preEvaluation.candidateName.replace(/\s+/g, '_')}.pdf"`,
+        "Content-Disposition": `attachment; filename="Pedido_Musico_${preEvaluation.candidateName.replace(/\s+/g, '_')}.pdf"`,
       },
     });
 

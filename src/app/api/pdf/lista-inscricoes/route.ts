@@ -246,7 +246,7 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `inline; filename="Lista_Inscricoes.pdf"`,
+        "Content-Disposition": `attachment; filename="Lista_Inscricoes.pdf"`,
       },
     });
 

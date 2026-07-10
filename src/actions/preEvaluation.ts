@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getSession } from "@/lib/auth";
+import { sendNotificationToUser } from "@/lib/webpush";
 
 export async function createPreEvaluation(formData: FormData) {
   const candidateName = formData.get("candidateName") as string;
@@ -87,9 +88,19 @@ export async function createPreEvaluation(formData: FormData) {
       await prisma.notification.createMany({
         data: targets.map(person => ({
           personInChargeId: person.id,
-          message: `Novo pedido de pré-avaliação criado para o candidato(a) ${candidateName}.`
+          title: "Novo Pedido de Avaliação",
+          message: `Novo pedido de pré-avaliação criado para o candidato(a) ${candidateName}.`,
+          type: "CADASTRO"
         }))
       });
+
+      Promise.allSettled(
+        targets.map(person => sendNotificationToUser(person.id, {
+          title: "Novo Pedido de Avaliação",
+          message: `Novo pedido de pré-avaliação criado para o candidato(a) ${candidateName}.`,
+          link: "/portal/pre-avaliacao"
+        }))
+      ).catch(e => console.error("Erro push CADASTRO", e));
     }
   } catch (error) {
     console.error("Erro ao despachar notificações:", error);
@@ -156,9 +167,17 @@ export async function schedulePreEvaluationDate(id: string, date: Date, evaluato
   await prisma.notification.create({
     data: {
       personInChargeId: preEvaluation.personInChargeId,
-      message: `A pré-avaliação de ${preEvaluation.candidateName} foi agendada para ${dateStr}.`
+      title: "Avaliação Agendada",
+      message: `A pré-avaliação de ${preEvaluation.candidateName} foi agendada para ${dateStr}.`,
+      type: "AGENDAMENTO"
     }
   });
+
+  sendNotificationToUser(preEvaluation.personInChargeId, {
+    title: "Avaliação Agendada",
+    message: `A pré-avaliação de ${preEvaluation.candidateName} foi agendada para ${dateStr}.`,
+    link: "/portal/pre-avaliacao"
+  }).catch(e => console.error("Erro push AGENDAMENTO", e));
 
   revalidatePath("/pre-avaliacao");
 }

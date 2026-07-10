@@ -1,11 +1,11 @@
 {
-  "name": "Sistema de Agendamento Musical",
-  "short_name": "Agendamento",
+  "name": "SAMEX - Sistema de Agendamento Musical e Exames",
+  "short_name": "SAMEX",
   "description": "Gerenciamento de testes musicais premium",
-  "start_url": "/",
+  "start_url": "/portal",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#0f172a",
+  "theme_color": "#224465",
   "icons": [
     {
       "src": "/icon-192x192.png",

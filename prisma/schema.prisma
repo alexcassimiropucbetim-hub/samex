@@ -82,6 +82,10 @@ model PersonInCharge {
   allowedTestTypes        TestType[]            @relation("PersonInChargeToTestType")
   accessLogs           AccessLog[]
   notifications        Notification[]
+  pushSubscriptions    PushSubscription[]
+  notifyOnNewRegistration Boolean  @default(true)
+  notifyOnSchedule        Boolean  @default(true)
+  notifyOnResult          Boolean  @default(true)
 }
 
 model Evaluator {
@@ -244,9 +248,27 @@ model LoginAttempt {
 model Notification {
   id               String          @id @default(cuid())
   personInChargeId String
+  title            String          @default("Notificação SAMEX")
   message          String
+  icon             String?
+  link             String?
+  priority         String          @default("MEDIA") // BAIXA, MEDIA, ALTA
+  type             String          @default("SISTEMA") // SISTEMA, CADASTRO, AGENDAMENTO, RESULTADO
   isRead           Boolean         @default(false)
+  sentAt           DateTime        @default(now())
   createdAt        DateTime        @default(now())
   
   personInCharge   PersonInCharge  @relation(fields: [personInChargeId], references: [id], onDelete: Cascade)
+}
+
+model PushSubscription {
+  id               String          @id @default(cuid())
+  personInChargeId String?
+  adminUsername    String?
+  endpoint         String          @unique
+  p256dh           String
+  auth             String
+  createdAt        DateTime        @default(now())
+  
+  personInCharge   PersonInCharge? @relation(fields: [personInChargeId], references: [id], onDelete: Cascade)
 }

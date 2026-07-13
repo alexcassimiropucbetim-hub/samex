@@ -80,7 +80,7 @@ export function TestPanelTableClient({
       {/* Action Buttons */}
       <div className="p-4 flex gap-3 border-b border-slate-100">
         <button 
-          onClick={() => window.open(`/imprimir-teste/${testScheduleId}`, '_blank')}
+          onClick={() => window.location.href = `/imprimir-teste/${testScheduleId}`}
           className="flex items-center gap-2 px-4 py-2 border border-orange-200 text-orange-600 rounded-lg hover:bg-orange-50 font-medium text-sm transition-colors"
         >
           <Printer className="w-4 h-4" />
@@ -89,7 +89,7 @@ export function TestPanelTableClient({
         <button 
           onClick={() => {
             if (selectedIds.length === 0) return alert("Selecione pelo menos um candidato.");
-            window.open(`/imprimir-resultado/lote?ids=${selectedIds.join(",")}`, '_blank');
+            window.location.href = `/imprimir-resultado/lote?ids=${selectedIds.join(",")}`;
           }}
           className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors"
         >
@@ -231,9 +231,9 @@ export function TestPanelTableClient({
                             <button 
                               onClick={() => {
                                 setOpenMenuId(null);
-                                window.open(`/portal/pre-avaliacao/resultado?id=${cand.id}`, '_blank');
+                                window.location.href = `/portal/pre-avaliacao/resultado?id=${cand.id}`;
                               }}
-                              className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors mt-1"
+                              className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors mt-1"
                             >
                               <BookOpen className="w-4 h-4 text-orange-500" />
                               Ver Estudo Dirigido
@@ -241,9 +241,9 @@ export function TestPanelTableClient({
                             <button 
                               onClick={() => {
                                 setOpenMenuId(null);
-                                window.open(`/imprimir-resultado/${cand.id}`, '_blank');
+                                window.location.href = `/imprimir-resultado/${cand.id}`;
                               }}
-                              className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"
+                              className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors"
                             >
                               <FileText className="w-4 h-4 text-orange-500" />
                               Imprimir Resultado
@@ -363,17 +363,17 @@ export function TestPanelTableClient({
                   >
                     <XCircle className="w-5 h-5" />
                   </button>
-                  <button 
-                    onClick={() => window.open(`/portal/pre-avaliacao/resultado?id=${cand.id}`, '_blank')}
-                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                  <button
+                    onClick={() => window.location.href = `/portal/pre-avaliacao/resultado?id=${cand.id}`}
                     title="Ver Estudo Dirigido"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                   >
                     <BookOpen className="w-5 h-5" />
                   </button>
-                  <button 
-                    onClick={() => window.open(`/imprimir-resultado/${cand.id}`, '_blank')}
-                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
+                  <button
+                    onClick={() => window.location.href = `/imprimir-resultado/${cand.id}`}
                     title="Imprimir Resultado"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
                   >
                     <FileText className="w-5 h-5" />
                   </button>

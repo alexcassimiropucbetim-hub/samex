@@ -1,5 +1,6 @@
 import { getTestDetails } from "@/actions/testDetails";
 import { notFound } from "next/navigation";
+import { PrintControls } from "@/components/PrintControls";
 
 export default async function ImprimirListaTestePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -13,6 +14,7 @@ export default async function ImprimirListaTestePage({ params }: { params: Promi
   // Separate males and females or sort alphabetically. getTestDetails already sorts alphabetically.
   return (
     <div className="print-container font-sans bg-white text-black min-h-screen p-8">
+      <PrintControls />
       <div className="max-w-[21cm] mx-auto">
         <div className="text-center mb-8 border-b-2 border-black pb-4">
           <h1 className="text-2xl font-bold uppercase">Lista de Candidatos para Teste</h1>

@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { PrintControls } from "@/components/PrintControls";
 
 export default async function ImprimirResultadoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -64,6 +65,7 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
 
   return (
     <div className="font-sans bg-white text-black min-h-screen p-8 pt-12">
+      <PrintControls />
       <div className="max-w-[21cm] mx-auto border-[1.5px] border-black">
         {/* Header */}
         <div className="bg-gray-200 border-b-[1.5px] border-black text-center font-bold py-0.5 text-base">

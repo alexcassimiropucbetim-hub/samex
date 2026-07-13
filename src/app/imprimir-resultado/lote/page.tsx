@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
+import { PrintControls } from "@/components/PrintControls";
 
 export default async function ImprimirResultadoLotePage({ searchParams }: { searchParams: Promise<{ ids: string }> }) {
   const params = await searchParams;
@@ -28,6 +29,7 @@ export default async function ImprimirResultadoLotePage({ searchParams }: { sear
 
   return (
     <div className="font-sans bg-white text-black min-h-screen">
+      <PrintControls />
       {orderedCandidates.map((candidate, index) => {
         const isFemale = candidate.gender === "F";
         const isTroca = candidate.testType?.name.toLowerCase().includes("troca");

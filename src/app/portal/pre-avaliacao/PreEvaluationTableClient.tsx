@@ -59,7 +59,7 @@ export default function PreEvaluationTableClient({
   const handlePrintBatch = () => {
     if (selectedIds.size === 0) return;
     const idsString = Array.from(selectedIds).join(",");
-    window.open(`/api/pdf/lote?ids=${idsString}`, "_blank");
+    window.location.href = `/api/pdf/lote?ids=${idsString}`;
   };
 
   return (
@@ -83,14 +83,13 @@ export default function PreEvaluationTableClient({
 
       {!isLocal && preEvaluations.length > 0 && (
         <div className="flex justify-end mb-4">
-          <Link
+          <a
             href={`/api/pdf/lista-inscricoes`}
-            target="_blank"
             className="flex items-center gap-2 bg-[#224465] hover:bg-[#1a334d] text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm"
           >
             <Printer className="w-4 h-4" />
             Imprimir Lista em Tabela (A4)
-          </Link>
+          </a>
         </div>
       )}
 
@@ -276,8 +275,6 @@ export default function PreEvaluationTableClient({
                           href={evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO') 
                                  ? `/api/pdf/troca-instrumento?id=${evalReq.id}` 
                                  : evalReq.gender === 'M' ? `/api/pdf/musico?id=${evalReq.id}` : `/api/pdf/organista?id=${evalReq.id}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
                           className="text-[#e95931] hover:bg-[#e95931]/10 p-2 rounded-lg transition-colors"
                           title={evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO') ? 'Imprimir Pedido de Troca de Instrumento' : `Imprimir Pedido de Teste (${evalReq.gender === 'M' ? 'Músicos' : 'Organistas'})`}
                         >
@@ -515,8 +512,6 @@ export default function PreEvaluationTableClient({
                     href={evalReq.testType.name.toUpperCase().includes('TROCA DE INSTRUMENTO') 
                             ? `/api/pdf/troca-instrumento?id=${evalReq.id}` 
                             : evalReq.gender === 'M' ? `/api/pdf/musico?id=${evalReq.id}` : `/api/pdf/organista?id=${evalReq.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
                     className="text-[#e95931] bg-[#e95931]/10 hover:bg-[#e95931]/20 p-2.5 rounded-xl transition-colors"
                   >
                     <Printer className="w-4 h-4" />

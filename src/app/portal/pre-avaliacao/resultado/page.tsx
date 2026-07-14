@@ -136,14 +136,13 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
                     </h3>
                     <ul className="space-y-2">
                       {msaLessons.map((l: any, i: number) => {
-                        let text = l;
-                        if (typeof l === 'string' && l.startsWith('{')) {
-                          try {
-                            const obj = JSON.parse(l);
-                            text = obj.page 
-                              ? `${obj.methodName} - Pág ${obj.page} - Lição ${obj.lesson}`
-                              : `${obj.methodName} - Lição ${obj.lesson}`;
-                          } catch {}
+                        let text = "";
+                        if (typeof l === 'object' && l !== null) {
+                          text = l.page 
+                            ? `${l.methodName || ''} - Pág ${l.page} - Lição ${l.lesson}`
+                            : `${l.methodName || ''} - Lição ${l.lesson}`;
+                        } else {
+                          text = String(l);
                         }
                         return (
                           <li key={i} className="bg-slate-100 px-3 py-2 rounded-lg text-slate-600 flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-orange-500 before:rounded-full">
@@ -162,14 +161,13 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
                     </h3>
                     <ul className="space-y-2">
                       {methodLessons.map((l: any, i: number) => {
-                        let text = l;
-                        if (typeof l === 'string' && l.startsWith('{')) {
-                          try {
-                            const obj = JSON.parse(l);
-                            text = obj.page 
-                              ? `${obj.methodName} - Pág ${obj.page} - Lição ${obj.lesson}`
-                              : `${obj.methodName} - Lição ${obj.lesson}`;
-                          } catch {}
+                        let text = "";
+                        if (typeof l === 'object' && l !== null) {
+                          text = l.page 
+                            ? `${l.methodName || ''} - Pág ${l.page} - Lição ${l.lesson}`
+                            : `${l.methodName || ''} - Lição ${l.lesson}`;
+                        } else {
+                          text = String(l);
                         }
                         return (
                           <li key={i} className="bg-slate-100 px-3 py-2 rounded-lg text-slate-600 flex items-center gap-2 before:content-[''] before:w-1.5 before:h-1.5 before:bg-blue-500 before:rounded-full">

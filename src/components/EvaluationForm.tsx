@@ -42,24 +42,23 @@ export function EvaluationForm({
   const [isLoading, setIsLoading] = useState(false);
 
   // Program state
-  type LessonInput = { methodId: string, methodName: string, page: string, lesson: string };
-  const [msaLessons, setMsaLessons] = useState<LessonInput[]>([
-    { methodId: "", methodName: "", page: "", lesson: "" }
-  ]);
-  const [methodLessons, setMethodLessons] = useState<LessonInput[]>([
-    { methodId: "", methodName: "", page: "", lesson: "" }
-  ]);
+  type LessonInput = { page: string, lesson: string };
+  const [globalTheoryMethodId, setGlobalTheoryMethodId] = useState("");
+  const [globalPracticalMethodId, setGlobalPracticalMethodId] = useState("");
+
+  const [msaLessons, setMsaLessons] = useState<LessonInput[]>([{ page: "", lesson: "" }]);
+  const [methodLessons, setMethodLessons] = useState<LessonInput[]>([{ page: "", lesson: "" }]);
   const [hymns, setHymns] = useState<string[]>(Array(10).fill(""));
 
   const addMsaLesson = () => {
     if (msaLessons.length < 8) {
-      setMsaLessons([...msaLessons, { methodId: "", methodName: "", page: "", lesson: "" }]);
+      setMsaLessons([...msaLessons, { page: "", lesson: "" }]);
     }
   };
 
   const addMethodLesson = () => {
     if (methodLessons.length < 8) {
-      setMethodLessons([...methodLessons, { methodId: "", methodName: "", page: "", lesson: "" }]);
+      setMethodLessons([...methodLessons, { page: "", lesson: "" }]);
     }
   };
 
@@ -72,20 +71,12 @@ export function EvaluationForm({
   const handleMsaChange = (index: number, field: keyof LessonInput, val: string) => {
     const newArr = [...msaLessons];
     newArr[index] = { ...newArr[index], [field]: val };
-    if (field === 'methodId') {
-      const method = theoryMethods.find(m => m.id === val);
-      newArr[index].methodName = method?.name || "";
-    }
     setMsaLessons(newArr);
   };
 
   const handleMethodChange = (index: number, field: keyof LessonInput, val: string) => {
     const newArr = [...methodLessons];
     newArr[index] = { ...newArr[index], [field]: val };
-    if (field === 'methodId') {
-      const method = practicalMethods.find(m => m.id === val);
-      newArr[index].methodName = method?.name || "";
-    }
     setMethodLessons(newArr);
   };
 
@@ -104,8 +95,22 @@ export function EvaluationForm({
         ...answers,
         observacao,
         // filter out empty fields if approved
-        msaLessons: isApproved ? msaLessons.filter(l => l.lesson.trim() !== '' && l.methodId !== '') : undefined,
-        methodLessons: isApproved ? methodLessons.filter(l => l.lesson.trim() !== '' && l.methodId !== '') : undefined,
+        msaLessons: isApproved && globalTheoryMethodId 
+          ? msaLessons.filter(l => l.lesson.trim() !== '' || l.page.trim() !== '').map(l => ({
+              methodId: globalTheoryMethodId,
+              methodName: theoryMethods?.find(m => m.id === globalTheoryMethodId)?.name || "",
+              page: l.page,
+              lesson: l.lesson
+            }))
+          : undefined,
+        methodLessons: isApproved && globalPracticalMethodId
+          ? methodLessons.filter(l => l.lesson.trim() !== '' || l.page.trim() !== '').map(l => ({
+              methodId: globalPracticalMethodId,
+              methodName: practicalMethods?.find(m => m.id === globalPracticalMethodId)?.name || "",
+              page: l.page,
+              lesson: l.lesson
+            }))
+          : undefined,
         hymns: isApproved ? hymns.filter(h => h.trim() !== '') : undefined,
       });
       router.push("/portal/pre-avaliacao");
@@ -193,20 +198,22 @@ export function EvaluationForm({
           <div className="space-y-8">
             {/* Métodos de Teoria */}
             <div>
-              <h3 className="text-slate-600 font-medium mb-3">Métodos de Teoria (até 8 lições)</h3>
+              <h3 className="text-slate-600 font-medium mb-3">Método de Teoria (até 8 lições)</h3>
+              <div className="mb-4">
+                <select
+                  value={globalTheoryMethodId}
+                  onChange={(e) => setGlobalTheoryMethodId(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                >
+                  <option value="">Selecione o método...</option>
+                  {theoryMethods.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
               <div className="grid grid-cols-1 gap-4">
                 {msaLessons.map((item, i) => (
                   <div key={`msa-${i}`} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                    <select
-                      value={item.methodId}
-                      onChange={(e) => handleMsaChange(i, 'methodId', e.target.value)}
-                      className="flex-[2] bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                    >
-                      <option value="">Selecione o método...</option>
-                      {theoryMethods.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </select>
                     <input
                       type="text"
                       placeholder={`Pág ${i + 1}`}
@@ -238,20 +245,22 @@ export function EvaluationForm({
 
             {/* Método Prático */}
             <div>
-              <h3 className="text-slate-600 font-medium mb-3">Métodos de Prática (até 8 lições)</h3>
+              <h3 className="text-slate-600 font-medium mb-3">Método de Prática (até 8 lições)</h3>
+              <div className="mb-4">
+                <select
+                  value={globalPracticalMethodId}
+                  onChange={(e) => setGlobalPracticalMethodId(e.target.value)}
+                  className="w-full bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50"
+                >
+                  <option value="">Selecione o método...</option>
+                  {practicalMethods.map(m => (
+                    <option key={m.id} value={m.id}>{m.name}</option>
+                  ))}
+                </select>
+              </div>
               <div className="grid grid-cols-1 gap-4">
                 {methodLessons.map((item, i) => (
                   <div key={`met-${i}`} className="flex flex-col sm:flex-row gap-2 bg-slate-50 p-2 rounded-xl border border-slate-200">
-                    <select
-                      value={item.methodId}
-                      onChange={(e) => handleMethodChange(i, 'methodId', e.target.value)}
-                      className="flex-[2] bg-white border border-slate-200 rounded-lg p-2.5 text-slate-900 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500/50"
-                    >
-                      <option value="">Selecione o método...</option>
-                      {practicalMethods.map(m => (
-                        <option key={m.id} value={m.id}>{m.name}</option>
-                      ))}
-                    </select>
                     <input
                       type="text"
                       placeholder={`Pág ${i + 1}`}

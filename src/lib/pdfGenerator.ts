@@ -57,6 +57,104 @@ export async function generateMusicoLetter(preEvaluation: any): Promise<Uint8Arr
     color: rgb(1, 1, 1),
   });
 
+  // Área de Estudo Dirigido
+  page.drawText("ESTUDO DIRIGIDO:", { x: 45, y: 220, size: 10, color });
+  
+  const evalResult = preEvaluation.evaluationResult;
+  let hasEstudoData = false;
+
+  const drawColumnTitle = (text: string, x: number, y: number, width: number) => {
+    page.drawRectangle({ x, y: y - 3, width, height: 14, color: rgb(0.9, 0.9, 0.9) });
+    page.drawText(text.toUpperCase(), { x: x + 5, y: y + 1, size: 9, color: rgb(0,0,0) });
+  };
+
+  if (evalResult) {
+    let y1 = 205;
+    let y2 = 205;
+
+    if (evalResult.msaLessons) {
+      try {
+        const parsed = JSON.parse(evalResult.msaLessons);
+        if (parsed.length > 0) {
+          const firstMethod = typeof parsed[0] === 'object' ? parsed[0].methodName : "";
+          drawColumnTitle(firstMethod ? `TEORIA: ${firstMethod}` : "TEORIA", 45, y1, 245);
+          y1 -= 14;
+          parsed.forEach((p: any, i: number) => {
+            if (i % 2 !== 0) {
+              page.drawRectangle({ x: 45, y: y1 - 3, width: 245, height: 12, color: rgb(0.95, 0.95, 0.95) });
+            }
+            if (typeof p === 'string') {
+              page.drawText(`- ${p}`, { x: 50, y: y1, size: 9, color });
+            } else {
+              page.drawText(`Pág: ${p.page || '---'}`, { x: 50, y: y1, size: 9, color });
+              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 140, y: y1, size: 9, color });
+            }
+            y1 -= 12;
+          });
+          hasEstudoData = true;
+        }
+      } catch (e) {}
+    }
+
+    if (evalResult.methodLessons) {
+      try {
+        const parsed = JSON.parse(evalResult.methodLessons);
+        if (parsed.length > 0) {
+          const firstMethod = typeof parsed[0] === 'object' ? parsed[0].methodName : "";
+          drawColumnTitle(firstMethod ? `PRÁTICA: ${firstMethod}` : "PRÁTICA", 300, y2, 245);
+          y2 -= 14;
+          parsed.forEach((p: any, i: number) => {
+            if (i % 2 !== 0) {
+              page.drawRectangle({ x: 300, y: y2 - 3, width: 245, height: 12, color: rgb(0.95, 0.95, 0.95) });
+            }
+            if (typeof p === 'string') {
+              page.drawText(`- ${p}`, { x: 305, y: y2, size: 9, color });
+            } else {
+              page.drawText(`Pág: ${p.page || '---'}`, { x: 305, y: y2, size: 9, color });
+              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 395, y: y2, size: 9, color });
+            }
+            y2 -= 12;
+          });
+          hasEstudoData = true;
+        }
+      } catch (e) {}
+    }
+
+    let finalY = Math.min(y1, y2) - 10;
+
+    if (evalResult.hymns) {
+      try {
+        const parsed = JSON.parse(evalResult.hymns);
+        if (parsed.length > 0) {
+          drawColumnTitle("HINOS", 45, finalY, 500);
+          finalY -= 14;
+          const text = parsed.join(", ");
+          if (text.length > 100) {
+            page.drawText(text.substring(0, 100), { x: 50, y: finalY, size: 9, color });
+            finalY -= 12;
+            page.drawText(text.substring(100, 200), { x: 50, y: finalY, size: 9, color });
+          } else {
+            page.drawText(text, { x: 50, y: finalY, size: 9, color });
+          }
+          finalY -= 12;
+          hasEstudoData = true;
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (!hasEstudoData) {
+    for (let i = 0; i < 4; i++) {
+      const lineY = 195 - (i * 25);
+      page.drawLine({
+        start: { x: 45, y: lineY },
+        end: { x: 550, y: lineY },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+    }
+  }
+
   return await pdfDoc.save();
 }
 
@@ -123,6 +221,104 @@ export async function generateOrganistaLetter(preEvaluation: any): Promise<Uint8
     height: 195,
     color: rgb(1, 1, 1),
   });
+
+  // Área de Estudo Dirigido
+  page.drawText("ESTUDO DIRIGIDO:", { x: 45, y: 175, size: 10, color });
+  
+  const evalResultOrg = preEvaluation.evaluationResult;
+  let hasEstudoDataOrg = false;
+
+  const drawColumnTitleOrg = (text: string, x: number, y: number, width: number) => {
+    page.drawRectangle({ x, y: y - 3, width, height: 14, color: rgb(0.9, 0.9, 0.9) });
+    page.drawText(text.toUpperCase(), { x: x + 5, y: y + 1, size: 9, color: rgb(0,0,0) });
+  };
+
+  if (evalResultOrg) {
+    let y1 = 160;
+    let y2 = 160;
+
+    if (evalResultOrg.msaLessons) {
+      try {
+        const parsed = JSON.parse(evalResultOrg.msaLessons);
+        if (parsed.length > 0) {
+          const firstMethod = typeof parsed[0] === 'object' ? parsed[0].methodName : "";
+          drawColumnTitleOrg(firstMethod ? `TEORIA: ${firstMethod}` : "TEORIA", 45, y1, 245);
+          y1 -= 14;
+          parsed.forEach((p: any, i: number) => {
+            if (i % 2 !== 0) {
+              page.drawRectangle({ x: 45, y: y1 - 3, width: 245, height: 12, color: rgb(0.95, 0.95, 0.95) });
+            }
+            if (typeof p === 'string') {
+              page.drawText(`- ${p}`, { x: 50, y: y1, size: 9, color });
+            } else {
+              page.drawText(`Pág: ${p.page || '---'}`, { x: 50, y: y1, size: 9, color });
+              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 140, y: y1, size: 9, color });
+            }
+            y1 -= 12;
+          });
+          hasEstudoDataOrg = true;
+        }
+      } catch (e) {}
+    }
+
+    if (evalResultOrg.methodLessons) {
+      try {
+        const parsed = JSON.parse(evalResultOrg.methodLessons);
+        if (parsed.length > 0) {
+          const firstMethod = typeof parsed[0] === 'object' ? parsed[0].methodName : "";
+          drawColumnTitleOrg(firstMethod ? `PRÁTICA: ${firstMethod}` : "PRÁTICA", 300, y2, 245);
+          y2 -= 14;
+          parsed.forEach((p: any, i: number) => {
+            if (i % 2 !== 0) {
+              page.drawRectangle({ x: 300, y: y2 - 3, width: 245, height: 12, color: rgb(0.95, 0.95, 0.95) });
+            }
+            if (typeof p === 'string') {
+              page.drawText(`- ${p}`, { x: 305, y: y2, size: 9, color });
+            } else {
+              page.drawText(`Pág: ${p.page || '---'}`, { x: 305, y: y2, size: 9, color });
+              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 395, y: y2, size: 9, color });
+            }
+            y2 -= 12;
+          });
+          hasEstudoDataOrg = true;
+        }
+      } catch (e) {}
+    }
+
+    let finalY = Math.min(y1, y2) - 10;
+
+    if (evalResultOrg.hymns) {
+      try {
+        const parsed = JSON.parse(evalResultOrg.hymns);
+        if (parsed.length > 0) {
+          drawColumnTitleOrg("HINOS", 45, finalY, 500);
+          finalY -= 14;
+          const text = parsed.join(", ");
+          if (text.length > 100) {
+            page.drawText(text.substring(0, 100), { x: 50, y: finalY, size: 9, color });
+            finalY -= 12;
+            page.drawText(text.substring(100, 200), { x: 50, y: finalY, size: 9, color });
+          } else {
+            page.drawText(text, { x: 50, y: finalY, size: 9, color });
+          }
+          finalY -= 12;
+          hasEstudoDataOrg = true;
+        }
+      } catch (e) {}
+    }
+  }
+
+  if (!hasEstudoDataOrg) {
+    for (let i = 0; i < 4; i++) {
+      const lineY = 150 - (i * 25);
+      page.drawLine({
+        start: { x: 45, y: lineY },
+        end: { x: 550, y: lineY },
+        thickness: 1,
+        color: rgb(0, 0, 0),
+      });
+    }
+  }
 
   return await pdfDoc.save();
 }

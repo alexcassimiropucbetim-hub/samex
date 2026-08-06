@@ -76,7 +76,7 @@ export async function loginEncarregado(formData: FormData) {
     include: { roleType: true, church: true, managedChurches: true },
   });
 
-  if (!encarregado || encarregado.login !== login) {
+  if (!encarregado || encarregado.login.trim().toLowerCase() !== login.trim().toLowerCase()) {
     await prisma.loginAttempt.create({ data: { ipAddress, login, success: false } });
     return { error: "Credenciais inválidas. Verifique sua carteirinha e login." };
   }

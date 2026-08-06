@@ -3,7 +3,12 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-export function CalendarWidget() {
+interface CalendarEvent {
+  id: string;
+  date: Date;
+}
+
+export function CalendarWidget({ events = [] }: { events?: CalendarEvent[] }) {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
@@ -15,8 +20,12 @@ export function CalendarWidget() {
   const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
 
-  // Mocking events for specific days (e.g. 5, 12, 18, 25)
-  const eventDays = [5, 12, 18, 25];
+  const eventDays = events
+    .filter(e => {
+      const d = new Date(e.date);
+      return d.getMonth() === currentDate.getMonth() && d.getFullYear() === currentDate.getFullYear();
+    })
+    .map(e => new Date(e.date).getDate());
 
   const renderDays = () => {
     const days = [];

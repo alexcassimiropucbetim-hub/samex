@@ -7,19 +7,17 @@ import { getTestSchedules } from "@/actions/testSchedule";
 import { prisma } from "@/lib/prisma";
 import DashboardCharts from "@/components/DashboardCharts";
 import { LatestRegistrations } from "@/components/LatestRegistrations";
+import { CalendarWidget } from "@/components/CalendarWidget";
+import { NextEventsWidget } from "@/components/NextEventsWidget";
 
 export default async function PortalDashboard() {
   const session = await getSession();
   
-  const isRegional = session?.roleName?.toLowerCase().includes("regional");
-  const isExaminadora = session?.roleName?.toLowerCase().includes("examinadora");
+  const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
+  const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
   const isAdmin = session?.type === "admin";
 
-  if (!isRegional && !isExaminadora && !isAdmin) {
-    redirect("/portal/pre-avaliacao");
-  }
-
-  const [allPreEvaluations, testSchedules, categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations] = await Promise.all([
+  const [allPreEvaluations, testSchedules, categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations, allEvents] = await Promise.all([
     getPreEvaluations(),
     getTestSchedules(),
     prisma.instrumentCategory.findMany({
@@ -47,9 +45,22 @@ export default async function PortalDashboard() {
         }
       }
     }),
+    prisma.event.findMany({
+      orderBy: {
+        date: "asc"
+      }
+    })
   ]);
 
   let preEvaluations = allPreEvaluations;
+
+  if (isExaminadora) {
+    preEvaluations = allPreEvaluations.filter(p => p.gender === 'F');
+  } else if (isRegional) {
+    preEvaluations = allPreEvaluations;
+  } else if (!isAdmin) {
+    preEvaluations = allPreEvaluations.filter(p => p.churchId === session?.churchId);
+  }
 
   const pendentes = preEvaluations.filter(p => !p.status || p.status === "PENDENTE");
   const alocados = preEvaluations.filter(p => p.testScheduleId !== null);
@@ -75,6 +86,11 @@ export default async function PortalDashboard() {
       name: tt.name,
       count: tt._count.preEvaluations
     }))
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const nextEvents = allEvents.filter(e => new Date(e.date) >= today);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
@@ -141,10 +157,20 @@ export default async function PortalDashboard() {
           </Link>
         </div>
 
-        <div className="xl:col-span-2">
-          <LatestRegistrations registrations={preEvaluations} />
+        <div className="flex flex-col gap-6 xl:col-span-1">
+          <CalendarWidget events={allEvents} />
         </div>
 
+        <div className="flex flex-col gap-6 xl:col-span-1">
+          <NextEventsWidget events={nextEvents} />
+        </div>
+
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div className="xl:col-span-3">
+          <LatestRegistrations registrations={preEvaluations} />
+        </div>
       </div>
 
       <DashboardCharts sectorsData={sectorsData} categoriesData={categoriesData} testTypesData={testTypesData} />

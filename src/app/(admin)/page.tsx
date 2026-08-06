@@ -29,7 +29,8 @@ export default async function Home() {
     pendentesIrmas,
     categoriesWithInstruments,
     sectorsWithEvaluations,
-    testTypesWithEvaluations
+    testTypesWithEvaluations,
+    allEvents
   ] = await Promise.all([
     prisma.sector.count(),
     prisma.church.count(),
@@ -113,6 +114,11 @@ export default async function Home() {
         }
       }
     }),
+    prisma.event.findMany({
+      orderBy: {
+        date: "asc"
+      }
+    })
   ]);
 
   const categoriesData = categoriesWithInstruments
@@ -155,12 +161,8 @@ export default async function Home() {
     { label: "Aguardando", value: aguardandoIrmaos + aguardandoIrmas, color: "#3b82f6" },
   ];
 
-  const nextEvents = [
-    { id: "1", title: "Ensaio Regional", date: "05/11/2026 - 19:30", type: "ensaio" as const },
-    { id: "2", title: "Teste Oficial", date: "12/11/2026 - 09:00", type: "teste" as const },
-    { id: "3", title: "Reunião Anual", date: "18/11/2026 - 20:00", type: "reuniao" as const },
-    { id: "4", title: "Oficialização", date: "25/11/2026 - 19:00", type: "oficializacao" as const },
-  ];
+  // Filtrando eventos a partir de hoje
+  const nextEvents = allEvents.filter(e => new Date(e.date) >= today);
 
   const session = await getSession();
   
@@ -203,7 +205,7 @@ export default async function Home() {
           <ActivitySummaryWidget data={activityData} />
         </div>
         <div className="xl:col-span-4">
-          <CalendarWidget />
+          <CalendarWidget events={allEvents} />
         </div>
         <div className="xl:col-span-4">
           <NextEventsWidget events={nextEvents} />

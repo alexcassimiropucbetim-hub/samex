@@ -35,7 +35,8 @@ const menuGroups = [
     icon: CalendarClock,
     items: [
       { name: "Cadastro de Teste", href: "/portal/cadastro-teste", icon: CalendarClock },
-      { name: "Pedido Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature }
+      { name: "Pedido Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
+      { name: "Eventos", href: "/eventos", icon: CalendarClock }
     ]
   },
   {

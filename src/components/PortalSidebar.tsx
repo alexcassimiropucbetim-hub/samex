@@ -14,7 +14,7 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
   const closeSidebar = () => setIsOpen(false);
 
   const allItems = [
-    ...(isRegional ? [{ name: "Início", href: "/portal", icon: CalendarClock }] : []),
+    { name: "Início", href: "/portal", icon: CalendarClock },
     ...(isRegional ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
     { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
     { name: "Manual", href: "/portal/manual", icon: BookOpen },

@@ -272,3 +272,14 @@ model PushSubscription {
   
   personInCharge   PersonInCharge? @relation(fields: [personInChargeId], references: [id], onDelete: Cascade)
 }
+
+
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime
+  type        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -2,7 +2,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileSignature, CalendarClock, LogOut, Menu, X, BookOpen, Settings, Home, Users, Calendar } from "lucide-react";
+import { FileSignature, CalendarClock, LogOut, Menu, X, BookOpen, Settings, Home, Users, Calendar, ChevronDown } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
 import { NotificationBell } from "./NotificationBell";
@@ -10,24 +10,34 @@ import { NotificationBell } from "./NotificationBell";
 export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    "Agendamentos": true,
+  });
   
   const closeSidebar = () => setIsOpen(false);
 
-  const allItems = [
-    { name: "Início", href: "/portal", icon: Home },
-    { name: "Meus Alunos", href: "/portal/alunos", icon: Users },
-    ...(isRegional ? [{ name: "Eventos", href: "/portal/eventos", icon: Calendar }] : []),
-    ...(isRegional ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
-    { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
-    { name: "Manual", href: "/portal/manual", icon: BookOpen },
-    ...(isRegional ? [{ name: "Configurações", href: "/portal/configuracoes", icon: Settings }] : [])
-  ];
+  const toggleGroup = (groupName: string) => {
+    setOpenGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
+  };
 
   const menuGroups = [
     {
-      name: "Painel do Encarregado",
+      name: "Dashboard",
+      items: [
+        { name: "Início", href: "/portal", icon: Home },
+        { name: "Meus Alunos", href: "/portal/alunos", icon: Users },
+        { name: "Manual", href: "/portal/manual", icon: BookOpen },
+        ...(isRegional ? [{ name: "Configurações", href: "/portal/configuracoes", icon: Settings }] : [])
+      ]
+    },
+    {
+      name: "Agendamentos",
       icon: CalendarClock,
-      items: allItems
+      items: [
+        ...(isRegional ? [{ name: "Eventos", href: "/portal/eventos", icon: Calendar }] : []),
+        ...(isRegional ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
+        { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
+      ]
     }
   ];
 
@@ -95,35 +105,81 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
           </div>
         </div>
 
-        <nav className="flex-1 overflow-y-auto p-4 space-y-6">
-          {menuGroups.map((group) => (
-            <div key={group.name} className="space-y-1">
-              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-3">
-                {group.name}
-              </div>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
+          {menuGroups.map((group) => {
+            if (!group.icon) {
+              return (
+                <div key={group.name} className="flex flex-col gap-1">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 px-3">
+                    {group.name}
+                  </div>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                    
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={closeSidebar}
+                        className={clsx(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
+                          isActive 
+                            ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
+                            : "text-slate-500 hover:text-slate-600 hover:bg-slate-100 border border-transparent"
+                        )}
+                      >
+                        <Icon className={clsx("w-5 h-5", isActive ? "text-orange-400" : "text-slate-500 group-hover:text-slate-500")} />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              );
+            }
+
+            const GroupIcon = group.icon;
+            const isOpenGroup = openGroups[group.name];
+
+            return (
+              <div key={group.name} className="flex flex-col">
+                <button 
+                  onClick={() => toggleGroup(group.name)}
+                  className="flex items-center justify-between px-2 py-2 text-slate-500 hover:text-slate-700 transition-colors group mb-2"
+                >
+                  <div className="flex items-center gap-2">
+                    <GroupIcon className="w-4 h-4 text-slate-500 group-hover:text-orange-400 transition-colors" />
+                    <span className="text-xs font-bold uppercase tracking-wider">{group.name}</span>
+                  </div>
+                  <ChevronDown className={clsx("w-4 h-4 text-slate-400 transition-transform duration-300", isOpenGroup ? "rotate-180" : "")} />
+                </button>
                 
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={closeSidebar}
-                    className={clsx(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
-                      isActive 
-                        ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
-                        : "text-slate-500 hover:text-slate-600 hover:bg-slate-100 border border-transparent"
-                    )}
-                  >
-                    <Icon className={clsx("w-5 h-5", isActive ? "text-orange-400" : "text-slate-500 group-hover:text-slate-500")} />
-                    {item.name}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
+                <div className={clsx("flex flex-col gap-1 overflow-hidden transition-all duration-300 origin-top", isOpenGroup ? "max-h-[500px] opacity-100 scale-y-100" : "max-h-0 opacity-0 scale-y-0")}>
+                  {group.items.map((item) => {
+                    const Icon = item.icon;
+                    const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+                    
+                    return (
+                      <Link
+                        key={item.name}
+                        href={item.href}
+                        onClick={closeSidebar}
+                        className={clsx(
+                          "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group",
+                          isActive 
+                            ? "bg-orange-500/10 text-orange-400 border border-orange-500/20" 
+                            : "text-slate-500 hover:text-slate-600 hover:bg-slate-100 border border-transparent"
+                        )}
+                      >
+                        <Icon className={clsx("w-5 h-5", isActive ? "text-orange-400" : "text-slate-500 group-hover:text-slate-500")} />
+                        {item.name}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
         </nav>
         
         <div className="p-4 border-t border-slate-200">

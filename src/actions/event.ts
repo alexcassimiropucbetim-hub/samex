@@ -20,7 +20,10 @@ export async function getEvents() {
 
 export async function createEvent(formData: FormData) {
   const session = await getSession();
-  if (session?.type !== "admin") {
+  const isAdmin = session?.type === "admin";
+  const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
+
+  if (!isAdmin && !isRegional) {
     throw new Error("Acesso negado");
   }
 
@@ -50,7 +53,10 @@ export async function createEvent(formData: FormData) {
 
 export async function updateEvent(id: string, formData: FormData) {
   const session = await getSession();
-  if (session?.type !== "admin") {
+  const isAdmin = session?.type === "admin";
+  const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
+
+  if (!isAdmin && !isRegional) {
     throw new Error("Acesso negado");
   }
 
@@ -80,7 +86,10 @@ export async function updateEvent(id: string, formData: FormData) {
 
 export async function deleteEvent(id: string) {
   const session = await getSession();
-  if (session?.type !== "admin") {
+  const isAdmin = session?.type === "admin";
+  const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
+
+  if (!isAdmin && !isRegional) {
     throw new Error("Acesso negado");
   }
 

@@ -1,4 +1,11 @@
-import { CalendarClock, FileSignature } from "lucide-react";
+import { 
+  FileSignature, 
+  CalendarClock,
+  Users,
+  TrendingUp,
+  CalendarDays,
+  Clock
+} from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
@@ -96,63 +103,89 @@ export default async function PortalDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         <div className="flex flex-col gap-6 xl:col-span-1">
-          <Link href="/portal/pre-avaliacao" className="glass-card p-6 flex items-start gap-4 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all group relative overflow-hidden">
-            <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-              <FileSignature className="w-48 h-48" />
+          {/* Card 1: Inscrições Totais */}
+          <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-orange-500 flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
+            <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+              <FileSignature className="w-64 h-64 text-orange-500" />
             </div>
-            <div className="w-14 h-14 bg-orange-500/20 text-orange-400 rounded-2xl flex items-center justify-center shrink-0 border border-orange-500/30 group-hover:scale-110 transition-transform">
-              <FileSignature className="w-7 h-7" />
-            </div>
-            <div className="relative z-10">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Inscrições Totais</h3>
-              <div className="flex items-end gap-3 mb-2">
-                <span className="text-3xl font-black text-orange-400 leading-none">{preEvaluations.length}</span>
-                <span className="text-sm font-medium text-slate-500 mb-0.5">cadastrados</span>
+
+            <div className="flex items-center gap-6 relative z-10 w-full">
+              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-orange-50 to-orange-100/50 flex items-center justify-center shrink-0 shadow-sm border border-orange-100/50">
+                <FileSignature className="w-8 h-8 text-orange-500" />
               </div>
-              <p className="text-sm text-slate-500">
-                Total de inscrições recebidas.
-              </p>
+              
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-[#0B1B3D] mb-1">Inscrições Totais</h3>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-[2.75rem] font-black text-orange-500 leading-none tracking-tight">{preEvaluations.length}</span>
+                  <span className="text-sm font-bold text-orange-500">cadastrados</span>
+                </div>
+                <p className="text-[15px] text-slate-500 font-medium">Total de inscrições recebidas.</p>
+              </div>
+            </div>
+
+            <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center justify-center w-16 h-[60px] rounded-2xl bg-white border border-orange-100 shadow-sm group-hover:bg-orange-50/50 transition-colors">
+              <TrendingUp className="w-5 h-5 text-orange-500 mb-1" />
+              <span className="text-[10px] font-bold text-orange-500 capitalize">Resumo</span>
             </div>
           </Link>
 
-          <Link href="/portal/pre-avaliacao" className="glass-card p-6 flex items-start gap-4 hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group relative overflow-hidden">
-            <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-              <FileSignature className="w-48 h-48" />
+          {/* Card 2: Pré-Avaliações Pendentes */}
+          <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-[#FFC107] flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
+            <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+              <FileSignature className="w-64 h-64 text-[#FFC107]" />
             </div>
-            <div className="w-14 h-14 bg-yellow-500/20 text-yellow-400 rounded-2xl flex items-center justify-center shrink-0 border border-yellow-500/30 group-hover:scale-110 transition-transform">
-              <FileSignature className="w-7 h-7" />
-            </div>
-            <div className="relative z-10">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Pré-Avaliações Pendentes</h3>
-              <div className="flex items-end gap-3 mb-2">
-                <span className="text-3xl font-black text-yellow-400 leading-none">{pendentes.length}</span>
-                <span className="text-sm font-medium text-slate-500 mb-0.5">aguardando</span>
+
+            <div className="flex items-center gap-6 relative z-10 w-full">
+              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-amber-50 to-amber-100/50 flex items-center justify-center shrink-0 shadow-sm border border-amber-100/50">
+                <FileSignature className="w-8 h-8 text-[#FFC107]" />
               </div>
-              <p className="text-sm text-slate-500">
-                Inscrições que ainda aguardam avaliação.
-              </p>
+              
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-[#0B1B3D] mb-1">Pré-Avaliações Pendentes</h3>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-[2.75rem] font-black text-[#FFC107] leading-none tracking-tight">{pendentes.length}</span>
+                  <span className="text-sm font-bold text-[#FFC107]">aguardando</span>
+                </div>
+                <p className="text-[15px] text-slate-500 font-medium">Inscrições que ainda aguardam avaliação.</p>
+              </div>
+            </div>
+
+            <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center justify-center w-16 h-[60px] rounded-2xl bg-white border border-amber-100 shadow-sm group-hover:bg-amber-50/50 transition-colors">
+              <Clock className="w-5 h-5 text-[#FFC107] mb-1" />
+              <span className="text-[10px] font-bold text-[#FFC107] capitalize">Pendente</span>
             </div>
           </Link>
 
-          <Link href="/portal/cadastro-teste" className="glass-card p-6 flex items-start gap-4 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group relative overflow-hidden">
-            <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
-              <CalendarClock className="w-48 h-48" />
+          {/* Card 3: Agendamento de Testes */}
+          <Link href="/portal/cadastro-teste" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-blue-600 flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
+            <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+              <CalendarClock className="w-64 h-64 text-blue-600" />
             </div>
-            <div className="w-14 h-14 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center shrink-0 border border-blue-500/30 group-hover:scale-110 transition-transform">
-              <CalendarClock className="w-7 h-7" />
+
+            <div className="flex items-start gap-6 relative z-10 w-full">
+              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shrink-0 shadow-sm border border-blue-100/50 mt-1">
+                <CalendarClock className="w-8 h-8 text-blue-600" />
+              </div>
+              
+              <div className="flex-1">
+                <h3 className="text-xl font-bold text-[#0B1B3D] mb-1">Agendamento de Testes</h3>
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-[2.75rem] font-black text-blue-600 leading-none tracking-tight">{testSchedules.length}</span>
+                  <span className="text-sm font-bold text-blue-600">datas marcadas</span>
+                </div>
+                <p className="text-[15px] text-slate-500 font-medium mb-4">Visualise os locais e datas de testes.</p>
+                
+                <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100/50 rounded-full px-4 py-2">
+                  <Users className="w-4 h-4 text-blue-600" />
+                  <span className="text-sm font-bold text-blue-600">{alocados.length} candidatos alocados</span>
+                </div>
+              </div>
             </div>
-            <div className="relative z-10">
-              <h3 className="text-xl font-bold text-slate-900 mb-1">Agendamento de Testes</h3>
-              <div className="flex items-end gap-3 mb-2">
-                <span className="text-3xl font-black text-blue-400 leading-none">{testSchedules.length}</span>
-                <span className="text-sm font-medium text-slate-500 mb-0.5">datas marcadas</span>
-              </div>
-              <p className="text-sm text-slate-500 mb-2">
-                Visualize os locais e datas de testes.
-              </p>
-              <div className="inline-block bg-blue-500/10 border border-blue-500/20 rounded-full px-3 py-1">
-                <span className="text-xs font-semibold text-blue-400">{alocados.length} candidato{alocados.length !== 1 ? 's' : ''} alocado{alocados.length !== 1 ? 's' : ''}</span>
-              </div>
+
+            <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center justify-center w-16 h-[60px] rounded-2xl bg-white border border-blue-100 shadow-sm group-hover:bg-blue-50/50 transition-colors">
+              <CalendarDays className="w-5 h-5 text-blue-600 mb-1" />
+              <span className="text-[10px] font-bold text-blue-600 capitalize">Agenda</span>
             </div>
           </Link>
         </div>

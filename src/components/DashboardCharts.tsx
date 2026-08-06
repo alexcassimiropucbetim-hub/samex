@@ -21,7 +21,7 @@ export default function DashboardCharts({ sectorsData, categoriesData, testTypes
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mt-8">
       {/* Chart by Sector */}
-      <div className="glass-card p-6">
+      <div className="glass-card p-6 rounded-[18px] border border-slate-200/60 hover:shadow-md transition-all">
         <h3 className="text-xl font-bold text-slate-900 mb-6">Pré-Avaliações por Setor</h3>
         <div className="space-y-4">
           {sectorsData.map((item, index) => (
@@ -47,7 +47,7 @@ export default function DashboardCharts({ sectorsData, categoriesData, testTypes
       </div>
 
       {/* Chart by Category */}
-      <div className="glass-card p-6">
+      <div className="glass-card p-6 rounded-[18px] border border-slate-200/60 hover:shadow-md transition-all">
         <h3 className="text-xl font-bold text-slate-900 mb-6">Pré-Avaliações por Categoria</h3>
         <div className="space-y-4">
           {categoriesData.map((item, index) => (
@@ -73,7 +73,7 @@ export default function DashboardCharts({ sectorsData, categoriesData, testTypes
       </div>
 
       {/* Chart by Test Type */}
-      <div className="glass-card p-6">
+      <div className="glass-card p-6 rounded-[18px] border border-slate-200/60 hover:shadow-md transition-all">
         <h3 className="text-xl font-bold text-slate-900 mb-6">Pré-Avaliações por Tipo de Teste</h3>
         <div className="space-y-4">
           {testTypesData.map((item, index) => (

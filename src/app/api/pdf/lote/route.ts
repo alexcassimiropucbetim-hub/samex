@@ -27,6 +27,7 @@ export async function GET(request: Request) {
         testType: true,
         personInCharge: true,
         currentInstrument: true,
+        evaluationResult: true,
       }
     });
 

@@ -3,7 +3,10 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DashboardCharts from "@/components/DashboardCharts";
 import { getSession } from "@/lib/auth";
-
+import { DashboardHeader } from "@/components/DashboardHeader";
+import { ActivitySummaryWidget } from "@/components/ActivitySummaryWidget";
+import { CalendarWidget } from "@/components/CalendarWidget";
+import { NextEventsWidget } from "@/components/NextEventsWidget";
 export default async function Home() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -137,11 +140,26 @@ export default async function Home() {
     .sort((a, b) => b.count - a.count);
 
   const stats = [
-    { name: "Setores", value: sectorsCount, icon: MapPin, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", hover: "hover:border-blue-500/50 hover:bg-blue-500/5" },
-    { name: "Igrejas", value: churchesCount, icon: Church, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", hover: "hover:border-emerald-500/50 hover:bg-emerald-500/5" },
-    { name: "Categorias", value: categoriesCount, icon: ListMusic, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", hover: "hover:border-purple-500/50 hover:bg-purple-500/5" },
-    { name: "Instrumentos", value: instrumentsCount, icon: Music2, color: "text-pink-500", bg: "bg-pink-500/10", border: "border-pink-500/20", hover: "hover:border-pink-500/50 hover:bg-pink-500/5" },
-    { name: "Ministérios", value: ministriesCount, icon: Users, color: "text-yellow-600", bg: "bg-yellow-500/10", border: "border-yellow-500/20", hover: "hover:border-yellow-500/50 hover:bg-yellow-500/5" },
+    { name: "Setores", value: sectorsCount, icon: MapPin, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", trend: "+12%" },
+    { name: "Igrejas", value: churchesCount, icon: Church, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", trend: "+5%" },
+    { name: "Categorias", value: categoriesCount, icon: ListMusic, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", trend: "0%" },
+    { name: "Instrumentos", value: instrumentsCount, icon: Music2, color: "text-pink-500", bg: "bg-pink-500/10", border: "border-pink-500/20", trend: "+18%" },
+    { name: "Ministérios", value: ministriesCount, icon: Users, color: "text-yellow-600", bg: "bg-yellow-500/10", border: "border-yellow-500/20", trend: "+3%" },
+  ];
+
+  // Mock data for widgets based on real counts where possible
+  const activityData = [
+    { label: "Aprovados", value: pendentesCount, color: "#10b981" },
+    { label: "Pendentes (Irmãos)", value: pendentesIrmaos, color: "#f59e0b" },
+    { label: "Pendentes (Irmãs)", value: pendentesIrmas, color: "#f43f5e" },
+    { label: "Aguardando", value: aguardandoIrmaos + aguardandoIrmas, color: "#3b82f6" },
+  ];
+
+  const nextEvents = [
+    { id: "1", title: "Ensaio Regional", date: "05/11/2026 - 19:30", type: "ensaio" as const },
+    { id: "2", title: "Teste Oficial", date: "12/11/2026 - 09:00", type: "teste" as const },
+    { id: "3", title: "Reunião Anual", date: "18/11/2026 - 20:00", type: "reuniao" as const },
+    { id: "4", title: "Oficialização", date: "25/11/2026 - 19:00", type: "oficializacao" as const },
   ];
 
   const session = await getSession();
@@ -151,40 +169,54 @@ export default async function Home() {
   const diaSemanaCapitalized = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">
-          A Paz de Deus, {session?.name}!
-        </h1>
-        <p className="text-sm text-slate-500 mt-1">Hoje é {diaSemanaCapitalized}, {dataExtenso}.</p>
-      </div>
+    <div className="space-y-6 animate-in fade-in duration-500">
+      <DashboardHeader name={session?.name || "Administrador"} date={dataExtenso} weekday={diaSemanaCapitalized} />
 
       {/* Cadastros Base Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className={`glass-card group relative overflow-hidden flex items-center p-6 gap-5 transition-all duration-300 ${stat.hover}`}>
-              <div className="absolute -right-4 -bottom-4 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-500">
-                <Icon className="w-32 h-32" />
+            <div key={stat.name} className={`glass-card p-5 rounded-[18px] transition-all duration-300 hover:shadow-md border border-slate-200/60`}>
+              <div className="flex items-start justify-between mb-4">
+                <div className={`p-3 rounded-2xl ${stat.bg} border ${stat.border}`}>
+                  <Icon className={`w-6 h-6 ${stat.color}`} />
+                </div>
+                <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2 py-1 rounded-full">
+                  <span className={`text-xs font-bold ${stat.trend.startsWith('+') ? 'text-emerald-500' : 'text-slate-500'}`}>
+                    {stat.trend}
+                  </span>
+                </div>
               </div>
-              <div className={`p-4 rounded-2xl ${stat.bg} border ${stat.border} shrink-0 group-hover:scale-110 transition-transform duration-300`}>
-                <Icon className={`w-8 h-8 ${stat.color}`} />
-              </div>
-              <div className="relative z-10">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-1">{stat.name}</p>
-                <p className="text-3xl font-black text-slate-900 leading-none">{stat.value}</p>
+              <div>
+                <p className="text-3xl font-black text-slate-900 leading-none mb-1">{stat.value}</p>
+                <p className="text-sm font-semibold text-slate-500">{stat.name}</p>
               </div>
             </div>
           );
         })}
       </div>
 
-      <h2 className="text-2xl font-bold text-slate-900 pt-4">Visão Geral de Agendamentos</h2>
+      {/* Grid de 12 colunas para os Widgets Centrais */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-4">
+          <ActivitySummaryWidget data={activityData} />
+        </div>
+        <div className="xl:col-span-4">
+          <CalendarWidget />
+        </div>
+        <div className="xl:col-span-4">
+          <NextEventsWidget events={nextEvents} />
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between pt-4">
+        <h2 className="text-2xl font-bold text-slate-900">Visão Geral de Agendamentos</h2>
+      </div>
 
       {/* Agendamentos Cards (mesmo estilo do portal) */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <Link href="/portal/pre-avaliacao" className="glass-card p-6 flex items-start gap-4 hover:border-orange-500/50 hover:bg-orange-500/5 transition-all group relative overflow-hidden">
+        <Link href="/portal/pre-avaliacao" className="glass-card p-6 flex items-start gap-4 transition-all group relative overflow-hidden rounded-[18px] hover:shadow-md border border-slate-200/60">
           <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <FileSignature className="w-48 h-48" />
           </div>
@@ -201,7 +233,7 @@ export default async function Home() {
           </div>
         </Link>
 
-        <Link href="/portal/pre-avaliacao" className="glass-card p-6 flex flex-col justify-center gap-4 hover:border-yellow-500/50 hover:bg-yellow-500/5 transition-all group relative overflow-hidden">
+        <Link href="/portal/pre-avaliacao" className="glass-card p-6 flex flex-col justify-center gap-4 transition-all group relative overflow-hidden rounded-[18px] hover:shadow-md border border-slate-200/60">
           <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <FileSignature className="w-48 h-48" />
           </div>
@@ -240,7 +272,7 @@ export default async function Home() {
           </div>
         </Link>
 
-        <div className="glass-card p-6 flex flex-col justify-center gap-4 hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group relative overflow-hidden">
+        <div className="glass-card p-6 flex flex-col justify-center gap-4 transition-all group relative overflow-hidden rounded-[18px] hover:shadow-md border border-slate-200/60">
           <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <Users className="w-48 h-48" />
           </div>
@@ -272,7 +304,7 @@ export default async function Home() {
           </div>
         </div>
 
-        <Link href="/portal/cadastro-teste" className="glass-card p-6 flex items-start gap-4 hover:border-blue-500/50 hover:bg-blue-500/5 transition-all group relative overflow-hidden">
+        <Link href="/portal/cadastro-teste" className="glass-card p-6 flex items-start gap-4 transition-all group relative overflow-hidden rounded-[18px] hover:shadow-md border border-slate-200/60">
           <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <CalendarClock className="w-48 h-48" />
           </div>
@@ -291,7 +323,7 @@ export default async function Home() {
             </div>
           </div>
         </Link>
-        <Link href="/painel-testes" className="glass-card p-6 flex items-start gap-4 hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group relative overflow-hidden">
+        <Link href="/painel-testes" className="glass-card p-6 flex items-start gap-4 transition-all group relative overflow-hidden rounded-[18px] hover:shadow-md border border-slate-200/60">
           <div className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none group-hover:scale-110 transition-transform duration-500">
             <MonitorPlay className="w-48 h-48" />
           </div>

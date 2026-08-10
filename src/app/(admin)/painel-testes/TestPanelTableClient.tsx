@@ -80,22 +80,49 @@ export function TestPanelTableClient({
       {/* Action Buttons */}
       <div className="p-4 flex gap-3 border-b border-slate-100">
         <button 
-          onClick={() => window.location.href = `/imprimir-teste/${testScheduleId}`}
+          onClick={() => window.open(`/imprimir-teste/${testScheduleId}`, '_blank')}
           className="flex items-center gap-2 px-4 py-2 border border-orange-200 text-orange-600 rounded-lg hover:bg-orange-50 font-medium text-sm transition-colors"
         >
           <Printer className="w-4 h-4" />
           Imprimir Lista
         </button>
-        <button 
-          onClick={() => {
-            if (selectedIds.length === 0) return alert("Selecione pelo menos um candidato.");
-            window.location.href = `/imprimir-resultado/lote?ids=${selectedIds.join(",")}`;
-          }}
-          className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors"
-        >
-          <Printer className="w-4 h-4 text-orange-500" />
-          Imprimir Resultados
-        </button>
+
+        <div className="relative" ref={openMenuId === 'batch-print' ? menuRef : null}>
+          <button 
+            onClick={() => setOpenMenuId(openMenuId === 'batch-print' ? null : 'batch-print')}
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 rounded-lg hover:bg-slate-50 font-medium text-sm transition-colors"
+          >
+            <Printer className="w-4 h-4 text-orange-500" />
+            Imprimir Selecionados
+          </button>
+          
+          {openMenuId === 'batch-print' && (
+            <div className="absolute left-0 mt-2 w-48 bg-white border border-slate-100 rounded-lg shadow-xl z-50 overflow-hidden py-1">
+              <button 
+                onClick={() => {
+                  if (selectedIds.length === 0) return alert("Selecione pelo menos um candidato.");
+                  setOpenMenuId(null);
+                  window.open(`/api/pdf/lote?ids=${selectedIds.join(",")}`, '_blank');
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"
+              >
+                <FileText className="w-4 h-4 text-blue-500" />
+                Imprimir Cartas
+              </button>
+              <button 
+                onClick={() => {
+                  if (selectedIds.length === 0) return alert("Selecione pelo menos um candidato.");
+                  setOpenMenuId(null);
+                  window.open(`/imprimir-resultado/lote?ids=${selectedIds.join(",")}`, '_blank');
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors border-t border-slate-100"
+              >
+                <FileText className="w-4 h-4 text-orange-500" />
+                Imprimir Resultados
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -241,7 +268,17 @@ export function TestPanelTableClient({
                             <button 
                               onClick={() => {
                                 setOpenMenuId(null);
-                                window.location.href = `/imprimir-resultado/${cand.id}`;
+                                window.open(`/api/pdf/lote?ids=${cand.id}`, '_blank');
+                              }}
+                              className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors mt-1 border-t border-slate-100"
+                            >
+                              <Printer className="w-4 h-4 text-blue-500" />
+                              Imprimir Carta
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                window.open(`/imprimir-resultado/${cand.id}`, '_blank');
                               }}
                               className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors"
                             >
@@ -364,14 +401,21 @@ export function TestPanelTableClient({
                     <XCircle className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => window.location.href = `/portal/pre-avaliacao/resultado?id=${cand.id}`}
+                    onClick={() => window.open(`/portal/pre-avaliacao/resultado?id=${cand.id}`, '_blank')}
                     title="Ver Estudo Dirigido"
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
                   >
                     <BookOpen className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => window.location.href = `/imprimir-resultado/${cand.id}`}
+                    onClick={() => window.open(`/api/pdf/lote?ids=${cand.id}`, '_blank')}
+                    title="Imprimir Carta"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-purple-50 text-purple-600 hover:bg-purple-100 transition-colors"
+                  >
+                    <Printer className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => window.open(`/imprimir-resultado/${cand.id}`, '_blank')}
                     title="Imprimir Resultado"
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
                   >

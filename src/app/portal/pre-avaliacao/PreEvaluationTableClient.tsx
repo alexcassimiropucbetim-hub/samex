@@ -28,10 +28,17 @@ export default function PreEvaluationTableClient({
 }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [schedulingItem, setSchedulingItem] = useState<{ id: string; name: string; initialDate?: Date | null; initialEvaluatorId?: string | null } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string>('TODOS');
+
+  const filteredEvaluations = preEvaluations.filter(evalReq => {
+    if (statusFilter === 'TODOS') return true;
+    const currentStatus = evalReq.status || 'PENDENTE';
+    return currentStatus === statusFilter;
+  });
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      const validIds = preEvaluations
+      const validIds = filteredEvaluations
         .filter(evalReq => 
           (evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
           evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
@@ -81,17 +88,34 @@ export default function PreEvaluationTableClient({
         </div>
       )}
 
-      {!isLocal && preEvaluations.length > 0 && (
-        <div className="flex justify-end mb-4">
-          <a
-            href={`/api/pdf/lista-inscricoes`}
-            className="flex items-center gap-2 bg-[#224465] hover:bg-[#1a334d] text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm"
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="flex items-center gap-2">
+          <label htmlFor="statusFilter" className="text-sm font-semibold text-slate-700">Filtrar por Status:</label>
+          <select 
+            id="statusFilter" 
+            className="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 font-medium focus:ring-2 focus:ring-[#e95931] outline-none"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <Printer className="w-4 h-4" />
-            Imprimir Lista em Tabela (A4)
-          </a>
+            <option value="TODOS">Todos</option>
+            <option value="PENDENTE">Pendente</option>
+            <option value="APROVADO">Encaminhado para Teste</option>
+            <option value="REPROVADO">Estudar Mais</option>
+          </select>
         </div>
-      )}
+
+        {!isLocal && preEvaluations.length > 0 && (
+          <div className="flex justify-end">
+            <a
+              href={`/api/pdf/lista-inscricoes`}
+              className="flex items-center gap-2 bg-[#224465] hover:bg-[#1a334d] text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm"
+            >
+              <Printer className="w-4 h-4" />
+              Imprimir Lista em Tabela (A4)
+            </a>
+          </div>
+        )}
+      </div>
 
       {schedulingItem && (
         <SchedulePreEvaluationModal 
@@ -114,7 +138,7 @@ export default function PreEvaluationTableClient({
                   type="checkbox" 
                   className="rounded border-slate-300 text-[#e95931] focus:ring-[#e95931]"
                   onChange={handleSelectAll}
-                  checked={selectedIds.size > 0 && selectedIds.size === preEvaluations.filter(evalReq => 
+                  checked={selectedIds.size > 0 && selectedIds.size === filteredEvaluations.filter(evalReq => 
                     (evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
                     evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
                     evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
@@ -135,7 +159,7 @@ export default function PreEvaluationTableClient({
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {preEvaluations.map((evalReq) => {
+            {filteredEvaluations.map((evalReq) => {
               const canPrint = (
                 evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
                 evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
@@ -367,7 +391,7 @@ export default function PreEvaluationTableClient({
                 type="checkbox" 
                 className="rounded border-slate-300 w-5 h-5 text-[#e95931] focus:ring-[#e95931]"
                 onChange={handleSelectAll}
-                checked={selectedIds.size > 0 && selectedIds.size === preEvaluations.filter(evalReq => 
+                checked={selectedIds.size > 0 && selectedIds.size === filteredEvaluations.filter(evalReq => 
                   (evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
                   evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||
                   evalReq.testType.name.toUpperCase().includes('CULTO OFICIAL') ||
@@ -378,7 +402,7 @@ export default function PreEvaluationTableClient({
           </div>
         )}
 
-        {preEvaluations.map((evalReq) => {
+        {filteredEvaluations.map((evalReq) => {
           const canPrint = (
             evalReq.testType.name.toUpperCase().includes('OFICIALIZAÇÃO') ||
             evalReq.testType.name.toUpperCase().includes('REUNIÃO DE JOVEM') ||

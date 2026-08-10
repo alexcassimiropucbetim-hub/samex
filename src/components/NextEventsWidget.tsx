@@ -16,7 +16,7 @@ interface EventItem {
 export function NextEventsWidget({ events, currentDate }: { events: EventItem[], currentDate?: Date }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const eventsPerPage = 5;
+  const eventsPerPage = 3;
 
   const monthDate = currentDate || new Date();
 

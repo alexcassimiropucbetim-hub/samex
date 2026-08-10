@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Calendar, Music, Users, ShieldCheck, ChevronDown, ChevronUp, Clock, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import clsx from "clsx";
@@ -13,8 +13,30 @@ interface EventItem {
   description?: string | null;
 }
 
-export function NextEventsWidget({ events }: { events: EventItem[] }) {
+export function NextEventsWidget({ events, currentDate }: { events: EventItem[], currentDate?: Date }) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const eventsPerPage = 5;
+
+  const monthDate = currentDate || new Date();
+
+  // Reset page when month changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setExpandedId(null);
+  }, [currentDate]);
+
+  const filteredEvents = events.filter(event => {
+    const d = new Date(event.date);
+    return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
+  });
+
+  // Ensure they are sorted by date
+  const sortedEvents = [...filteredEvents].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const totalPages = Math.ceil(sortedEvents.length / eventsPerPage);
+  const paginatedEvents = sortedEvents.slice((currentPage - 1) * eventsPerPage, currentPage * eventsPerPage);
+
 
   const toggleExpand = (id: string) => {
     setExpandedId(expandedId === id ? null : id);
@@ -53,14 +75,14 @@ export function NextEventsWidget({ events }: { events: EventItem[] }) {
       </div>
       
       <div className="flex-1 overflow-y-auto px-1 custom-scrollbar">
-        {events.length === 0 ? (
+        {paginatedEvents.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-slate-400 py-8">
             <Calendar className="w-10 h-10 mb-2 opacity-50" />
-            <p className="text-sm">Nenhum evento próximo</p>
+            <p className="text-sm">Nenhum evento neste mês</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4 pb-2">
-            {events.map((event) => {
+            {paginatedEvents.map((event) => {
               const isExpanded = expandedId === event.id;
               const theme = getTheme(event.type);
               
@@ -117,7 +139,29 @@ export function NextEventsWidget({ events }: { events: EventItem[] }) {
         )}
       </div>
 
-      <div className="pt-4 shrink-0 border-t border-transparent">
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between py-2 mt-2 border-t border-slate-50 shrink-0">
+          <button
+            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            disabled={currentPage === 1}
+            className="text-xs font-medium text-slate-500 disabled:opacity-30 hover:text-blue-600 transition-colors px-2 py-1"
+          >
+            Anterior
+          </button>
+          <span className="text-xs font-semibold text-slate-400">
+            Página {currentPage} de {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+            disabled={currentPage === totalPages}
+            className="text-xs font-medium text-slate-500 disabled:opacity-30 hover:text-blue-600 transition-colors px-2 py-1"
+          >
+            Próxima
+          </button>
+        </div>
+      )}
+
+      <div className="pt-2 shrink-0 border-t border-transparent">
         <Link href="/portal/eventos" className="w-full py-4 bg-slate-50 hover:bg-slate-100 text-blue-600 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors">
           <Calendar className="w-5 h-5" /> Ver agenda completa <ChevronRight className="w-4 h-4" />
         </Link>

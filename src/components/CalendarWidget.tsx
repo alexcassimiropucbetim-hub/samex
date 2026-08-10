@@ -10,8 +10,19 @@ interface CalendarEvent {
   type?: string;
 }
 
-export function CalendarWidget({ events = [] }: { events?: CalendarEvent[] }) {
-  const [currentDate, setCurrentDate] = useState(new Date());
+export function CalendarWidget({ 
+  events = [], 
+  currentDate: externalDate,
+  onDateChange
+}: { 
+  events?: CalendarEvent[], 
+  currentDate?: Date,
+  onDateChange?: (date: Date) => void
+}) {
+  const [internalDate, setInternalDate] = useState(new Date());
+  
+  const currentDate = externalDate || internalDate;
+
 
   const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
   const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).getDay();
@@ -19,8 +30,17 @@ export function CalendarWidget({ events = [] }: { events?: CalendarEvent[] }) {
   const monthNames = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
   const dayNames = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-  const prevMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
-  const nextMonth = () => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
+  const prevMonth = () => {
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
+    if (onDateChange) onDateChange(newDate);
+    else setInternalDate(newDate);
+  };
+  
+  const nextMonth = () => {
+    const newDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
+    if (onDateChange) onDateChange(newDate);
+    else setInternalDate(newDate);
+  };
 
   // Extract event days per type (for the dots)
   const eventDays = events.reduce((acc, e) => {

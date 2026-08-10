@@ -14,8 +14,7 @@ import { getTestSchedules } from "@/actions/testSchedule";
 import { prisma } from "@/lib/prisma";
 import DashboardCharts from "@/components/DashboardCharts";
 import { LatestRegistrations } from "@/components/LatestRegistrations";
-import { CalendarWidget } from "@/components/CalendarWidget";
-import { NextEventsWidget } from "@/components/NextEventsWidget";
+import { CalendarEventsWrapper } from "@/components/CalendarEventsWrapper";
 
 export default async function PortalDashboard() {
   const session = await getSession();
@@ -190,13 +189,7 @@ export default async function PortalDashboard() {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-6 xl:col-span-1">
-          <CalendarWidget events={allEvents} />
-        </div>
-
-        <div className="flex flex-col gap-6 xl:col-span-1">
-          <NextEventsWidget events={nextEvents} />
-        </div>
+        <CalendarEventsWrapper events={allEvents} />
 
       </div>
 

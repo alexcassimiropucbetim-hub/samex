@@ -5,8 +5,7 @@ import DashboardCharts from "@/components/DashboardCharts";
 import { getSession } from "@/lib/auth";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { ActivitySummaryWidget } from "@/components/ActivitySummaryWidget";
-import { CalendarWidget } from "@/components/CalendarWidget";
-import { NextEventsWidget } from "@/components/NextEventsWidget";
+import { CalendarEventsWrapper } from "@/components/CalendarEventsWrapper";
 export default async function Home() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -204,12 +203,7 @@ export default async function Home() {
         <div className="xl:col-span-4">
           <ActivitySummaryWidget data={activityData} />
         </div>
-        <div className="xl:col-span-4">
-          <CalendarWidget events={allEvents} />
-        </div>
-        <div className="xl:col-span-4">
-          <NextEventsWidget events={nextEvents} />
-        </div>
+        <CalendarEventsWrapper events={allEvents} calendarSpan="xl:col-span-4" eventsSpan="xl:col-span-4" />
       </div>
 
       <div className="flex items-center justify-between pt-4">

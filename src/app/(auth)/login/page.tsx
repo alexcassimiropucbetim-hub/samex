@@ -67,18 +67,23 @@ export default function LoginPage() {
       <div className="flex flex-col md:flex-row w-full max-w-[900px] bg-white rounded-[24px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden z-10 min-h-[650px] border border-slate-700/50">
         
         {/* Left Column (Dark Sidebar) */}
-        <div className="w-full md:w-[40%] bg-[#0B1B3D] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+        <div className="w-full md:w-[40%] bg-[#0B1B3D] border-l-4 border-l-orange-500 p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
           {/* Subtle large background icon */}
           <Music className="absolute -left-12 -top-12 w-96 h-96 text-white opacity-[0.02] rotate-12 pointer-events-none" />
           
+          {/* Glowing effect at bottom to simulate energy/music notes */}
+          <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-orange-500/20 to-transparent pointer-events-none"></div>
+
           <div className="relative z-10 flex flex-col items-center">
-            <div className="w-20 h-20 bg-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/20">
+            <div className="w-20 h-20 bg-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-[0_0_20px_rgba(234,88,12,0.4)]">
               <Music className="w-10 h-10 text-white" />
             </div>
             
             <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">SAMEX</h1>
-            <h2 className="text-orange-500 font-semibold mb-4">Portal do Encarregado</h2>
-            <p className="text-slate-300 text-sm max-w-[200px] mb-12">
+            <h2 className="text-orange-500 font-semibold">Portal do Encarregado</h2>
+            <div className="w-10 h-0.5 bg-orange-600 mt-3 mb-6"></div>
+            
+            <p className="text-slate-300 text-sm max-w-[200px] mb-12 leading-relaxed">
               Acesso exclusivo para Encarregados e Examinadoras
             </p>
 
@@ -103,7 +108,11 @@ export default function LoginPage() {
                 <User className="w-8 h-8 text-orange-600" />
               </div>
               <h2 className="text-3xl font-extrabold text-[#0B1B3D]">Portal do Encarregado</h2>
-              <div className="w-12 h-0.5 bg-orange-500 rounded-full mt-4 mb-6"></div>
+              <div className="flex items-center gap-2 mt-4 mb-6">
+                <div className="w-8 h-0.5 bg-orange-500 rounded-full"></div>
+                <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
+                <div className="w-8 h-0.5 bg-orange-500 rounded-full"></div>
+              </div>
               <p className="text-slate-500 text-sm text-center">Acesso exclusivo para Encarregados e Examinadoras</p>
             </div>
 
@@ -159,7 +168,9 @@ export default function LoginPage() {
                 
                 <div>
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2">
-                    <IdCard className="w-4 h-4 text-orange-600" />
+                    <div className="w-6 h-6 border border-orange-200 rounded flex items-center justify-center bg-orange-50/50">
+                      <IdCard className="w-3.5 h-3.5 text-orange-600" />
+                    </div>
                     Número da Carteirinha
                   </label>
                   <div className="relative">
@@ -178,7 +189,9 @@ export default function LoginPage() {
 
                 <div>
                   <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2">
-                    <User className="w-4 h-4 text-orange-600" />
+                    <div className="w-6 h-6 border border-orange-200 rounded flex items-center justify-center bg-orange-50/50">
+                      <User className="w-3.5 h-3.5 text-orange-600" />
+                    </div>
                     Nome de Login
                   </label>
                   <div className="relative">
@@ -196,10 +209,20 @@ export default function LoginPage() {
                   </div>
                 </div>
 
+                <div className="flex flex-wrap items-center justify-between gap-4 mt-2 mb-2">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-orange-600 focus:ring-orange-500 transition-all" />
+                    <span className="text-sm font-medium text-slate-600 group-hover:text-slate-900 transition-colors">Lembrar meus dados</span>
+                  </label>
+                  <Link href="#" className="text-sm font-semibold text-orange-600 hover:text-orange-700 underline decoration-orange-600/30 underline-offset-4 transition-colors">
+                    Esqueci meus dados
+                  </Link>
+                </div>
+
                 <button 
                   type="submit" 
                   disabled={loading}
-                  className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group mt-2"
+                  className="w-full bg-gradient-to-r from-orange-600 to-orange-500 hover:from-orange-500 hover:to-orange-400 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-500/30 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group mt-2"
                 >
                   <Lock className="w-5 h-5" />
                   {loading ? "Acessando..." : "Entrar no Portal"}
@@ -224,10 +247,13 @@ export default function LoginPage() {
           </div>
           
           {/* Card Footer */}
-          <div className="bg-slate-50 border-t border-slate-100 py-4 px-8 flex justify-center mt-auto">
-            <Link href="/admin-login" className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors">
-              <Shield className="w-4 h-4" />
-              Acesso Restrito ao Administrador
+          <div className="bg-slate-50 border-t border-slate-100 py-6 px-8 flex justify-center mt-auto">
+            <Link href="/admin-login" className="flex items-center justify-between w-full bg-white border border-slate-200 hover:border-slate-300 hover:bg-slate-50 rounded-xl py-3 px-4 text-sm font-semibold text-slate-600 transition-all shadow-sm group">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
+                Acesso Restrito ao Administrador
+              </div>
+              <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-slate-600 transition-colors" />
             </Link>
           </div>
         </div>
@@ -239,7 +265,7 @@ export default function LoginPage() {
           <Lock className="w-4 h-4" />
           SAMEX - Sistema de Administração Musical de Exames
         </div>
-        <p className="text-slate-400 text-xs">© 2024 Todos os direitos reservados.</p>
+        <p className="text-slate-400 text-xs">© 2026 Todos os direitos reservados.</p>
       </div>
     </div>
   );

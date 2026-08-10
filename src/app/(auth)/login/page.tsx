@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { loginEncarregado, getRecaptchaSiteKey } from "@/actions/auth";
-import { UserCheck, ShieldAlert } from "lucide-react";
+import { useState } from "react";
+import { loginEncarregado } from "@/actions/auth";
+import { ShieldAlert, Music, ShieldCheck, User, Lock, ArrowRight, IdCard, Shield } from "lucide-react";
 import Link from "next/link";
 import dynamic from "next/dynamic";
 
@@ -11,7 +11,6 @@ const ReCAPTCHA = dynamic(() => import("react-google-recaptcha"), { ssr: false }
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [logoError, setLogoError] = useState(false);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || "6LeQkxUtAAAAAMo1Qv5ZcYC3FfDtYrusy2Ivrfgh";
   const [churchSelectionOptions, setChurchSelectionOptions] = useState<any[]>([]);
   const [tempCredentials, setTempCredentials] = useState<{login: string, cardNumber: string} | null>(null);
@@ -61,123 +60,186 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#0a0f1c] px-4 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-orange-500/20 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/20 rounded-full blur-[120px] pointer-events-none"></div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#1a2639] px-4 py-8 relative overflow-hidden">
+      {/* Background radial gradient for depth */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0,transparent_100%)] pointer-events-none"></div>
 
-      <div className="glass-card max-w-md w-full relative z-10 p-8 shadow-2xl shadow-black/50 border border-slate-200">
-        <div className="flex flex-col items-center mb-8">
-          {!logoError ? (
-            <div className="w-48 h-24 flex items-center justify-center mb-4">
-              <img 
-                src="/api/config/logo" 
-                alt="Logo do Sistema" 
-                className="max-w-full max-h-full object-contain drop-shadow-sm"
-                onError={() => setLogoError(true)}
-              />
-            </div>
-          ) : (
-            <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center mb-4 text-orange-400">
-              <UserCheck className="w-8 h-8" />
-            </div>
-          )}
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Portal do Encarregado</h1>
-          <p className="text-slate-500 text-sm mt-1">Acesso exclusivo para Encarregados e Examinadoras</p>
-        </div>
-
-        {error && (
-          <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
-            <ShieldAlert className="w-5 h-5 shrink-0" />
-            <p>{error}</p>
-          </div>
-        )}
-
-        {churchSelectionOptions.length > 0 ? (
-          <form action={handleSubmit} className="space-y-5 animate-in slide-in-from-right-8 duration-500">
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1.5">Selecione a Igreja de Atuação</label>
-              <select 
-                name="selectedChurchId"
-                required 
-                defaultValue=""
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
-              >
-                <option value="" disabled>Selecione uma igreja...</option>
-                {churchSelectionOptions.map((church) => (
-                  <option key={church.id} value={church.id}>{church.name}</option>
-                ))}
-              </select>
-              <p className="text-xs text-slate-500 mt-2">Você possui acesso a múltiplas igrejas. Selecione qual deseja administrar nesta sessão.</p>
+      <div className="flex flex-col md:flex-row w-full max-w-[900px] bg-white rounded-[24px] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.5)] overflow-hidden z-10 min-h-[650px] border border-slate-700/50">
+        
+        {/* Left Column (Dark Sidebar) */}
+        <div className="w-full md:w-[40%] bg-[#0B1B3D] p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
+          {/* Subtle large background icon */}
+          <Music className="absolute -left-12 -top-12 w-96 h-96 text-white opacity-[0.02] rotate-12 pointer-events-none" />
+          
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="w-20 h-20 bg-orange-600 rounded-2xl flex items-center justify-center mb-6 shadow-lg shadow-orange-500/20">
+              <Music className="w-10 h-10 text-white" />
             </div>
             
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 mt-4"
-            >
-              {loading ? "Acessando..." : "Confirmar Acesso"}
-            </button>
-            <button 
-              type="button" 
-              disabled={loading}
-              onClick={() => {
-                setChurchSelectionOptions([]);
-                setTempCredentials(null);
-                setError(null);
-              }}
-              className="w-full bg-transparent hover:bg-slate-50 text-slate-600 font-medium py-2 rounded-xl transition-all mt-2"
-            >
-              Voltar
-            </button>
-          </form>
-        ) : (
-          <form action={handleSubmit} className="space-y-5 animate-in slide-in-from-left-8 duration-500">
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1.5">Número da Carteirinha</label>
-              <input 
-                type="text" 
-                name="cardNumber"
-                placeholder="Digite o número da sua carteirinha"
-                required 
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
-              />
-            </div>
+            <h1 className="text-4xl font-bold text-white mb-2 tracking-tight">SAMEX</h1>
+            <h2 className="text-orange-500 font-semibold mb-4">Portal do Encarregado</h2>
+            <p className="text-slate-300 text-sm max-w-[200px] mb-12">
+              Acesso exclusivo para Encarregados e Examinadoras
+            </p>
 
-            <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1.5">Nome de Login</label>
-              <input 
-                type="text" 
-                name="login"
-                placeholder="Digite seu nome de login"
-                required 
-                onInput={(e) => e.currentTarget.value = e.currentTarget.value.toUpperCase()}
-                className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm uppercase" 
-              />
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-12 h-12 rounded-full border border-orange-500/30 flex items-center justify-center mb-1">
+                <ShieldCheck className="w-5 h-5 text-orange-500" />
+              </div>
+              <h3 className="text-white text-sm font-bold">Sistema seguro e confiável</h3>
+              <p className="text-slate-400 text-xs max-w-[220px]">
+                Seus dados e informações protegidos com segurança.
+              </p>
             </div>
-
-            <button 
-              type="submit" 
-              disabled={loading}
-              className="w-full bg-orange-600 hover:bg-orange-500 text-white font-medium py-3 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 mt-4"
-            >
-              {loading ? "Acessando..." : "Entrar no Portal"}
-            </button>
-            <div className="mt-4 flex justify-center w-full overflow-hidden min-h-[78px]">
-              <ReCAPTCHA
-                sitekey={siteKey}
-                onChange={(token) => setRecaptchaToken(token)}
-                theme="light"
-              />
-            </div>
-          </form>
-        )}
-
-        <div className="mt-8 pt-6 border-t border-slate-200 text-center">
-          <Link href="/admin-login" className="text-xs text-slate-500 hover:text-slate-600 transition-colors">
-            Acesso Restrito ao Administrador
-          </Link>
+          </div>
         </div>
+
+        {/* Right Column (Form Area) */}
+        <div className="w-full md:w-[60%] flex flex-col bg-white">
+          <div className="flex-1 p-8 md:p-12">
+            
+            <div className="flex flex-col items-center mb-8">
+              <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mb-6 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.1)] border border-slate-50">
+                <User className="w-8 h-8 text-orange-600" />
+              </div>
+              <h2 className="text-3xl font-extrabold text-[#0B1B3D]">Portal do Encarregado</h2>
+              <div className="w-12 h-0.5 bg-orange-500 rounded-full mt-4 mb-6"></div>
+              <p className="text-slate-500 text-sm text-center">Acesso exclusivo para Encarregados e Examinadoras</p>
+            </div>
+
+            {error && (
+              <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-500 px-4 py-3 rounded-xl text-sm flex items-start gap-3">
+                <ShieldAlert className="w-5 h-5 shrink-0" />
+                <p>{error}</p>
+              </div>
+            )}
+
+            {churchSelectionOptions.length > 0 ? (
+              <form action={handleSubmit} className="space-y-5 animate-in slide-in-from-right-8 duration-500">
+                <div>
+                  <label className="block text-sm font-bold text-slate-800 mb-2">Selecione a Igreja de Atuação</label>
+                  <select 
+                    name="selectedChurchId"
+                    required 
+                    defaultValue=""
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
+                  >
+                    <option value="" disabled>Selecione uma igreja...</option>
+                    {churchSelectionOptions.map((church) => (
+                      <option key={church.id} value={church.id}>{church.name}</option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-slate-500 mt-2">Você possui acesso a múltiplas igrejas. Selecione qual deseja administrar nesta sessão.</p>
+                </div>
+                
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 mt-4 flex items-center justify-center gap-2 group"
+                >
+                  <Lock className="w-5 h-5" />
+                  {loading ? "Acessando..." : "Confirmar Acesso"}
+                  {!loading && <ArrowRight className="w-5 h-5 ml-auto group-hover:translate-x-1 transition-transform" />}
+                </button>
+                <button 
+                  type="button" 
+                  disabled={loading}
+                  onClick={() => {
+                    setChurchSelectionOptions([]);
+                    setTempCredentials(null);
+                    setError(null);
+                  }}
+                  className="w-full bg-transparent hover:bg-slate-50 text-slate-600 font-bold py-3 rounded-xl transition-all mt-2 border border-slate-200"
+                >
+                  Voltar
+                </button>
+              </form>
+            ) : (
+              <form action={handleSubmit} className="space-y-6 animate-in slide-in-from-left-8 duration-500">
+                
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2">
+                    <IdCard className="w-4 h-4 text-orange-600" />
+                    Número da Carteirinha
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <IdCard className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <input 
+                      type="text" 
+                      name="cardNumber"
+                      placeholder="Digite o número da sua carteirinha"
+                      required 
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-2">
+                    <User className="w-4 h-4 text-orange-600" />
+                    Nome de Login
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                      <User className="w-5 h-5 text-slate-400" />
+                    </div>
+                    <input 
+                      type="text" 
+                      name="login"
+                      placeholder="Digite seu nome de login"
+                      required 
+                      onInput={(e) => e.currentTarget.value = e.currentTarget.value.toUpperCase()}
+                      className="w-full bg-white border border-slate-200 rounded-xl pl-12 pr-4 py-3.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm uppercase" 
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full bg-orange-600 hover:bg-orange-500 text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-orange-500/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 group mt-2"
+                >
+                  <Lock className="w-5 h-5" />
+                  {loading ? "Acessando..." : "Entrar no Portal"}
+                  {!loading && <ArrowRight className="w-5 h-5 ml-auto group-hover:translate-x-1 transition-transform" />}
+                </button>
+
+                <div className="flex items-center gap-4 my-8">
+                  <hr className="flex-1 border-slate-100" />
+                  <span className="text-xs font-semibold text-slate-400">Verificação de Segurança</span>
+                  <hr className="flex-1 border-slate-100" />
+                </div>
+
+                <div className="flex justify-center w-full overflow-hidden min-h-[78px]">
+                  <ReCAPTCHA
+                    sitekey={siteKey}
+                    onChange={(token) => setRecaptchaToken(token)}
+                    theme="light"
+                  />
+                </div>
+              </form>
+            )}
+          </div>
+          
+          {/* Card Footer */}
+          <div className="bg-slate-50 border-t border-slate-100 py-4 px-8 flex justify-center mt-auto">
+            <Link href="/admin-login" className="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-700 transition-colors">
+              <Shield className="w-4 h-4" />
+              Acesso Restrito ao Administrador
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Global Footer */}
+      <div className="mt-8 text-center flex flex-col items-center gap-2">
+        <div className="flex items-center gap-2 text-slate-300 text-sm font-medium">
+          <Lock className="w-4 h-4" />
+          SAMEX - Sistema de Administração Musical de Exames
+        </div>
+        <p className="text-slate-400 text-xs">© 2024 Todos os direitos reservados.</p>
       </div>
     </div>
   );

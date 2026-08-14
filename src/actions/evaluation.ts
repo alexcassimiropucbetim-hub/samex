@@ -102,6 +102,13 @@ export async function saveEvaluation(data: {
       link: "/portal/pre-avaliacao"
     }).catch(e => console.error("Erro push RESULTADO", e));
 
+    await import("@/lib/audit").then(m => m.logActivity(
+      "AVALIOU_CANDIDATO",
+      "PreEvaluation",
+      preEvaluationId,
+      { status, observacao, autoAllocatedTestId }
+    ));
+
     revalidatePath("/portal");
     revalidatePath("/portal/pre-avaliacao");
     return { success: true };

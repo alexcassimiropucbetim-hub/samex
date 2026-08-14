@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MapPin, Church, ListMusic, Music, Music2, Users, UserCheck, ChevronDown, FolderOpen, Briefcase, FileSignature, CalendarClock, LogOut, Settings, Menu, X, Activity, UserCog, BookOpen, BellRing } from "lucide-react";
+import { Home, MapPin, Church, ListMusic, Music, Music2, Users, UserCheck, ChevronDown, FolderOpen, Briefcase, FileSignature, CalendarClock, LogOut, Settings, Menu, X, Activity, UserCog, BookOpen, BellRing, Database } from "lucide-react";
 import clsx from "clsx";
 import { useState } from "react";
 import { logout } from "@/actions/auth-actions";
@@ -55,6 +55,7 @@ const menuGroups = [
       { name: "Central de Notificações", href: "/notificacoes", icon: BellRing },
       { name: "Configurações", href: "/configuracoes", icon: Settings },
       { name: "Logs de Acesso", href: "/logs", icon: Activity },
+      { name: "Auditoria de Dados", href: "/auditoria", icon: Database },
       { name: "Manual do Sistema", href: "/manual", icon: BookOpen }
     ]
   }

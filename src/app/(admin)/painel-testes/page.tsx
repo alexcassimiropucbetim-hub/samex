@@ -12,8 +12,7 @@ export default async function PainelTestesPage() {
   const testSchedule = await prisma.testSchedule.findFirst({
     where: {
       testDate: {
-        gte: today,
-        lte: endOfMonth
+        gte: today
       },
       isClosed: false
     },
@@ -46,8 +45,8 @@ export default async function PainelTestesPage() {
   if (!testSchedule) {
     return (
       <div className="flex flex-col items-center justify-center h-[70vh]">
-        <h2 className="text-2xl font-bold text-slate-700">Nenhum teste programado para este mês</h2>
-        <p className="text-slate-500">Não há testes futuros agendados para o mês atual no sistema.</p>
+        <h2 className="text-2xl font-bold text-slate-700">Nenhum teste programado</h2>
+        <p className="text-slate-500">Não há testes futuros agendados no sistema.</p>
       </div>
     );
   }

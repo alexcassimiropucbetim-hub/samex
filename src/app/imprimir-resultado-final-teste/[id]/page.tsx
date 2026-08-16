@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { PrintControls } from "@/components/PrintControls";
 import { prisma } from "@/lib/prisma";
 
-export default async function ImprimirListaTestePage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ImprimirResultadoFinalTestePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const test = await getTestDetails(id);
 
@@ -31,7 +31,7 @@ export default async function ImprimirListaTestePage({ params }: { params: Promi
           </div>
           
           <div className="text-right flex flex-col items-end gap-1">
-            <h1 className="text-2xl font-bold text-[#1e3a8a] uppercase tracking-wide mb-1">Lista de Candidatos para Teste</h1>
+            <h1 className="text-2xl font-bold text-[#1e3a8a] uppercase tracking-wide mb-1">Resultado Final do Teste</h1>
             <div className="flex items-end gap-2 text-sm font-medium">
               <span className="text-gray-700">Local de Teste:</span>
               <span className="border-b border-black w-64 inline-block text-center">{test.church.name}</span>
@@ -50,11 +50,11 @@ export default async function ImprimirListaTestePage({ params }: { params: Promi
           <thead>
             <tr className="bg-orange-500 text-white uppercase tracking-wider text-left">
               <th className="px-2 py-2 w-8 text-center">#</th>
-              <th className="px-2 py-2">Candidato(a)</th>
+              <th className="px-2 py-2">Nome</th>
               <th className="px-2 py-2">Congregação</th>
-              <th className="px-2 py-2">Setor</th>
               <th className="px-2 py-2">Instrumento</th>
-              <th className="px-2 py-2">Tipo de Teste</th>
+              <th className="px-2 py-2">Tipo</th>
+              <th className="px-2 py-2">Resultado Final</th>
             </tr>
           </thead>
           <tbody>
@@ -63,9 +63,17 @@ export default async function ImprimirListaTestePage({ params }: { params: Promi
                 <td className="border-b border-gray-100 px-2 py-2 text-center font-bold text-gray-500">{idx + 1}</td>
                 <td className="border-b border-gray-100 px-2 py-2 font-semibold uppercase">{candidate.candidateName}</td>
                 <td className="border-b border-gray-100 px-2 py-2 uppercase text-gray-600">{candidate.church.name}</td>
-                <td className="border-b border-gray-100 px-2 py-2 uppercase text-gray-600">{candidate.sector.name}</td>
                 <td className="border-b border-gray-100 px-2 py-2 uppercase text-gray-600">{candidate.instrument.name}</td>
                 <td className="border-b border-gray-100 px-2 py-2 uppercase text-gray-600">{candidate.testType.name}</td>
+                <td className="border-b border-gray-100 px-2 py-2 font-bold uppercase">
+                  {candidate.finalTestStatus === "APROVADO" ? (
+                    <span className="text-emerald-600">APROVADO</span>
+                  ) : candidate.finalTestStatus === "REPROVADO" ? (
+                    <span className="text-red-600">REPROVADO</span>
+                  ) : (
+                    <span className="text-gray-500">PENDENTE</span>
+                  )}
+                </td>
               </tr>
             ))}
             {test.candidates.length === 0 && (

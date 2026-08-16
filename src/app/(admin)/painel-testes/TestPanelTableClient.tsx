@@ -86,6 +86,14 @@ export function TestPanelTableClient({
           <Printer className="w-4 h-4" />
           Imprimir Lista
         </button>
+        
+        <button 
+          onClick={() => window.open(`/imprimir-resultado-final-teste/${testScheduleId}`, '_blank')}
+          className="flex items-center gap-2 px-4 py-2 border border-blue-200 text-blue-600 rounded-lg hover:bg-blue-50 font-medium text-sm transition-colors"
+        >
+          <FileText className="w-4 h-4" />
+          Imprimir Resultado Final
+        </button>
 
         <div className="relative" ref={openMenuId === 'batch-print' ? menuRef : null}>
           <button 

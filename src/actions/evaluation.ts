@@ -24,7 +24,7 @@ export async function saveEvaluation(data: {
 }) {
   try {
     const session = await getSession();
-    const evaluatorId = session?.id;
+    const evaluatorId = session?.type === "encarregado" ? session.id : null;
 
     const { 
       preEvaluationId, 
@@ -112,8 +112,8 @@ export async function saveEvaluation(data: {
     revalidatePath("/portal");
     revalidatePath("/portal/pre-avaliacao");
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error("Failed to save evaluation:", error);
-    throw new Error("Falha ao salvar avaliação");
+    throw new Error("Falha ao salvar avaliação: " + (error?.message || String(error)));
   }
 }

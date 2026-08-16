@@ -11,9 +11,9 @@ export default async function ImprimirResultadoLotePage({ searchParams }: { sear
   const candidates = await prisma.preEvaluation.findMany({
     where: { id: { in: idArray } },
     include: {
-      church: true,
+      church: { include: { ministry: true } },
       testSchedule: {
-        include: { church: true }
+        include: { church: { include: { ministry: true } } }
       },
       testType: true,
       testEvaluator: {
@@ -27,10 +27,28 @@ export default async function ImprimirResultadoLotePage({ searchParams }: { sear
   // Order candidates by the order of IDs passed
   const orderedCandidates = idArray.map(id => candidates.find(c => c.id === id)).filter(Boolean) as typeof candidates;
 
+  // Resolve evaluator names for all candidates
+  const candidatesWithEvaluators = await Promise.all(orderedCandidates.map(async (candidate) => {
+    let evaluatorName = candidate.testEvaluator?.fullName || "";
+    
+    if (!evaluatorName) {
+      const isFemale = candidate.gender === "F";
+      const roleSearch = isFemale ? "EXAMINADORA" : "REGIONAL";
+      const defaultEvaluator = await prisma.personInCharge.findFirst({
+        where: {
+          church: { sectorId: candidate.church.sectorId },
+          roleType: { name: { contains: roleSearch } }
+        }
+      });
+      evaluatorName = defaultEvaluator?.fullName || "";
+    }
+    return { ...candidate, resolvedEvaluatorName: evaluatorName };
+  }));
+
   return (
     <div className="font-sans bg-white text-black min-h-screen">
       <PrintControls />
-      {orderedCandidates.map((candidate, index) => {
+      {candidatesWithEvaluators.map((candidate, index) => {
         const isFemale = candidate.gender === "F";
         const isTroca = candidate.testType?.name.toLowerCase().includes("troca");
         
@@ -66,8 +84,8 @@ export default async function ImprimirResultadoLotePage({ searchParams }: { sear
         const testDate = candidate.testSchedule?.testDate ? new Date(candidate.testSchedule.testDate).toLocaleDateString("pt-BR") : "";
         const testLocality = candidate.testSchedule?.church?.name || candidate.church.name;
         
-        const elderName = candidate.testSchedule?.elderName || "";
-        const evaluatorName = candidate.testEvaluator?.fullName || "";
+        const elderName = candidate.testSchedule?.elderName || candidate.testSchedule?.church?.ministry?.elderName || candidate.church.ministry?.elderName || "";
+        const evaluatorName = candidate.resolvedEvaluatorName;
 
         const isApproved = candidate.finalTestStatus === "APROVADO";
         const isRejected = candidate.finalTestStatus === "REPROVADO";

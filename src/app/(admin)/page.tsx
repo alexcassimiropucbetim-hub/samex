@@ -53,13 +53,15 @@ export default async function Home() {
     prisma.testSchedule.findFirst({
       where: {
         testDate: {
-          gte: today,
-          lte: endOfMonth
+          gte: today
         },
         isClosed: false
       },
       orderBy: {
         testDate: "asc"
+      },
+      include: {
+        candidates: true
       }
     }),
     prisma.preEvaluation.count({
@@ -375,7 +377,7 @@ export default async function Home() {
               <p className="text-[13px] text-slate-500 mt-1 font-medium">
                 {nextTestThisMonth 
                   ? `Próximo teste: ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(nextTestThisMonth.testDate))}`
-                  : "Nenhum teste agendado para este mês."}
+                  : "Nenhum teste agendado."}
               </p>
             </div>
           </div>
@@ -384,7 +386,7 @@ export default async function Home() {
             <div className="flex items-center gap-4">
               <Calendar className="w-8 h-8 text-emerald-500" />
               <div>
-                <span className="text-2xl font-black text-[#0B1B3D] block leading-none mb-1">0</span>
+                <span className="text-2xl font-black text-[#0B1B3D] block leading-none mb-1">{nextTestThisMonth ? 1 : 0}</span>
                 <span className="text-[11px] font-semibold text-slate-500">Testes agendados</span>
               </div>
             </div>
@@ -392,7 +394,7 @@ export default async function Home() {
             <div className="flex items-center gap-4">
               <User className="w-8 h-8 text-emerald-500" />
               <div>
-                <span className="text-2xl font-black text-[#0B1B3D] block leading-none mb-1">0</span>
+                <span className="text-2xl font-black text-[#0B1B3D] block leading-none mb-1">{nextTestThisMonth?.candidates?.length || 0}</span>
                 <span className="text-[11px] font-semibold text-slate-500">Candidatos</span>
               </div>
             </div>
@@ -400,7 +402,7 @@ export default async function Home() {
             <div className="flex items-center gap-4">
               <MapPin className="w-8 h-8 text-emerald-500" />
               <div>
-                <span className="text-2xl font-black text-[#0B1B3D] block leading-none mb-1">0</span>
+                <span className="text-2xl font-black text-[#0B1B3D] block leading-none mb-1">{nextTestThisMonth ? 1 : 0}</span>
                 <span className="text-[11px] font-semibold text-slate-500">Locais</span>
               </div>
             </div>

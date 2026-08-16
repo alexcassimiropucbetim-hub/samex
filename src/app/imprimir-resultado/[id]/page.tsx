@@ -8,9 +8,9 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
   const candidate = await prisma.preEvaluation.findUnique({
     where: { id },
     include: {
-      church: true,
+      church: { include: { ministry: true } },
       testSchedule: {
-        include: { church: true }
+        include: { church: { include: { ministry: true } } }
       },
       testType: true,
       testEvaluator: {
@@ -57,8 +57,19 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
   const testDate = candidate.testSchedule?.testDate ? new Date(candidate.testSchedule.testDate).toLocaleDateString("pt-BR") : "";
   const testLocality = candidate.testSchedule?.church?.name || candidate.church.name;
   
-  const elderName = candidate.testSchedule?.elderName || "";
-  const evaluatorName = candidate.testEvaluator?.fullName || "";
+  const elderName = candidate.testSchedule?.elderName || candidate.testSchedule?.church?.ministry?.elderName || candidate.church.ministry?.elderName || "";
+  let evaluatorName = candidate.testEvaluator?.fullName || "";
+
+  if (!evaluatorName) {
+    const roleSearch = isFemale ? "EXAMINADORA" : "REGIONAL";
+    const defaultEvaluator = await prisma.personInCharge.findFirst({
+      where: {
+        church: { sectorId: candidate.church.sectorId },
+        roleType: { name: { contains: roleSearch } }
+      }
+    });
+    evaluatorName = defaultEvaluator?.fullName || "";
+  }
 
   const isApproved = candidate.finalTestStatus === "APROVADO";
   const isRejected = candidate.finalTestStatus === "REPROVADO";

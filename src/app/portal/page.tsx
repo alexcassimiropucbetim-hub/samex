@@ -15,6 +15,7 @@ import { prisma } from "@/lib/prisma";
 import DashboardCharts from "@/components/DashboardCharts";
 import { LatestRegistrations } from "@/components/LatestRegistrations";
 import { CalendarEventsWrapper } from "@/components/CalendarEventsWrapper";
+import { PendingLettersWidget } from "@/components/PendingLettersWidget";
 
 export default async function PortalDashboard() {
   const session = await getSession();
@@ -97,11 +98,22 @@ export default async function PortalDashboard() {
   today.setHours(0, 0, 0, 0);
   const nextEvents = allEvents.filter(e => new Date(e.date) >= today);
 
+  const pendingLettersData = preEvaluations
+    .filter(p => p.status === "APROVADO" && p.letterPrinted === false)
+    .map(p => ({
+      id: p.id,
+      candidateName: p.candidateName,
+      instrumentName: p.instrument?.name || "N/A",
+      testTypeName: p.testType?.name || "N/A",
+    }));
+
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         <div className="flex flex-col gap-6 xl:col-span-1">
+          <PendingLettersWidget candidates={pendingLettersData} />
+          
           {/* Card 1: Inscrições Totais */}
           <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-orange-500 flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
             <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">

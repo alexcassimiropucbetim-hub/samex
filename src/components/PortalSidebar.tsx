@@ -25,7 +25,6 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
       name: "Dashboard",
       items: [
         { name: "Início", href: "/portal", icon: Home },
-        { name: "Meus Alunos", href: "/portal/alunos", icon: Users },
         { name: "Manual", href: "/portal/manual", icon: BookOpen },
         ...(isRegional ? [{ name: "Configurações", href: "/portal/configuracoes", icon: Settings }] : [])
       ]

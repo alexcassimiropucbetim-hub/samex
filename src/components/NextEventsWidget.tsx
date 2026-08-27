@@ -107,12 +107,12 @@ export function NextEventsWidget({ events, currentDate }: { events: EventItem[],
                       <div className="flex items-center gap-3 mt-1.5">
                         <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium">
                           <Calendar className="w-3.5 h-3.5 text-slate-400" /> 
-                          {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short' }).format(new Date(event.date))}
+                          {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(event.date))}
                         </div>
                         <span className="text-slate-300">|</span>
                         <div className="flex items-center gap-1.5 text-slate-500 text-xs font-medium">
                           <Clock className="w-3.5 h-3.5 text-slate-400" /> 
-                          {new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(new Date(event.date))}
+                          {new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(new Date(event.date))}
                         </div>
                       </div>
                     </div>

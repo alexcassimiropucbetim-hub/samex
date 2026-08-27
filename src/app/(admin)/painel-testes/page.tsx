@@ -59,8 +59,8 @@ export default async function PainelTestesPage() {
 
   // Formatar data
   const dateObj = new Date(testSchedule.testDate);
-  const formattedDateExt = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }).format(dateObj);
-  const formattedDateShort = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(dateObj);
+  const formattedDateExt = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(dateObj);
+  const formattedDateShort = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(dateObj);
 
   return (
     <div className="-mt-8 -mx-8">

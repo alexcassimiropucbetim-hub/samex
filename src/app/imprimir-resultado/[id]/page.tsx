@@ -38,7 +38,12 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
         labelExaminador = candidate.testEvaluator.roleType.name;
       }
     } else {
-      labelExaminador = "Encarregado Regional";
+      const testName = candidate.testType?.name?.toLowerCase() || "";
+      if (testName.includes("reunião") || testName.includes("jovens") || testName.includes("menores")) {
+        labelExaminador = "Encarregado Local";
+      } else {
+        labelExaminador = "Encarregado Regional";
+      }
     }
   }
 
@@ -47,8 +52,8 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
 
   if (isTroca) {
     formCode = "FORMULÁRIO M07";
-    if (!isFemale) {
-      labelExaminador = "Encarregado regional"; // Matches the exact case in the image
+    if (!isFemale && !candidate.testEvaluator) {
+      labelExaminador = "Encarregado regional"; 
     }
   }
 
@@ -59,17 +64,6 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
   
   const elderName = candidate.testSchedule?.elderName || candidate.testSchedule?.church?.ministry?.elderName || candidate.church.ministry?.elderName || "";
   let evaluatorName = candidate.testEvaluator?.fullName || "";
-
-  if (!evaluatorName) {
-    const roleSearch = isFemale ? "EXAMINADORA" : "REGIONAL";
-    const defaultEvaluator = await prisma.personInCharge.findFirst({
-      where: {
-        church: { sectorId: candidate.church.sectorId },
-        roleType: { name: { contains: roleSearch } }
-      }
-    });
-    evaluatorName = defaultEvaluator?.fullName || "";
-  }
 
   const isApproved = candidate.finalTestStatus === "APROVADO";
   const isRejected = candidate.finalTestStatus === "REPROVADO";
@@ -111,34 +105,22 @@ export default async function ImprimirResultadoPage({ params }: { params: Promis
         </div>
 
         {/* Signatures */}
-        {isTroca ? (
-          <div className="h-20 grid grid-cols-2 px-6 pt-5 pb-3 gap-x-12 items-end text-center">
-            <div>
-              {evaluatorName && <div className="text-xs font-semibold uppercase truncate mb-0.5">{evaluatorName}</div>}
-              <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">{labelExaminador}</div>
-            </div>
-            <div>
-              <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Assinatura</div>
-            </div>
+        <div className="h-28 grid grid-cols-2 px-6 pt-3 pb-3 gap-x-12 gap-y-4 items-end text-center">
+          <div>
+            {elderName && <div className="text-xs font-semibold uppercase truncate mb-0.5">{elderName}</div>}
+            <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Ancião</div>
           </div>
-        ) : (
-          <div className="h-28 grid grid-cols-2 px-6 pt-3 pb-3 gap-x-12 gap-y-4 items-end text-center">
-            <div>
-              {elderName && <div className="text-xs font-semibold uppercase truncate mb-0.5">{elderName}</div>}
-              <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Ancião</div>
-            </div>
-            <div>
-              <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Assinatura</div>
-            </div>
-            <div>
-              {evaluatorName && <div className="text-xs font-semibold uppercase truncate mb-0.5">{evaluatorName}</div>}
-              <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">{labelExaminador}</div>
-            </div>
-            <div>
-              <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Assinatura</div>
-            </div>
+          <div>
+            <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Assinatura</div>
           </div>
-        )}
+          <div>
+            {evaluatorName && <div className="text-xs font-semibold uppercase truncate mb-0.5">{evaluatorName}</div>}
+            <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">{labelExaminador}</div>
+          </div>
+          <div>
+            <div className="border-t-[1px] border-black pt-0.5 text-[10px] font-semibold">Assinatura</div>
+          </div>
+        </div>
       </div>
       
       {/* Footer */}

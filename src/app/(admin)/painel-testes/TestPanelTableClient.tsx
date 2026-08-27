@@ -176,7 +176,7 @@ export function TestPanelTableClient({
                   </td>
                   <td className="px-4 py-4 text-slate-500">{index + 1}</td>
                   <td className="px-3 py-4 font-bold text-slate-800">
-                    <div className="truncate max-w-[140px]" title={cand.candidateName.toUpperCase()}>
+                    <div title={cand.candidateName.toUpperCase()}>
                       {cand.candidateName.toUpperCase()}
                     </div>
                   </td>

@@ -13,9 +13,12 @@ export default async function EventosPage({
   const editId = resolvedSearchParams?.edit;
 
   const formatDateTimeLocal = (date: Date) => {
-    const tzOffset = date.getTimezoneOffset() * 60000; // offset in milliseconds
-    const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
-    return localISOTime;
+    const d = new Date(date.toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+    return d.getFullYear() + '-' + 
+           String(d.getMonth() + 1).padStart(2, '0') + '-' + 
+           String(d.getDate()).padStart(2, '0') + 'T' + 
+           String(d.getHours()).padStart(2, '0') + ':' + 
+           String(d.getMinutes()).padStart(2, '0');
   };
 
   const getIcon = (type: string) => {
@@ -201,7 +204,7 @@ export default async function EventosPage({
                         <div className="flex-1 min-w-0">
                           <h4 className="text-lg font-bold text-slate-900 truncate">{event.title}</h4>
                           <p className="text-sm font-medium text-slate-500">
-                            {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(event.date)}
+                            {new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Sao_Paulo' }).format(event.date)}
                           </p>
                           {event.description && (
                             <p className="text-sm text-slate-400 truncate mt-1">{event.description}</p>

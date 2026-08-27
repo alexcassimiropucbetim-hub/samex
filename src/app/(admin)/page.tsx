@@ -167,8 +167,8 @@ export default async function Home() {
 
   const session = await getSession();
   
-  const diaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'long' }).format(today);
-  const dataExtenso = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }).format(today);
+  const diaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: 'America/Sao_Paulo' }).format(today);
+  const dataExtenso = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(today);
   const diaSemanaCapitalized = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
 
   return (
@@ -376,7 +376,7 @@ export default async function Home() {
               <h3 className="text-xl font-bold text-[#0B1B3D]">Painel de Testes do Mês</h3>
               <p className="text-[13px] text-slate-500 mt-1 font-medium">
                 {nextTestThisMonth 
-                  ? `Próximo teste: ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(nextTestThisMonth.testDate))}`
+                  ? `Próximo teste: ${new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(new Date(nextTestThisMonth.testDate))}`
                   : "Nenhum teste agendado."}
               </p>
             </div>

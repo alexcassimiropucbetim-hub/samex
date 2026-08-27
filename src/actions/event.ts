@@ -37,7 +37,8 @@ export async function createEvent(formData: FormData) {
   }
 
   // dateStr expected in "YYYY-MM-DDTHH:mm"
-  const date = new Date(dateStr);
+  // Assuming America/Sao_Paulo timezone (-03:00)
+  const date = new Date(dateStr + ":00-03:00");
 
   await prisma.event.create({
     data: {
@@ -69,7 +70,8 @@ export async function updateEvent(id: string, formData: FormData) {
     throw new Error("Preencha todos os campos obrigatórios");
   }
 
-  const date = new Date(dateStr);
+  // Assuming America/Sao_Paulo timezone (-03:00)
+  const date = new Date(dateStr + ":00-03:00");
 
   await prisma.event.update({
     where: { id },

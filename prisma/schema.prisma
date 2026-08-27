@@ -154,6 +154,7 @@ model PreEvaluation {
   orchestraNeed           Boolean?
   illness                 Boolean?
   approvedInSectorMeeting Boolean?
+  letterPrinted           Boolean              @default(false)
   createdAt               DateTime             @default(now())
   updatedAt               DateTime             @updatedAt
   meetingDate             String?

@@ -33,7 +33,13 @@ export async function GET(request: Request) {
 
     const pdfBytesModified = await generateOrganistaLetter(preEvaluation);
 
-    return new Response(pdfBytesModified as any, {
+    // Marca a carta como impressa no banco
+    await prisma.preEvaluation.update({
+      where: { id },
+      data: { letterPrinted: true }
+    });
+
+    return new NextResponse(pdfBytesModified as any, {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",

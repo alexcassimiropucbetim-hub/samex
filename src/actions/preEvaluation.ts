@@ -40,6 +40,35 @@ export async function createPreEvaluation(formData: FormData) {
     throw new Error("Preencha todos os campos obrigatórios.");
   }
 
+  const testType = await prisma.testType.findUnique({ where: { id: testTypeId } });
+  const testTypeName = testType?.name?.toLowerCase() || "";
+  const isExempt = gender === "M" && (testTypeName.includes("reunião") || testTypeName.includes("jovens") || testTypeName.includes("menores"));
+
+  let autoAllocatedTestId: string | null = null;
+  let initialStatus = "PENDENTE";
+
+  if (isExempt) {
+    initialStatus = "APROVADO";
+    
+    const twentyFourHoursFromNow = new Date();
+    twentyFourHoursFromNow.setHours(twentyFourHoursFromNow.getHours() + 24);
+
+    const nextValidTest = await prisma.testSchedule.findFirst({
+      where: {
+        testDate: {
+          gte: twentyFourHoursFromNow
+        }
+      },
+      orderBy: {
+        testDate: 'asc'
+      }
+    });
+
+    if (nextValidTest) {
+      autoAllocatedTestId = nextValidTest.id;
+    }
+  }
+
   await prisma.preEvaluation.create({
     data: {
       candidateName,
@@ -65,10 +94,13 @@ export async function createPreEvaluation(formData: FormData) {
       meetingDate,
       meetingLocality,
       meetingElderName,
+      status: initialStatus,
+      testScheduleId: autoAllocatedTestId,
     },
   });
 
-  try {
+  if (!isExempt) {
+    try {
     const peopleToNotify = await prisma.personInCharge.findMany({
       where: {
         OR: [
@@ -104,6 +136,7 @@ export async function createPreEvaluation(formData: FormData) {
     }
   } catch (error) {
     console.error("Erro ao despachar notificações:", error);
+  }
   }
 
   revalidatePath("/pre-avaliacao");

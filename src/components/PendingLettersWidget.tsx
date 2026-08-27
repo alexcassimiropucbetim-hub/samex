@@ -17,9 +17,6 @@ export function PendingLettersWidget({ candidates }: { candidates: PendingLetter
   const [itemsPerPage, setItemsPerPage] = useState(2);
   const [currentPage, setCurrentPage] = useState(1);
 
-  if (!candidates || candidates.length === 0) {
-    return null;
-  }
 
   const handlePrint = (id: string, testTypeName: string) => {
     // Generate the correct PDF link based on test type
@@ -62,7 +59,7 @@ export function PendingLettersWidget({ candidates }: { candidates: PendingLetter
     return visibleCandidates.slice(start, start + itemsPerPage);
   }, [visibleCandidates, currentPage, itemsPerPage]);
 
-  if (visibleCandidates.length === 0) {
+  if (!candidates || candidates.length === 0 || visibleCandidates.length === 0) {
     return null;
   }
 

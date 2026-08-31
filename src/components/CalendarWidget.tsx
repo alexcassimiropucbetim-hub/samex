@@ -88,15 +88,24 @@ export function CalendarWidget({
       days.push(
         <div 
           key={i} 
+          onClick={() => {
+            if (onDateChange) {
+              onDateChange(new Date(currentDate.getFullYear(), currentDate.getMonth(), i));
+            } else {
+              setInternalDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), i));
+            }
+          }}
           className="h-12 md:h-14 flex flex-col items-center justify-center border-b border-r border-slate-100 relative cursor-pointer hover:bg-slate-50 transition-colors"
         >
           <span className={clsx(
             "w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold transition-colors z-10",
             isToday 
               ? "bg-blue-600 text-white shadow-md shadow-blue-500/30" 
-              : hasEvent 
-                ? "text-orange-500" 
-                : "text-slate-700"
+              : currentDate.getDate() === i && currentDate.getMonth() === internalDate.getMonth()
+                ? "bg-slate-200 text-slate-800"
+                : hasEvent 
+                  ? "text-orange-500" 
+                  : "text-slate-700"
           )}>
             {i}
           </span>

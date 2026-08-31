@@ -2,6 +2,7 @@ import { PortalSidebar } from "@/components/PortalSidebar";
 import { Sidebar } from "@/components/Sidebar";
 import { InactivityTimer } from "@/components/InactivityTimer";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 
 export default async function PortalLayout({
@@ -18,10 +19,27 @@ export default async function PortalLayout({
   const isAdmin = session.type === "admin";
   const isRegional = session.roleName?.toLowerCase().includes("regional") || session.roleName?.toLowerCase().includes("examinadora");
 
+  let pendingTestsCount = 0;
+  if (!isAdmin) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    pendingTestsCount = await prisma.preEvaluation.count({
+      where: {
+        testEvaluatorId: session.id,
+        evaluatorConfirmed: true,
+        finalTestStatus: "PENDENTE",
+        testSchedule: {
+          testDate: { gte: today },
+          isClosed: false,
+        },
+      },
+    });
+  }
+
   return (
     <>
       <InactivityTimer />
-      {isAdmin ? <Sidebar /> : <PortalSidebar isRegional={!!isRegional} />}
+      {isAdmin ? <Sidebar /> : <PortalSidebar isRegional={!!isRegional} pendingTestsCount={pendingTestsCount} />}
       <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 min-h-screen">
         {!isAdmin && (
           <div className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-2">

@@ -28,7 +28,9 @@ export function NextEventsWidget({ events, currentDate }: { events: EventItem[],
 
   const filteredEvents = events.filter(event => {
     const d = new Date(event.date);
-    return d.getMonth() === monthDate.getMonth() && d.getFullYear() === monthDate.getFullYear();
+    return d.getDate() === monthDate.getDate() && 
+           d.getMonth() === monthDate.getMonth() && 
+           d.getFullYear() === monthDate.getFullYear();
   });
 
   // Ensure they are sorted by date
@@ -76,9 +78,17 @@ export function NextEventsWidget({ events, currentDate }: { events: EventItem[],
       
       <div className="flex-1 overflow-y-auto px-1 custom-scrollbar">
         {paginatedEvents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-slate-400 py-8">
-            <Calendar className="w-10 h-10 mb-2 opacity-50" />
-            <p className="text-sm">Nenhum evento neste mês</p>
+          <div className="flex flex-col items-center justify-center h-full text-slate-400 py-8 text-center px-4">
+            <Calendar className="w-10 h-10 mb-3 opacity-50" />
+            <p className="text-sm font-medium">
+              Não temos eventos para {
+                monthDate.getDate() === new Date().getDate() && 
+                monthDate.getMonth() === new Date().getMonth() && 
+                monthDate.getFullYear() === new Date().getFullYear()
+                ? "o dia de hoje"
+                : "a data selecionada"
+              }
+            </p>
           </div>
         ) : (
           <div className="flex flex-col gap-4 pb-2">

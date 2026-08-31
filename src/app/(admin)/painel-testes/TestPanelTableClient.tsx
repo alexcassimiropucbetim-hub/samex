@@ -2,7 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText } from "lucide-react";
-import { assignEvaluator, updateCandidateStatus } from "@/actions/testPanel";
+import { useRouter } from "next/navigation";
+import { assignEvaluator, updateCandidateStatus, confirmEvaluator } from "@/actions/testPanel";
 
 type Candidate = {
   id: string;
@@ -15,6 +16,9 @@ type Candidate = {
   finalTestStatus: string | null;
   gender: string;
   testEvaluatorId: string | null;
+  evaluatorConfirmed: boolean;
+  testStartTime: Date | null;
+  testEndTime: Date | null;
 };
 
 type Evaluator = {
@@ -46,6 +50,16 @@ export function TestPanelTableClient({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const router = useRouter();
+
+  // Auto-refresh a cada 10 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      router.refresh();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [router]);
+
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedIds(candidates.map((c) => c.id));
@@ -73,6 +87,10 @@ export function TestPanelTableClient({
 
   const handleEvaluatorChange = async (candidateId: string, evaluatorId: string) => {
     await assignEvaluator(candidateId, evaluatorId === "" ? null : evaluatorId);
+  };
+
+  const handleConfirmEvaluator = async (candidateId: string) => {
+    await confirmEvaluator(candidateId, true);
   };
 
   return (
@@ -196,37 +214,58 @@ export function TestPanelTableClient({
                     </div>
                   </td>
                   <td className="px-3 py-4">
-                    <select
-                      className="bg-white border border-slate-200 text-slate-500 text-xs rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-36 lg:w-44 truncate"
-                      value={cand.testEvaluatorId || ""}
-                      onChange={(e) => handleEvaluatorChange(cand.id, e.target.value)}
-                    >
-                      <option value="">SELECIONE...</option>
-                      {evaluators.filter(ev => {
-                        const role = ev.roleType?.name?.toUpperCase() || "";
-                        const testName = cand.testType.name.toUpperCase();
-                        if (cand.gender === "F") {
-                          return role.includes("EXAMINADORA");
-                        } else {
-                          if (testName.includes("REUNIÃO") && !testName.includes("HOMENS")) {
-                            return role.includes("REGIONAL") || role.includes("LOCAL");
+                    <div className="flex items-center gap-2">
+                      <select
+                        className={`bg-white border text-xs rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-36 lg:w-44 truncate ${cand.evaluatorConfirmed ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : 'border-slate-200 text-slate-500'}`}
+                        value={cand.testEvaluatorId || ""}
+                        onChange={(e) => handleEvaluatorChange(cand.id, e.target.value)}
+                        disabled={cand.evaluatorConfirmed}
+                      >
+                        <option value="">SELECIONE...</option>
+                        {evaluators.filter(ev => {
+                          const role = ev.roleType?.name?.toUpperCase() || "";
+                          const testName = cand.testType.name.toUpperCase();
+                          if (cand.gender === "F") {
+                            return role.includes("EXAMINADORA");
                           } else {
-                            return role.includes("REGIONAL");
+                            if (testName.includes("REUNIÃO") && !testName.includes("HOMENS")) {
+                              return role.includes("REGIONAL") || role.includes("LOCAL");
+                            } else {
+                              return role.includes("REGIONAL");
+                            }
                           }
-                        }
-                      }).map((ev) => (
-                        <option key={ev.id} value={ev.id}>
-                          {ev.fullName.toUpperCase()}
-                        </option>
-                      ))}
-                    </select>
+                        }).map((ev) => (
+                          <option key={ev.id} value={ev.id}>
+                            {ev.fullName.toUpperCase()}
+                          </option>
+                        ))}
+                      </select>
+                      {cand.testEvaluatorId && !cand.evaluatorConfirmed && (
+                        <button
+                          onClick={() => handleConfirmEvaluator(cand.id)}
+                          className="flex items-center justify-center p-1.5 rounded-md bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
+                          title="Confirmar Avaliador"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </button>
+                      )}
+                      {cand.evaluatorConfirmed && (
+                        <div title="Avaliador Confirmado" className="text-emerald-500">
+                          <CheckCircle className="w-5 h-5" />
+                        </div>
+                      )}
+                    </div>
                   </td>
                   <td className="px-3 py-4 text-slate-500 font-medium text-center whitespace-nowrap">
                     {cand.testType.name.toUpperCase()}
                   </td>
                   <td className="px-4 py-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-3">
-                      {cand.finalTestStatus === "PENDENTE" || !cand.finalTestStatus ? (
+                      {cand.testStartTime && (!cand.finalTestStatus || cand.finalTestStatus === "PENDENTE") ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white uppercase tracking-widest">
+                          EM AVALIAÇÃO
+                        </span>
+                      ) : cand.finalTestStatus === "PENDENTE" || !cand.finalTestStatus ? (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 uppercase tracking-widest">
                           PEND.
                         </span>
@@ -334,7 +373,11 @@ export function TestPanelTableClient({
                   </div>
                 </div>
                 
-                {cand.finalTestStatus === "PENDENTE" || !cand.finalTestStatus ? (
+                {cand.testStartTime && (!cand.finalTestStatus || cand.finalTestStatus === "PENDENTE") ? (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500 text-white uppercase tracking-widest shrink-0">
+                    EM AVALIAÇÃO
+                  </span>
+                ) : cand.finalTestStatus === "PENDENTE" || !cand.finalTestStatus ? (
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-500 uppercase tracking-widest shrink-0">
                     PEND.
                   </span>
@@ -366,30 +409,47 @@ export function TestPanelTableClient({
 
               <div className="pt-2">
                 <p className="text-xs text-slate-500 font-medium mb-1">Avaliador</p>
-                <select
-                  className="w-full bg-white border border-slate-200 text-slate-600 text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase"
-                  value={cand.testEvaluatorId || ""}
-                  onChange={(e) => handleEvaluatorChange(cand.id, e.target.value)}
-                >
-                  <option value="">SELECIONE...</option>
-                  {evaluators.filter(ev => {
-                    const role = ev.roleType?.name?.toUpperCase() || "";
-                    const testName = cand.testType.name.toUpperCase();
-                    if (cand.gender === "F") {
-                      return role.includes("EXAMINADORA");
-                    } else {
-                      if (testName.includes("REUNIÃO") && !testName.includes("HOMENS")) {
-                        return role.includes("REGIONAL") || role.includes("LOCAL");
+                <div className="flex items-center gap-2">
+                  <select
+                    className={`flex-1 bg-white border text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase ${cand.evaluatorConfirmed ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : 'border-slate-200 text-slate-600'}`}
+                    value={cand.testEvaluatorId || ""}
+                    onChange={(e) => handleEvaluatorChange(cand.id, e.target.value)}
+                    disabled={cand.evaluatorConfirmed}
+                  >
+                    <option value="">SELECIONE...</option>
+                    {evaluators.filter(ev => {
+                      const role = ev.roleType?.name?.toUpperCase() || "";
+                      const testName = cand.testType.name.toUpperCase();
+                      if (cand.gender === "F") {
+                        return role.includes("EXAMINADORA");
                       } else {
-                        return role.includes("REGIONAL");
+                        if (testName.includes("REUNIÃO") && !testName.includes("HOMENS")) {
+                          return role.includes("REGIONAL") || role.includes("LOCAL");
+                        } else {
+                          return role.includes("REGIONAL");
+                        }
                       }
-                    }
-                  }).map((ev) => (
-                    <option key={ev.id} value={ev.id}>
-                      {ev.fullName.toUpperCase()}
-                    </option>
-                  ))}
-                </select>
+                    }).map((ev) => (
+                      <option key={ev.id} value={ev.id}>
+                        {ev.fullName.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                  {cand.testEvaluatorId && !cand.evaluatorConfirmed && (
+                    <button
+                      onClick={() => handleConfirmEvaluator(cand.id)}
+                      className="flex items-center justify-center p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors shrink-0"
+                      title="Confirmar Avaliador"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                    </button>
+                  )}
+                  {cand.evaluatorConfirmed && (
+                    <div title="Avaliador Confirmado" className="text-emerald-500 p-2 shrink-0">
+                      <CheckCircle className="w-6 h-6" />
+                    </div>
+                  )}
+                </div>
               </div>
 
               <div className="flex justify-end pt-2 border-t border-slate-100">

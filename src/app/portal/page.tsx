@@ -23,6 +23,7 @@ export default async function PortalDashboard() {
   const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
   const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
   const isAdmin = session?.type === "admin";
+  const isLocal = !isRegional && !isExaminadora && !isAdmin;
 
   const [allPreEvaluations, testSchedules, categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations, allEvents] = await Promise.all([
     getPreEvaluations(),
@@ -112,7 +113,7 @@ export default async function PortalDashboard() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         
         <div className="flex flex-col gap-6 xl:col-span-1">
-          <PendingLettersWidget candidates={pendingLettersData} />
+          {isLocal && <PendingLettersWidget candidates={pendingLettersData} />}
           
           {/* Card 1: Inscrições Totais */}
           <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-orange-500 flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">

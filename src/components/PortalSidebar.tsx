@@ -2,12 +2,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileSignature, CalendarClock, LogOut, Menu, X, BookOpen, Settings, Home, Users, Calendar, ChevronDown } from "lucide-react";
+import { FileSignature, CalendarClock, LogOut, Menu, X, BookOpen, Settings, Home, Users, Calendar, ChevronDown, Music } from "lucide-react";
 import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
 import { NotificationBell } from "./NotificationBell";
 
-export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
+export function PortalSidebar({ isRegional, pendingTestsCount = 0 }: { isRegional: boolean, pendingTestsCount?: number }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -25,6 +25,7 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
       name: "Dashboard",
       items: [
         { name: "Início", href: "/portal", icon: Home },
+        { name: "Aplicar Teste", href: "/portal/meus-testes", icon: Music, badge: pendingTestsCount > 0 ? pendingTestsCount : undefined },
         { name: "Manual", href: "/portal/manual", icon: BookOpen },
         ...(isRegional ? [{ name: "Configurações", href: "/portal/configuracoes", icon: Settings }] : [])
       ]
@@ -130,6 +131,11 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
                       >
                         <Icon className={clsx("w-5 h-5", isActive ? "text-orange-400" : "text-slate-500 group-hover:text-slate-500")} />
                         {item.name}
+                        {item.badge && (
+                          <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}
@@ -172,6 +178,11 @@ export function PortalSidebar({ isRegional }: { isRegional: boolean }) {
                       >
                         <Icon className={clsx("w-5 h-5", isActive ? "text-orange-400" : "text-slate-500 group-hover:text-slate-500")} />
                         {item.name}
+                        {item.badge && (
+                          <span className="ml-auto bg-orange-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                            {item.badge}
+                          </span>
+                        )}
                       </Link>
                     );
                   })}

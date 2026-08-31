@@ -20,7 +20,20 @@ export function PortalSidebar({ isRegional, pendingTestsCount = 0 }: { isRegiona
     setOpenGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
   };
 
-  const menuGroups = [
+  type MenuItem = {
+    name: string;
+    href: string;
+    icon: any;
+    badge?: number;
+  };
+
+  type MenuGroup = {
+    name: string;
+    icon?: any;
+    items: MenuItem[];
+  };
+
+  const menuGroups: MenuGroup[] = [
     {
       name: "Dashboard",
       items: [

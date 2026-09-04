@@ -86,8 +86,12 @@ export async function generateMusicoLetter(preEvaluation: any): Promise<Uint8Arr
             if (typeof p === 'string') {
               page.drawText(`- ${p}`, { x: 50, y: y1, size: 9, color });
             } else {
-              page.drawText(`Pág: ${p.page || '---'}`, { x: 50, y: y1, size: 9, color });
-              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 140, y: y1, size: 9, color });
+              const pageText = String(p.page || '---');
+              const displayPageText = pageText.length > 28 ? pageText.substring(0, 25) + '...' : pageText;
+              const lessonText = String(p.lesson || '---');
+              const displayLessonText = lessonText.length > 15 ? lessonText.substring(0, 12) + '...' : lessonText;
+              page.drawText(`Pág: ${displayPageText}`, { x: 50, y: y1, size: 9, color });
+              page.drawText(`Lição: ${displayLessonText}`, { x: 200, y: y1, size: 9, color });
             }
             y1 -= 12;
           });
@@ -110,8 +114,12 @@ export async function generateMusicoLetter(preEvaluation: any): Promise<Uint8Arr
             if (typeof p === 'string') {
               page.drawText(`- ${p}`, { x: 305, y: y2, size: 9, color });
             } else {
-              page.drawText(`Pág: ${p.page || '---'}`, { x: 305, y: y2, size: 9, color });
-              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 395, y: y2, size: 9, color });
+              const pageText = String(p.page || '---');
+              const displayPageText = pageText.length > 28 ? pageText.substring(0, 25) + '...' : pageText;
+              const lessonText = String(p.lesson || '---');
+              const displayLessonText = lessonText.length > 15 ? lessonText.substring(0, 12) + '...' : lessonText;
+              page.drawText(`Pág: ${displayPageText}`, { x: 305, y: y2, size: 9, color });
+              page.drawText(`Lição: ${displayLessonText}`, { x: 455, y: y2, size: 9, color });
             }
             y2 -= 12;
           });
@@ -251,8 +259,12 @@ export async function generateOrganistaLetter(preEvaluation: any): Promise<Uint8
             if (typeof p === 'string') {
               page.drawText(`- ${p}`, { x: 50, y: y1, size: 9, color });
             } else {
-              page.drawText(`Pág: ${p.page || '---'}`, { x: 50, y: y1, size: 9, color });
-              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 140, y: y1, size: 9, color });
+              const pageText = String(p.page || '---');
+              const displayPageText = pageText.length > 28 ? pageText.substring(0, 25) + '...' : pageText;
+              const lessonText = String(p.lesson || '---');
+              const displayLessonText = lessonText.length > 15 ? lessonText.substring(0, 12) + '...' : lessonText;
+              page.drawText(`Pág: ${displayPageText}`, { x: 50, y: y1, size: 9, color });
+              page.drawText(`Lição: ${displayLessonText}`, { x: 200, y: y1, size: 9, color });
             }
             y1 -= 12;
           });
@@ -275,8 +287,12 @@ export async function generateOrganistaLetter(preEvaluation: any): Promise<Uint8
             if (typeof p === 'string') {
               page.drawText(`- ${p}`, { x: 305, y: y2, size: 9, color });
             } else {
-              page.drawText(`Pág: ${p.page || '---'}`, { x: 305, y: y2, size: 9, color });
-              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 395, y: y2, size: 9, color });
+              const pageText = String(p.page || '---');
+              const displayPageText = pageText.length > 28 ? pageText.substring(0, 25) + '...' : pageText;
+              const lessonText = String(p.lesson || '---');
+              const displayLessonText = lessonText.length > 15 ? lessonText.substring(0, 12) + '...' : lessonText;
+              page.drawText(`Pág: ${displayPageText}`, { x: 305, y: y2, size: 9, color });
+              page.drawText(`Lição: ${displayLessonText}`, { x: 455, y: y2, size: 9, color });
             }
             y2 -= 12;
           });
@@ -432,8 +448,12 @@ export async function generateTrocaInstrumentoLetter(preEvaluation: any): Promis
             if (typeof p === 'string') {
               page.drawText(`- ${p}`, { x: 50, y: y1, size: 9, color });
             } else {
-              page.drawText(`Pág: ${p.page || '---'}`, { x: 50, y: y1, size: 9, color });
-              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 140, y: y1, size: 9, color });
+              const pageText = String(p.page || '---');
+              const displayPageText = pageText.length > 28 ? pageText.substring(0, 25) + '...' : pageText;
+              const lessonText = String(p.lesson || '---');
+              const displayLessonText = lessonText.length > 15 ? lessonText.substring(0, 12) + '...' : lessonText;
+              page.drawText(`Pág: ${displayPageText}`, { x: 50, y: y1, size: 9, color });
+              page.drawText(`Lição: ${displayLessonText}`, { x: 200, y: y1, size: 9, color });
             }
             y1 -= 12;
           });
@@ -456,8 +476,12 @@ export async function generateTrocaInstrumentoLetter(preEvaluation: any): Promis
             if (typeof p === 'string') {
               page.drawText(`- ${p}`, { x: 305, y: y2, size: 9, color });
             } else {
-              page.drawText(`Pág: ${p.page || '---'}`, { x: 305, y: y2, size: 9, color });
-              page.drawText(`Lição: ${p.lesson || '---'}`, { x: 395, y: y2, size: 9, color });
+              const pageText = String(p.page || '---');
+              const displayPageText = pageText.length > 28 ? pageText.substring(0, 25) + '...' : pageText;
+              const lessonText = String(p.lesson || '---');
+              const displayLessonText = lessonText.length > 15 ? lessonText.substring(0, 12) + '...' : lessonText;
+              page.drawText(`Pág: ${displayPageText}`, { x: 305, y: y2, size: 9, color });
+              page.drawText(`Lição: ${displayLessonText}`, { x: 455, y: y2, size: 9, color });
             }
             y2 -= 12;
           });

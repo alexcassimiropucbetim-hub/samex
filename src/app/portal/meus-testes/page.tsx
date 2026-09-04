@@ -42,7 +42,7 @@ export default async function MeusTestesPage() {
         <div className="flex items-center gap-3 text-white">
           <Music className="w-8 h-8 text-blue-400" />
           <div>
-            <h1 className="text-2xl font-bold">Aplicar Teste</h1>
+            <h1 className="text-2xl font-bold text-white">Aplicar Teste</h1>
             <p className="text-sm text-slate-300">Candidatos aguardando sua avaliação</p>
           </div>
         </div>

@@ -9,7 +9,7 @@ type Props = {
   sectors: { id: string; name: string }[];
   churches: { id: string; name: string; sectorId: string }[];
   instruments: { id: string; name: string; categoryId: string }[];
-  personInCharges: { id: string; fullName: string; churchId: string; roleType: { name: string } | null }[];
+  personInCharges: { id: string; fullName: string; churchId: string; roleType: { name: string } | null; managedChurches?: { id: string }[] }[];
   testTypes: { id: string; name: string }[];
   initialData?: {
     id: string;

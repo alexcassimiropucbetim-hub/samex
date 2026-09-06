@@ -109,7 +109,10 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
       
       // Auto-selecionar encarregado quando a congregação muda
       if (field === "churchId" && value) {
-        const encarregadosDaIgreja = personInCharges.filter(p => p.churchId === value);
+        const encarregadosDaIgreja = personInCharges.filter(p => 
+          p.churchId === value || 
+          (p.managedChurches && (p.managedChurches as any[]).some((mc: any) => mc.id === value))
+        );
         if (encarregadosDaIgreja.length > 0) {
           newData.personInChargeId = encarregadosDaIgreja[0].id;
         } else {
@@ -140,7 +143,10 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
 
   const filteredChurches = churches.filter(c => c.sectorId === formData.sectorId);
   const filteredPersonInCharges = formData.churchId 
-    ? personInCharges.filter(p => p.churchId === formData.churchId)
+    ? personInCharges.filter(p => 
+        p.churchId === formData.churchId || 
+        (p.managedChurches && (p.managedChurches as any[]).some((mc: any) => mc.id === formData.churchId))
+      )
     : personInCharges;
 
   const steps = [
@@ -172,8 +178,8 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         await createPreEvaluation(data);
       }
       setSuccess(true);
-    } catch (error) {
-      alert("Ocorreu um erro ao salvar o pedido.");
+    } catch (error: any) {
+      alert(error.message || "Ocorreu um erro ao salvar o pedido.");
     } finally {
       setIsLoading(false);
     }

@@ -29,11 +29,11 @@ export async function generateMusicoLetter(preEvaluation: any): Promise<Uint8Arr
 
   const testTypeName = preEvaluation.testType.name.toUpperCase();
   const xSize = 12;
-  if (testTypeName.includes("REUNIÃO DE JOVEM")) {
+  if (testTypeName.includes("REUNIÃO") || testTypeName.includes("JOVEN")) {
     page.drawText("X", { x: 263, y: 738, size: xSize, color });
-  } else if (testTypeName.includes("CULTO OFICIAL")) {
+  } else if (testTypeName.includes("CULTO") || testTypeName.includes("OFICIAL") && !testTypeName.includes("OFICIALIZAÇÃO")) {
     page.drawText("X", { x: 401, y: 738, size: xSize, color });
-  } else if (testTypeName.includes("OFICIALIZAÇÃO")) {
+  } else if (testTypeName.includes("OFICIALIZAÇÃO") || testTypeName.includes("OFICIALIZACAO")) {
     page.drawText("X", { x: 502, y: 738, size: xSize, color });
   }
 
@@ -193,11 +193,11 @@ export async function generateOrganistaLetter(preEvaluation: any): Promise<Uint8
 
   const testTypeName = preEvaluation.testType.name.toUpperCase();
   const xSize = 12;
-  if (testTypeName.includes("REUNIÃO DE JOVEM")) {
+  if (testTypeName.includes("REUNIÃO") || testTypeName.includes("JOVEN")) {
     page.drawText("X", { x: 263, y: 738, size: xSize, color });
-  } else if (testTypeName.includes("CULTO OFICIAL")) {
+  } else if (testTypeName.includes("CULTO") || testTypeName.includes("OFICIAL") && !testTypeName.includes("OFICIALIZAÇÃO")) {
     page.drawText("X", { x: 401, y: 738, size: xSize, color });
-  } else if (testTypeName.includes("OFICIALIZAÇÃO")) {
+  } else if (testTypeName.includes("OFICIALIZAÇÃO") || testTypeName.includes("OFICIALIZACAO")) {
     page.drawText("X", { x: 502, y: 738, size: xSize, color });
   }
 
@@ -366,11 +366,11 @@ export async function generateTrocaInstrumentoLetter(preEvaluation: any): Promis
 
   const testTypeName = preEvaluation.testType.name.toUpperCase();
   const xSize = 12;
-  if (testTypeName.includes("REUNIÃO DE JOVEM")) {
+  if (testTypeName.includes("REUNIÃO") || testTypeName.includes("JOVEN")) {
     page.drawText("X", { x: 263, y: 738, size: xSize, color });
-  } else if (testTypeName.includes("CULTO OFICIAL")) {
+  } else if (testTypeName.includes("CULTO") || testTypeName.includes("OFICIAL") && !testTypeName.includes("OFICIALIZAÇÃO")) {
     page.drawText("X", { x: 401, y: 738, size: xSize, color });
-  } else if (testTypeName.includes("OFICIALIZAÇÃO")) {
+  } else if (testTypeName.includes("OFICIALIZAÇÃO") || testTypeName.includes("OFICIALIZACAO")) {
     page.drawText("X", { x: 502, y: 738, size: xSize, color });
   }
 

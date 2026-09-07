@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
 import { NotificationBell } from "./NotificationBell";
 
-export function PortalSidebar({ isRegional, pendingTestsCount = 0 }: { isRegional: boolean, pendingTestsCount?: number }) {
+export function PortalSidebar({ isRegional, isExaminadora = false, pendingTestsCount = 0 }: { isRegional: boolean, isExaminadora?: boolean, pendingTestsCount?: number }) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -47,8 +47,8 @@ export function PortalSidebar({ isRegional, pendingTestsCount = 0 }: { isRegiona
       name: "Agendamentos",
       icon: CalendarClock,
       items: [
-        ...(isRegional ? [{ name: "Eventos", href: "/portal/eventos", icon: Calendar }] : []),
-        ...(isRegional ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
+        ...(isRegional && !isExaminadora ? [{ name: "Eventos", href: "/portal/eventos", icon: Calendar }] : []),
+        ...(isRegional && !isExaminadora ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
         { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
       ]
     }

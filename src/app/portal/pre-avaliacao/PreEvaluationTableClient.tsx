@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
-import { User, MapPin, Church, Music, Calendar, Printer, BookOpen, ClipboardCheck, Pencil, Trash2 } from "lucide-react";
+import { User, MapPin, Church, Music, Calendar, Printer, BookOpen, ClipboardCheck, Pencil, Trash2, Search } from "lucide-react";
 import { AllocationButton } from "@/components/AllocationButton";
 import { SchedulePreEvaluationModal } from "@/components/SchedulePreEvaluationModal";
 
@@ -30,11 +30,20 @@ export default function PreEvaluationTableClient({
   const [schedulingItem, setSchedulingItem] = useState<{ id: string; name: string; initialDate?: Date | null; initialEvaluatorId?: string | null } | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('TODOS');
 
-  const filteredEvaluations = preEvaluations.filter(evalReq => {
-    if (statusFilter === 'TODOS') return true;
-    const currentStatus = evalReq.status || 'PENDENTE';
-    return currentStatus === statusFilter;
-  });
+  const [searchName, setSearchName] = useState("");
+  const [searchInstrument, setSearchInstrument] = useState("");
+  const [searchType, setSearchType] = useState("");
+
+  const filteredEvaluations = useMemo(() => {
+    return preEvaluations.filter((evalReq) => {
+      const matchStatus = statusFilter === 'TODOS' || (evalReq.status || 'PENDENTE') === statusFilter;
+      const matchName = evalReq.candidateName.toLowerCase().includes(searchName.toLowerCase());
+      const matchInstrument = evalReq.instrument?.name?.toLowerCase().includes(searchInstrument.toLowerCase()) || false;
+      const matchType = evalReq.testType?.name?.toLowerCase().includes(searchType.toLowerCase()) || false;
+
+      return matchStatus && matchName && matchInstrument && matchType;
+    });
+  }, [preEvaluations, statusFilter, searchName, searchInstrument, searchType]);
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
@@ -82,33 +91,61 @@ export default function PreEvaluationTableClient({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
-        <div className="flex items-center gap-2">
-          <label htmlFor="statusFilter" className="text-sm font-semibold text-slate-700">Filtrar por Status:</label>
+      {!isLocal && preEvaluations.length > 0 && (
+        <div className="flex justify-end mb-4">
+          <a
+            href={`/api/pdf/lista-inscricoes`}
+            className="flex items-center gap-2 bg-[#224465] hover:bg-[#1a334d] text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm"
+          >
+            <Printer className="w-4 h-4" />
+            Imprimir Lista em Tabela (A4)
+          </a>
+        </div>
+      )}
+
+      {/* Filtros de Pesquisa */}
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar por candidato..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#e95931]"
+          />
+        </div>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Filtrar por instrumento..."
+            value={searchInstrument}
+            onChange={(e) => setSearchInstrument(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#e95931]"
+          />
+        </div>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Filtrar por tipo de teste..."
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#e95931]"
+          />
+        </div>
+        <div className="flex-1">
           <select 
             id="statusFilter" 
-            className="border border-slate-200 bg-white rounded-lg px-3 py-2 text-sm text-slate-700 font-medium focus:ring-2 focus:ring-[#e95931] outline-none"
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-500 focus:outline-none focus:ring-2 focus:ring-[#e95931] bg-white"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
           >
-            <option value="TODOS">Todos</option>
+            <option value="TODOS">Todos os Status</option>
             <option value="PENDENTE">Pendente</option>
             <option value="APROVADO">Encaminhado para Teste</option>
             <option value="REPROVADO">Estudar Mais</option>
           </select>
         </div>
-
-        {!isLocal && preEvaluations.length > 0 && (
-          <div className="flex justify-end">
-            <a
-              href={`/api/pdf/lista-inscricoes`}
-              className="flex items-center gap-2 bg-[#224465] hover:bg-[#1a334d] text-white px-5 py-2 rounded-xl text-sm font-bold transition-colors shadow-sm"
-            >
-              <Printer className="w-4 h-4" />
-              Imprimir Lista em Tabela (A4)
-            </a>
-          </div>
-        )}
       </div>
 
       {schedulingItem && (

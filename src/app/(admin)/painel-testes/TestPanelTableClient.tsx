@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText } from "lucide-react";
+import { useState, useRef, useEffect, useMemo } from "react";
+import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { assignEvaluator, updateCandidateStatus, confirmEvaluator } from "@/actions/testPanel";
 
@@ -40,6 +40,19 @@ export function TestPanelTableClient({
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  const [searchName, setSearchName] = useState("");
+  const [searchInstrument, setSearchInstrument] = useState("");
+  const [searchType, setSearchType] = useState("");
+
+  const filteredCandidates = useMemo(() => {
+    return candidates.filter((cand) => {
+      const matchName = cand.candidateName.toLowerCase().includes(searchName.toLowerCase());
+      const matchInstrument = cand.instrument.name.toLowerCase().includes(searchInstrument.toLowerCase());
+      const matchType = cand.testType.name.toLowerCase().includes(searchType.toLowerCase());
+      return matchName && matchInstrument && matchType;
+    });
+  }, [candidates, searchName, searchInstrument, searchType]);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -62,7 +75,7 @@ export function TestPanelTableClient({
 
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
-      setSelectedIds(candidates.map((c) => c.id));
+      setSelectedIds(filteredCandidates.map((c) => c.id));
     } else {
       setSelectedIds([]);
     }
@@ -151,6 +164,38 @@ export function TestPanelTableClient({
         </div>
       </div>
 
+      {/* Filtros */}
+      <div className="p-4 bg-slate-50 border-b border-slate-100 flex flex-col md:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Buscar por candidato..."
+            value={searchName}
+            onChange={(e) => setSearchName(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+        </div>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Filtrar por instrumento..."
+            value={searchInstrument}
+            onChange={(e) => setSearchInstrument(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+        </div>
+        <div className="flex-1">
+          <input
+            type="text"
+            placeholder="Filtrar por tipo de teste..."
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+            className="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+          />
+        </div>
+      </div>
+
       {/* Table */}
       <div className="hidden lg:block overflow-x-auto w-full min-h-[300px]">
         <table className="w-full text-left text-sm">
@@ -160,7 +205,7 @@ export function TestPanelTableClient({
                 <input
                   type="checkbox"
                   className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-                  checked={selectedIds.length === candidates.length && candidates.length > 0}
+                  checked={selectedIds.length === filteredCandidates.length && filteredCandidates.length > 0}
                   onChange={handleSelectAll}
                 />
               </th>
@@ -175,14 +220,14 @@ export function TestPanelTableClient({
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {candidates.length === 0 ? (
+            {filteredCandidates.length === 0 ? (
               <tr>
                 <td colSpan={9} className="px-6 py-8 text-center text-slate-500">
-                  Nenhum candidato alocado neste teste.
+                  Nenhum candidato encontrado.
                 </td>
               </tr>
             ) : (
-              candidates.map((cand, index) => (
+              filteredCandidates.map((cand, index) => (
                 <tr key={cand.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-6 py-4">
                     <input
@@ -345,19 +390,19 @@ export function TestPanelTableClient({
       </div>
 
       {/* Mobile Cards */}
-      {candidates.length > 0 && (
+      {filteredCandidates.length > 0 && (
         <div className="lg:hidden p-4 flex flex-col gap-4 bg-slate-50/50">
           <div className="flex items-center gap-2 mb-2">
             <input
               type="checkbox"
               className="w-4 h-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-              checked={selectedIds.length === candidates.length && candidates.length > 0}
+              checked={selectedIds.length === filteredCandidates.length && filteredCandidates.length > 0}
               onChange={handleSelectAll}
             />
             <span className="text-sm font-medium text-slate-700">Selecionar Todos</span>
           </div>
           
-          {candidates.map((cand, index) => (
+          {filteredCandidates.map((cand, index) => (
             <div key={cand.id} className="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col gap-3">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
@@ -499,7 +544,7 @@ export function TestPanelTableClient({
       {/* Footer */}
       <div className="px-6 py-4 border-t border-slate-100 flex justify-between items-center bg-slate-50/30">
         <span className="font-bold text-sm text-slate-800">Total</span>
-        <span className="font-black text-sm text-slate-900">{candidates.length}</span>
+        <span className="font-black text-sm text-slate-900">{filteredCandidates.length}</span>
       </div>
     </div>
   );

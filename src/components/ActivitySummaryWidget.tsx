@@ -2,20 +2,51 @@
 
 import { motion } from "framer-motion";
 
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { ChangeEvent } from "react";
+
 interface ActivityData {
   label: string;
   value: number;
   color: string;
 }
 
-export function ActivitySummaryWidget({ data }: { data: ActivityData[] }) {
+export function ActivitySummaryWidget({ data, currentYear }: { data: ActivityData[], currentYear: number }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const handleYearChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const year = e.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("year", year);
+    router.push(`${pathname}?${params.toString()}`);
+    router.refresh();
+  };
+
   const total = data.reduce((sum, item) => sum + item.value, 0);
   
   let currentAngle = 0;
 
+  // Generate an array of years for the dropdown
+  const startYear = 2024; // Base starting year
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: Math.max(thisYear - startYear + 2, 5) }, (_, i) => thisYear + 1 - i).sort((a, b) => b - a);
+
   return (
     <div className="glass-card p-6 h-full flex flex-col rounded-[18px]">
-      <h3 className="text-lg font-bold text-slate-900 mb-6">Resumo de Atividades</h3>
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-bold text-slate-900">Resumo de Atividades</h3>
+        <select 
+          value={currentYear}
+          onChange={handleYearChange}
+          className="bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-lg focus:ring-blue-500 focus:border-blue-500 block px-2.5 py-1.5 cursor-pointer outline-none hover:bg-slate-100 transition-colors"
+        >
+          {years.map(y => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
+      </div>
       
       <div className="flex-1 flex flex-col xl:flex-row items-center justify-center gap-8">
         {/* Donut Chart */}

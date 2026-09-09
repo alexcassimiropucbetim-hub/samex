@@ -145,6 +145,11 @@ export async function createPreEvaluation(formData: FormData) {
 
 export async function getPreEvaluations() {
   return await prisma.preEvaluation.findMany({
+    where: {
+      finalTestStatus: {
+        not: "APROVADO"
+      }
+    },
     include: {
       sector: true,
       church: true,

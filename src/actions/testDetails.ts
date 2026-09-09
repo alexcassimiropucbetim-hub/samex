@@ -45,13 +45,49 @@ export async function toggleTestLock(id: string, isClosed: boolean) {
   revalidatePath(`/portal/cadastro-teste/${id}`);
 }
 
+import { getSession } from "@/lib/auth";
+
 export async function updateCandidateTestRecord(candidateId: string, evaluatorId: string | null, finalStatus: string) {
+  const session = await getSession();
+  
+  // Fetch current evaluator to see if it's changing
+  const current = await prisma.preEvaluation.findUnique({
+    where: { id: candidateId },
+    select: { testEvaluatorId: true, candidateName: true }
+  });
+
+  const isChangingEvaluator = current?.testEvaluatorId !== evaluatorId;
+
+  const dataToUpdate: any = {
+    testEvaluatorId: evaluatorId,
+    finalTestStatus: finalStatus,
+  };
+
+  if (isChangingEvaluator && session) {
+    if (session.type === "admin") {
+      dataToUpdate.evaluatorAssignedByAdmin = session.id; // Or username if it were username, but session.id holds the id
+    } else {
+      dataToUpdate.evaluatorAssignedById = session.id;
+    }
+    dataToUpdate.evaluatorAssignedAt = new Date();
+  }
+
   await prisma.preEvaluation.update({
     where: { id: candidateId },
-    data: { 
-      testEvaluatorId: evaluatorId,
-      finalTestStatus: finalStatus
-    }
+    data: dataToUpdate
   });
-  // We revalidate but don't strictly need to return anything. The client component will handle state optimistically if we want, or rely on router.refresh
+
+  // Log the activity if it changed
+  if (isChangingEvaluator && session) {
+    await prisma.activityLog.create({
+      data: {
+        action: "APONTOU_AVALIADOR",
+        entityType: "PreEvaluation",
+        entityId: candidateId,
+        details: `Candidato ${current?.candidateName} apontado para avaliador ${evaluatorId || 'nenhum'}`,
+        personInChargeId: session.type === "encarregado" ? session.id : null,
+        adminUsername: session.type === "admin" ? session.name : null, 
+      }
+    });
+  }
 }

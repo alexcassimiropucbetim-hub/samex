@@ -4,7 +4,8 @@ import {
   Users,
   TrendingUp,
   CalendarDays,
-  Clock
+  Clock,
+  BarChart2
 } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
@@ -33,7 +34,11 @@ export default async function PortalDashboard() {
         instruments: {
           include: {
             _count: {
-              select: { preEvaluations: true }
+              select: { 
+                preEvaluations: {
+                  where: { finalTestStatus: { not: "APROVADO" } }
+                }
+              }
             }
           }
         }
@@ -42,14 +47,22 @@ export default async function PortalDashboard() {
     prisma.sector.findMany({
       include: {
         _count: {
-          select: { preEvaluations: true }
+          select: { 
+            preEvaluations: {
+              where: { finalTestStatus: { not: "APROVADO" } }
+            }
+          }
         }
       }
     }),
     prisma.testType.findMany({
       include: {
         _count: {
-          select: { preEvaluations: true }
+          select: { 
+            preEvaluations: {
+              where: { finalTestStatus: { not: "APROVADO" } }
+            }
+          }
         }
       }
     }),
@@ -98,6 +111,10 @@ export default async function PortalDashboard() {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const nextEvents = allEvents.filter(e => new Date(e.date) >= today);
+  
+  const futureSchedules = testSchedules.filter(t => new Date(t.testDate) >= today);
+  const startOfYear = new Date(today.getFullYear(), 0, 1);
+  const schedulesThisYear = testSchedules.filter(t => new Date(t.testDate) >= startOfYear);
 
   const pendingLettersData = preEvaluations
     .filter(p => p.status === "APROVADO" && p.letterPrinted === false)
@@ -109,101 +126,85 @@ export default async function PortalDashboard() {
     }));
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+    <div className="space-y-6 animate-in fade-in duration-500">
+      
+      {isLocal && pendingLettersData.length > 0 && (
+        <PendingLettersWidget candidates={pendingLettersData} />
+      )}
+
+      {/* Row 1: 4 Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         
-        <div className="flex flex-col gap-6 xl:col-span-1">
-          {isLocal && <PendingLettersWidget candidates={pendingLettersData} />}
-          
-          {/* Card 1: Inscrições Totais */}
-          <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-orange-500 flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
-            <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
-              <FileSignature className="w-64 h-64 text-orange-500" />
+        {/* Card 1: Inscrições Totais */}
+        <Link href="/portal/pre-avaliacao" className="bg-white p-5 rounded-[20px] shadow-sm border border-slate-100 flex items-center gap-4 group relative overflow-hidden transition-all hover:shadow-md">
+          <div className="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center shrink-0 border border-orange-100">
+            <FileSignature className="w-6 h-6 text-orange-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-bold text-[#0B1B3D] mb-1">Inscrições Totais</h3>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-orange-500 leading-none">{preEvaluations.length}</span>
+              <span className="text-[11px] font-bold text-slate-500">cadastrados</span>
             </div>
+          </div>
+          <div className="absolute top-4 right-4 w-6 h-6 rounded-md bg-orange-50 flex items-center justify-center border border-orange-100">
+            <TrendingUp className="w-3 h-3 text-orange-500" />
+          </div>
+        </Link>
 
-            <div className="flex items-center gap-6 relative z-10 w-full">
-              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-orange-50 to-orange-100/50 flex items-center justify-center shrink-0 shadow-sm border border-orange-100/50">
-                <FileSignature className="w-8 h-8 text-orange-500" />
-              </div>
-              
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-[#0B1B3D] mb-1">Inscrições Totais</h3>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-[2.75rem] font-black text-orange-500 leading-none tracking-tight">{preEvaluations.length}</span>
-                  <span className="text-sm font-bold text-orange-500">cadastrados</span>
-                </div>
-                <p className="text-[15px] text-slate-500 font-medium">Total de inscrições recebidas.</p>
-              </div>
+        {/* Card 2: Pré-Avaliações Pendentes */}
+        <Link href="/portal/pre-avaliacao" className="bg-white p-5 rounded-[20px] shadow-sm border border-slate-100 flex items-center gap-4 group relative overflow-hidden transition-all hover:shadow-md">
+          <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0 border border-blue-100">
+            <Users className="w-6 h-6 text-blue-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-bold text-[#0B1B3D] mb-1 leading-tight">Pré-Avaliações<br/>Pendentes</h3>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-blue-500 leading-none">{pendentes.length}</span>
+              <span className="text-[11px] font-bold text-slate-500">aguardando</span>
             </div>
+          </div>
+          <div className="absolute top-4 right-4 w-6 h-6 rounded-md bg-blue-50 flex items-center justify-center border border-blue-100">
+            <TrendingUp className="w-3 h-3 text-blue-500" />
+          </div>
+        </Link>
 
-            <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center justify-center w-16 h-[60px] rounded-2xl bg-white border border-orange-100 shadow-sm group-hover:bg-orange-50/50 transition-colors">
-              <TrendingUp className="w-5 h-5 text-orange-500 mb-1" />
-              <span className="text-[10px] font-bold text-orange-500 capitalize">Resumo</span>
+        {/* Card 3: Agendamento de Testes */}
+        <div className="bg-white p-5 rounded-[20px] shadow-sm border border-slate-100 flex items-center gap-4 group relative overflow-hidden transition-all hover:shadow-md cursor-default">
+          <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center shrink-0 border border-emerald-100">
+            <CalendarDays className="w-6 h-6 text-emerald-500" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-bold text-[#0B1B3D] mb-1">Agendamento de Testes</h3>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-emerald-500 leading-none">{futureSchedules.length}</span>
+              <span className="text-[11px] font-bold text-slate-500">próximos marcados</span>
             </div>
-          </Link>
-
-          {/* Card 2: Pré-Avaliações Pendentes */}
-          <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-[#FFC107] flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
-            <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
-              <FileSignature className="w-64 h-64 text-[#FFC107]" />
-            </div>
-
-            <div className="flex items-center gap-6 relative z-10 w-full">
-              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-amber-50 to-amber-100/50 flex items-center justify-center shrink-0 shadow-sm border border-amber-100/50">
-                <FileSignature className="w-8 h-8 text-[#FFC107]" />
-              </div>
-              
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-[#0B1B3D] mb-1">Pré-Avaliações Pendentes</h3>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-[2.75rem] font-black text-[#FFC107] leading-none tracking-tight">{pendentes.length}</span>
-                  <span className="text-sm font-bold text-[#FFC107]">aguardando</span>
-                </div>
-                <p className="text-[15px] text-slate-500 font-medium">Inscrições que ainda aguardam avaliação.</p>
-              </div>
-            </div>
-
-            <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center justify-center w-16 h-[60px] rounded-2xl bg-white border border-amber-100 shadow-sm group-hover:bg-amber-50/50 transition-colors">
-              <Clock className="w-5 h-5 text-[#FFC107] mb-1" />
-              <span className="text-[10px] font-bold text-[#FFC107] capitalize">Pendente</span>
-            </div>
-          </Link>
-
-          {/* Card 3: Agendamento de Testes */}
-          <Link href="/portal/cadastro-teste" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 border-l-[6px] border-l-blue-600 flex items-center justify-between group relative overflow-hidden transition-all hover:shadow-md">
-            <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
-              <CalendarClock className="w-64 h-64 text-blue-600" />
-            </div>
-
-            <div className="flex items-start gap-6 relative z-10 w-full">
-              <div className="w-[84px] h-[84px] rounded-full bg-gradient-to-br from-blue-50 to-blue-100/50 flex items-center justify-center shrink-0 shadow-sm border border-blue-100/50 mt-1">
-                <CalendarClock className="w-8 h-8 text-blue-600" />
-              </div>
-              
-              <div className="flex-1">
-                <h3 className="text-xl font-bold text-[#0B1B3D] mb-1">Agendamento de Testes</h3>
-                <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-[2.75rem] font-black text-blue-600 leading-none tracking-tight">{testSchedules.length}</span>
-                  <span className="text-sm font-bold text-blue-600">datas marcadas</span>
-                </div>
-                <p className="text-[15px] text-slate-500 font-medium mb-4">Visualise os locais e datas de testes.</p>
-                
-                <div className="inline-flex items-center gap-2 bg-blue-50 border border-blue-100/50 rounded-full px-4 py-2">
-                  <Users className="w-4 h-4 text-blue-600" />
-                  <span className="text-sm font-bold text-blue-600">{alocados.length} candidatos alocados</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute bottom-6 right-6 z-10 flex flex-col items-center justify-center w-16 h-[60px] rounded-2xl bg-white border border-blue-100 shadow-sm group-hover:bg-blue-50/50 transition-colors">
-              <CalendarDays className="w-5 h-5 text-blue-600 mb-1" />
-              <span className="text-[10px] font-bold text-blue-600 capitalize">Agenda</span>
-            </div>
-          </Link>
+          </div>
         </div>
 
-        <CalendarEventsWrapper events={allEvents} />
+        {/* Card 4: Total de Testes no Ano */}
+        <div className="bg-white p-5 rounded-[20px] shadow-sm border border-slate-100 flex items-center gap-4 group relative overflow-hidden transition-all hover:shadow-md cursor-default">
+          <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center shrink-0 border border-purple-100">
+            <CalendarClock className="w-6 h-6 text-purple-600" />
+          </div>
+          <div className="flex-1">
+            <h3 className="text-sm font-bold text-[#0B1B3D] mb-1">Total de Testes no Ano</h3>
+            <div className="flex items-baseline gap-1">
+              <span className="text-2xl font-black text-purple-600 leading-none">{schedulesThisYear.length}</span>
+              <span className="text-[11px] font-bold text-slate-500">testes realizados</span>
+            </div>
+          </div>
+          <div className="absolute top-4 right-4 w-6 h-6 rounded-md bg-purple-50 flex items-center justify-center border border-purple-100">
+            <BarChart2 className="w-3 h-3 text-purple-600" />
+          </div>
+        </div>
 
+      </div>
+
+      {/* Row 2: Calendar & Events */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <CalendarEventsWrapper events={allEvents} calendarSpan="xl:col-span-7" eventsSpan="xl:col-span-5" />
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

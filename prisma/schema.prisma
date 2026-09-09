@@ -79,6 +79,7 @@ model PersonInCharge {
   preEvaluations       PreEvaluation[]
   preEvaluationResults    PreEvaluationResult[] @relation("PreEvaluator")
   scheduledPreEvaluations PreEvaluation[]       @relation("PreEvaluationScheduler")
+  assignedEvaluations     PreEvaluation[]       @relation("EvaluatorAssigner")
   allowedTestTypes        TestType[]            @relation("PersonInChargeToTestType")
   accessLogs           AccessLog[]
   activityLogs         ActivityLog[]
@@ -165,7 +166,11 @@ model PreEvaluation {
   meetingLocality         String?
   scheduledDate           DateTime?
   schedulerId             String?
+  evaluatorAssignedById   String?
+  evaluatorAssignedByAdmin String?
+  evaluatorAssignedAt     DateTime?
   scheduler               PersonInCharge?      @relation("PreEvaluationScheduler", fields: [schedulerId], references: [id])
+  evaluatorAssignedBy     PersonInCharge?      @relation("EvaluatorAssigner", fields: [evaluatorAssignedById], references: [id])
   currentInstrument       Instrument?          @relation("CurrentInstrument", fields: [currentInstrumentId], references: [id])
   testEvaluator           PersonInCharge?      @relation("TestEvaluator", fields: [testEvaluatorId], references: [id])
   testSchedule            TestSchedule?        @relation(fields: [testScheduleId], references: [id])

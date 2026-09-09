@@ -185,6 +185,36 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
     }
   };
 
+  const handleNewRequest = () => {
+    setSuccess(false);
+    setStep(1);
+    setFormData(prev => ({
+      sectorId: prev.sectorId,
+      churchId: prev.churchId,
+      candidateName: "",
+      gender: "",
+      instructorName: "",
+      instructorChurchId: "",
+      instructorChurchName: "",
+      instrumentId: "",
+      personInChargeId: prev.personInChargeId,
+      testTypeId: "",
+      msaStatus: "",
+      msaJustification: "",
+      currentInstrumentId: "",
+      currentTonality: "",
+      desiredTonality: "",
+      officializationDate: "",
+      candidateLevel: "",
+      orchestraNeed: "",
+      illness: "",
+      approvedInSectorMeeting: "",
+      meetingDate: "",
+      meetingLocality: "",
+      meetingElderName: "",
+    }));
+  };
+
   if (success) {
     return (
       <div className="glass-card text-center py-16 space-y-4">
@@ -193,12 +223,22 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
         </div>
         <h2 className="text-xl sm:text-2xl font-bold text-slate-900">Pedido de Pré-Avaliação {initialData?.id ? "Atualizado" : "Enviado"}!</h2>
         <p className="text-slate-500">O cadastro foi realizado com sucesso.</p>
-        <Link 
-          href="/portal/pre-avaliacao"
-          className="btn-primary mt-8 inline-block"
-        >
-          {initialData?.id ? "Voltar aos Cadastros" : "Fazer Novo Pedido"}
-        </Link>
+        
+        {initialData?.id ? (
+          <Link 
+            href="/portal/pre-avaliacao"
+            className="btn-primary mt-8 inline-block"
+          >
+            Voltar aos Cadastros
+          </Link>
+        ) : (
+          <button 
+            onClick={handleNewRequest}
+            className="btn-primary mt-8 inline-block"
+          >
+            Fazer Novo Pedido
+          </button>
+        )}
       </div>
     );
   }

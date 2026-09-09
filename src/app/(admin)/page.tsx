@@ -6,10 +6,15 @@ import { getSession } from "@/lib/auth";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { ActivitySummaryWidget } from "@/components/ActivitySummaryWidget";
 import { CalendarEventsWrapper } from "@/components/CalendarEventsWrapper";
-export default async function Home() {
+export default async function Home(props: { searchParams: Promise<{ year?: string }> | { year?: string } }) {
+  const searchParams = await props.searchParams;
+  const selectedYear = searchParams?.year ? parseInt(searchParams.year) : new Date().getFullYear();
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999);
+  
+  const startOfYear = new Date(selectedYear, 0, 1);
+  const endOfYear = new Date(selectedYear, 11, 31, 23, 59, 59, 999);
 
   const [
     sectorsCount, 
@@ -20,12 +25,17 @@ export default async function Home() {
     preEvaluationsCount, 
     pendentesCount, 
     testSchedulesCount, 
+    totalTestSchedulesThisYear,
     allocatedCount, 
     nextTestThisMonth,
     aguardandoIrmaos,
     aguardandoIrmas,
     pendentesIrmaos,
     pendentesIrmas,
+    preAvPendentesAno,
+    aguardandoTesteAno,
+    aprovadosTesteAno,
+    reprovadosAno,
     categoriesWithInstruments,
     sectorsWithEvaluations,
     testTypesWithEvaluations,
@@ -36,7 +46,11 @@ export default async function Home() {
     prisma.instrumentCategory.count(),
     prisma.instrument.count(),
     prisma.ministry.count(),
-    prisma.preEvaluation.count(),
+    prisma.preEvaluation.count({
+      where: {
+        finalTestStatus: { not: "APROVADO" }
+      }
+    }),
     prisma.preEvaluation.count({ 
       where: { 
         NOT: {
@@ -46,7 +60,12 @@ export default async function Home() {
         }
       } 
     }),
-    prisma.testSchedule.count(),
+    prisma.testSchedule.count({
+      where: { testDate: { gte: today } }
+    }),
+    prisma.testSchedule.count({
+      where: { testDate: { gte: new Date(today.getFullYear(), 0, 1) } }
+    }),
     prisma.preEvaluation.count({
       where: { testScheduleId: { not: null } }
     }),
@@ -90,12 +109,41 @@ export default async function Home() {
         gender: "F"
       } 
     }),
+    prisma.preEvaluation.count({
+      where: { 
+        NOT: { status: { in: ["APROVADO", "REPROVADO"] } },
+        createdAt: { gte: startOfYear, lte: endOfYear } 
+      }
+    }),
+    prisma.preEvaluation.count({
+      where: { 
+        status: "APROVADO", 
+        finalTestStatus: "PENDENTE", 
+        createdAt: { gte: startOfYear, lte: endOfYear } 
+      }
+    }),
+    prisma.preEvaluation.count({
+      where: { 
+        finalTestStatus: "APROVADO", 
+        createdAt: { gte: startOfYear, lte: endOfYear } 
+      }
+    }),
+    prisma.preEvaluation.count({
+      where: {
+        OR: [{ status: "REPROVADO" }, { finalTestStatus: "REPROVADO" }],
+        createdAt: { gte: startOfYear, lte: endOfYear }
+      }
+    }),
     prisma.instrumentCategory.findMany({
       include: {
         instruments: {
           include: {
             _count: {
-              select: { preEvaluations: true }
+              select: { 
+                preEvaluations: {
+                  where: { finalTestStatus: { not: "APROVADO" } }
+                }
+              }
             }
           }
         }
@@ -104,14 +152,22 @@ export default async function Home() {
     prisma.sector.findMany({
       include: {
         _count: {
-          select: { preEvaluations: true }
+          select: { 
+            preEvaluations: {
+              where: { finalTestStatus: { not: "APROVADO" } }
+            }
+          }
         }
       }
     }),
     prisma.testType.findMany({
       include: {
         _count: {
-          select: { preEvaluations: true }
+          select: { 
+            preEvaluations: {
+              where: { finalTestStatus: { not: "APROVADO" } }
+            }
+          }
         }
       }
     }),
@@ -154,12 +210,12 @@ export default async function Home() {
     { name: "Ministérios", value: ministriesCount, icon: Users, color: "text-yellow-600", bg: "bg-yellow-500/10", border: "border-yellow-500/20", trend: "+3%" },
   ];
 
-  // Mock data for widgets based on real counts where possible
+  // Real data for widgets based on counts from this year
   const activityData = [
-    { label: "Aprovados", value: pendentesCount, color: "#10b981" },
-    { label: "Pendentes (Irmãos)", value: pendentesIrmaos, color: "#f59e0b" },
-    { label: "Pendentes (Irmãs)", value: pendentesIrmas, color: "#f43f5e" },
-    { label: "Aguardando", value: aguardandoIrmaos + aguardandoIrmas, color: "#3b82f6" },
+    { label: "Pré-Avaliação Pendente", value: preAvPendentesAno, color: "#3b82f6" }, // Azul
+    { label: "Aguardando Teste", value: aguardandoTesteAno, color: "#f59e0b" }, // Amarelo
+    { label: "Aprovados", value: aprovadosTesteAno, color: "#10b981" }, // Verde
+    { label: "Reprovados", value: reprovadosAno, color: "#f43f5e" }, // Vermelho
   ];
 
   // Filtrando eventos a partir de hoje
@@ -203,7 +259,7 @@ export default async function Home() {
       {/* Grid de 12 colunas para os Widgets Centrais */}
       <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <div className="xl:col-span-4">
-          <ActivitySummaryWidget data={activityData} />
+          <ActivitySummaryWidget data={activityData} currentYear={selectedYear} />
         </div>
         <CalendarEventsWrapper events={allEvents} calendarSpan="xl:col-span-4" eventsSpan="xl:col-span-4" />
       </div>
@@ -213,7 +269,7 @@ export default async function Home() {
       </div>
 
       {/* Agendamentos Cards (mesmo estilo do portal) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
         {/* Card 1: Inscrições Totais */}
         <Link href="/portal/pre-avaliacao" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 flex flex-col justify-between group relative overflow-hidden transition-all hover:shadow-md">
           <div className="absolute -right-12 -bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
@@ -346,9 +402,9 @@ export default async function Home() {
           <div className="relative z-10 mb-4">
             <div className="flex items-baseline gap-2 mb-2">
               <span className="text-[2rem] font-black text-blue-600 leading-none">{testSchedulesCount}</span>
-              <span className="text-xs font-bold text-slate-500">datas marcadas</span>
+              <span className="text-xs font-bold text-slate-500">próximos marcados</span>
             </div>
-            <p className="text-[13px] text-slate-500 font-medium">Visualizar locais e datas<br/>de testes globais.</p>
+            <p className="text-[13px] text-slate-500 font-medium">Visualizar locais e datas<br/>dos próximos testes.</p>
           </div>
           
           <div className="relative z-10 mt-auto">
@@ -362,8 +418,46 @@ export default async function Home() {
           </div>
         </Link>
         
-        {/* Card 5: Painel de Testes do Mês (Ocupa 2 colunas) */}
-        <Link href="/painel-testes" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 flex flex-col justify-between group relative overflow-hidden transition-all hover:shadow-md md:col-span-2 xl:col-span-2">
+        {/* Card 4.5: Total de Testes no Ano */}
+        <Link href="/portal/cadastro-teste" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 flex flex-col justify-between group relative overflow-hidden transition-all hover:shadow-md">
+          <div className="absolute right-0 bottom-12 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
+            <CalendarCheck className="w-48 h-48 text-indigo-500" />
+          </div>
+
+          <div className="flex items-start justify-between relative z-10 w-full mb-4">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center shrink-0 border border-indigo-100">
+                <CalendarCheck className="w-7 h-7 text-indigo-500" />
+              </div>
+              <h3 className="text-lg font-bold text-[#0B1B3D] leading-tight">Total de Testes<br/>no Ano</h3>
+            </div>
+            
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center border border-indigo-100 shrink-0">
+              <BarChart2 className="w-4 h-4 text-indigo-500" />
+            </div>
+          </div>
+          
+          <div className="relative z-10 mb-4">
+            <div className="flex items-baseline gap-2 mb-2">
+              <span className="text-[2rem] font-black text-indigo-600 leading-none">{totalTestSchedulesThisYear}</span>
+              <span className="text-xs font-bold text-slate-500">testes este ano</span>
+            </div>
+            <p className="text-[13px] text-slate-500 font-medium">Contagem geral de testes<br/>agendados no ano atual.</p>
+          </div>
+          
+          <div className="relative z-10 mt-auto">
+            <div className="flex items-center justify-between bg-indigo-50 hover:bg-indigo-100 transition-colors rounded-xl py-3 px-4 text-indigo-600 font-bold text-xs">
+              <div className="flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                Histórico completo
+              </div>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+        
+        {/* Card 5: Painel de Testes do Mês (Ocupa 5 colunas) */}
+        <Link href="/painel-testes" className="bg-white p-6 rounded-[24px] shadow-sm border border-slate-100 flex flex-col justify-between group relative overflow-hidden transition-all hover:shadow-md md:col-span-2 xl:col-span-5">
           <div className="absolute right-8 top-1/2 -translate-y-1/2 opacity-[0.03] pointer-events-none group-hover:scale-110 transition-transform duration-700">
             <MonitorPlay className="w-64 h-64 text-emerald-500" />
           </div>

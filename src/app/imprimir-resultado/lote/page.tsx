@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { PrintControls } from "@/components/PrintControls";
 
+export const dynamic = "force-dynamic";
+
 export default async function ImprimirResultadoLotePage({ searchParams }: { searchParams: Promise<{ ids: string }> }) {
   const params = await searchParams;
   if (!params.ids) notFound();
@@ -75,7 +77,7 @@ export default async function ImprimirResultadoLotePage({ searchParams }: { sear
 
         const aptaLabel = isFemale ? "Apta" : "Apto";
         const testDate = candidate.testSchedule?.testDate ? new Date(candidate.testSchedule.testDate).toLocaleDateString("pt-BR") : "";
-        const testLocality = candidate.testSchedule?.church?.name || candidate.church.name;
+        const testLocality = candidate.church.name;
         
         const elderName = candidate.testSchedule?.elderName || candidate.testSchedule?.church?.ministry?.elderName || candidate.church.ministry?.elderName || "";
         const evaluatorName = candidate.resolvedEvaluatorName;

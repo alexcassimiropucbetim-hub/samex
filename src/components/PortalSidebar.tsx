@@ -49,6 +49,7 @@ export function PortalSidebar({ isRegional, isExaminadora = false, pendingTestsC
       items: [
         ...(isRegional && !isExaminadora ? [{ name: "Eventos", href: "/portal/eventos", icon: Calendar }] : []),
         ...(isRegional && !isExaminadora ? [{ name: "Agendar Teste", href: "/portal/cadastro-teste", icon: CalendarClock }] : []),
+        { name: "Fila para Teste", href: "/portal/fila-teste", icon: Users },
         { name: "Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
       ]
     }

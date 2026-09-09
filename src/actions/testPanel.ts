@@ -4,14 +4,49 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { uploadTestResultToDrive } from "@/lib/googleDrive";
 
+import { getSession } from "@/lib/auth";
+
 export async function assignEvaluator(candidateId: string, evaluatorId: string | null) {
+  const session = await getSession();
+
+  const current = await prisma.preEvaluation.findUnique({
+    where: { id: candidateId },
+    select: { testEvaluatorId: true, candidateName: true }
+  });
+
+  const dataToUpdate: any = {
+    testEvaluatorId: evaluatorId,
+    evaluatorConfirmed: false, // Reseta a confirmação ao trocar
+  };
+
+  const isChangingEvaluator = current?.testEvaluatorId !== evaluatorId;
+
+  if (isChangingEvaluator && session) {
+    if (session.type === "admin") {
+      dataToUpdate.evaluatorAssignedByAdmin = session.id;
+    } else {
+      dataToUpdate.evaluatorAssignedById = session.id;
+    }
+    dataToUpdate.evaluatorAssignedAt = new Date();
+  }
+
   await prisma.preEvaluation.update({
     where: { id: candidateId },
-    data: {
-      testEvaluatorId: evaluatorId,
-      evaluatorConfirmed: false, // Reseta a confirmação ao trocar
-    },
+    data: dataToUpdate,
   });
+
+  if (isChangingEvaluator && session) {
+    await prisma.activityLog.create({
+      data: {
+        action: "APONTOU_AVALIADOR",
+        entityType: "PreEvaluation",
+        entityId: candidateId,
+        details: `Candidato ${current?.candidateName} apontado para avaliador ${evaluatorId || 'nenhum'}`,
+        personInChargeId: session.type === "encarregado" ? session.id : null,
+        adminUsername: session.type === "admin" ? session.name : null, 
+      }
+    });
+  }
 
   revalidatePath("/painel-testes");
 }

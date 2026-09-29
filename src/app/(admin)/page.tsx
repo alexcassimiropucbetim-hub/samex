@@ -1,4 +1,4 @@
-import { Music2, MapPin, Church, ListMusic, FileSignature, CalendarClock, Users, User, MonitorPlay, TrendingUp, Clock, Hourglass, CalendarDays, CalendarCheck, Eye, ChevronRight, Calendar, BarChart2 } from "lucide-react";
+import { Music2, MapPin, Church, ListMusic, FileSignature, CalendarClock, Users, User, MonitorPlay, TrendingUp, Clock, Hourglass, CalendarDays, CalendarCheck, Eye, ChevronRight, Calendar, BarChart2, Network, Building } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import DashboardCharts from "@/components/DashboardCharts";
@@ -221,7 +221,24 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
     .filter(tt => tt.count > 0)
     .sort((a, b) => b.count - a.count);
 
+  const session = await getSession();
+  const isSuperAdmin = session?.role === "SUPER_ADMIN";
+
+  let rrmCount = 0;
+  let adminCount = 0;
+
+  if (isSuperAdmin) {
+    [rrmCount, adminCount] = await Promise.all([
+      prisma.rRM.count(),
+      prisma.administration.count(),
+    ]);
+  }
+
   const stats = [
+    ...(isSuperAdmin ? [
+      { name: "RRM", value: rrmCount, icon: Network, color: "text-indigo-500", bg: "bg-indigo-500/10", border: "border-indigo-500/20", trend: "" },
+      { name: "Administrações", value: adminCount, icon: Building, color: "text-teal-500", bg: "bg-teal-500/10", border: "border-teal-500/20", trend: "" },
+    ] : []),
     { name: "Setores", value: sectorsCount, icon: MapPin, color: "text-blue-500", bg: "bg-blue-500/10", border: "border-blue-500/20", trend: "+12%" },
     { name: "Igrejas", value: churchesCount, icon: Church, color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/20", trend: "+5%" },
     { name: "Categorias", value: categoriesCount, icon: ListMusic, color: "text-purple-500", bg: "bg-purple-500/10", border: "border-purple-500/20", trend: "0%" },
@@ -240,8 +257,6 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
   // Filtrando eventos a partir de hoje
   const nextEvents = allEvents.filter(e => new Date(e.date) >= today);
 
-  const session = await getSession();
-  
   const diaSemana = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', timeZone: 'America/Sao_Paulo' }).format(today);
   const dataExtenso = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(today);
   const diaSemanaCapitalized = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);

@@ -1,14 +1,11 @@
 import PreEvaluationForm from "@/components/PreEvaluationForm";
-import { getSectors } from "@/actions/sector";
-import { getChurches } from "@/actions/church";
 import { getInstruments } from "@/actions/instrument";
-import { getPeopleInCharge } from "@/actions/personInCharge";
 import { getTestTypes } from "@/actions/testType";
-import { getPreEvaluations, deletePreEvaluation } from "@/actions/preEvaluation";
-import { getTestSchedules } from "@/actions/testSchedule";
+import { getPortalSectors, getPortalChurches, getPortalPeopleInCharge, getPortalPreEvaluations, getPortalTestSchedules, getPortalScopes } from "@/lib/portal-data";
 import { FileSignature, MapPin, Church, User, Music, Calendar, Pencil, Trash2, ClipboardCheck, BookOpen, Printer } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import PreEvaluationTableClient from "./PreEvaluationTableClient";
 
 export default async function PreEvaluationPage({
@@ -17,33 +14,22 @@ export default async function PreEvaluationPage({
   searchParams: Promise<{ edit?: string }>;
 }) {
   const session = await getSession();
-  const [sectors, churches, instruments, personInCharges, testTypes, allPreEvaluations, testSchedules] = await Promise.all([
-    getSectors(),
-    getChurches(),
+  if (!session) {
+    redirect("/login");
+  }
+
+  const [sectors, churches, instruments, personInCharges, testTypes, preEvaluations, testSchedules] = await Promise.all([
+    getPortalSectors(session),
+    getPortalChurches(session),
     getInstruments(),
-    getPeopleInCharge(),
+    getPortalPeopleInCharge(session),
     getTestTypes(),
-    getPreEvaluations(),
-    getTestSchedules(),
+    getPortalPreEvaluations(session),
+    getPortalTestSchedules(session),
   ]);
 
-  const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
-  const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
-  const isAdmin = session?.type === "admin";
+  const { isRegional, isExaminadora, isAdmin } = await getPortalScopes(session);
   const isLocal = !isRegional && !isExaminadora && !isAdmin;
-  
-  let preEvaluations = allPreEvaluations;
-
-  if (isExaminadora) {
-    // Examinadora vê tudo, mas apenas do sexo feminino (F)
-    preEvaluations = allPreEvaluations.filter(p => p.gender === 'F');
-  } else if (isRegional) {
-    // Regional vê tudo, de todos os sexos
-    preEvaluations = allPreEvaluations;
-  } else if (!isAdmin) {
-    // Encarregado Local vê apenas a sua igreja (ambos os sexos)
-    preEvaluations = allPreEvaluations.filter(p => p.churchId === session?.churchId);
-  }
 
   const resolvedParams = await searchParams;
   const editingId = resolvedParams.edit;

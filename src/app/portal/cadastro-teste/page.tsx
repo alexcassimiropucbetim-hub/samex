@@ -1,9 +1,9 @@
-import { getSectors } from "@/actions/sector";
-import { getChurches } from "@/actions/church";
-import { getTestSchedules, createTestSchedule, updateTestSchedule, deleteTestSchedule } from "@/actions/testSchedule";
+import { createTestSchedule, updateTestSchedule, deleteTestSchedule } from "@/actions/testSchedule";
+import { getPortalSectors, getPortalChurches, getPortalTestSchedules, getPortalScopes } from "@/lib/portal-data";
 import { CalendarClock, MapPin, Church, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export default async function CadastroTestePage({
   searchParams,
@@ -11,19 +11,17 @@ export default async function CadastroTestePage({
   searchParams: Promise<{ edit?: string }>;
 }) {
   const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
   
-  const [sectors, churches, allTestSchedules] = await Promise.all([
-    getSectors(),
-    getChurches(),
-    getTestSchedules(),
+  const [sectors, churches, testSchedules] = await Promise.all([
+    getPortalSectors(session),
+    getPortalChurches(session),
+    getPortalTestSchedules(session),
   ]);
 
-  const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
-  const isAdmin = session?.type === "admin";
-  
-  const testSchedules = (isRegional || isAdmin) 
-    ? allTestSchedules 
-    : allTestSchedules.filter(t => t.churchId === session?.churchId);
+  const { isRegional, isAdmin } = await getPortalScopes(session);
 
   const resolvedParams = await searchParams;
   const editingId = resolvedParams.edit;

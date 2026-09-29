@@ -8,15 +8,19 @@ export const dynamic = "force-dynamic";
 
 export default async function FilaTestePortalPage() {
   const session = await getSession();
-  if (!session) redirect("/portal/login");
+  if (!session) redirect("/login");
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  const { getPortalScopes } = await import("@/lib/portal-data");
+  const { testScheduleScope } = await getPortalScopes(session);
+
   const testSchedule = await prisma.testSchedule.findFirst({
     where: {
       testDate: { gte: today },
-      isClosed: false
+      isClosed: false,
+      AND: testScheduleScope
     },
     include: {
       church: true,

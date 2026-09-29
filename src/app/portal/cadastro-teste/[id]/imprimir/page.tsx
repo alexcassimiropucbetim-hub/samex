@@ -1,9 +1,13 @@
-import { getTestDetails } from "@/actions/testDetails";
-import { notFound } from "next/navigation";
+import { getPortalTestDetails } from "@/lib/portal-data";
+import { getSession } from "@/lib/auth";
+import { notFound, redirect } from "next/navigation";
 
 export default async function ImprimirListaTestePage({ params }: { params: Promise<{ id: string }> }) {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
   const { id } = await params;
-  const test = await getTestDetails(id);
+  const test = await getPortalTestDetails(id, session);
 
   if (!test) notFound();
 

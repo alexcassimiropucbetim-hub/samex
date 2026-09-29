@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 export default async function SettingsPage() {
   const authPayload = await getSession();
   if (!authPayload) {
-    redirect("/portal/login");
+    redirect("/login");
   }
 
   const isRegional = authPayload.roleName?.toLowerCase().includes("regional") || authPayload.roleName?.toLowerCase().includes("examinadora");

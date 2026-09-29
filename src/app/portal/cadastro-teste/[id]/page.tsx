@@ -1,5 +1,6 @@
 import { getSession } from "@/lib/auth";
-import { getTestDetails, getEligibleEvaluators, toggleTestLock } from "@/actions/testDetails";
+import { toggleTestLock } from "@/actions/testDetails";
+import { getPortalTestDetails, getPortalEligibleEvaluators } from "@/lib/portal-data";
 import { notFound, redirect } from "next/navigation";
 import { Lock, Unlock, Printer, FileCheck, ChevronUp, ChevronDown } from "lucide-react";
 import Link from "next/link";
@@ -7,13 +8,17 @@ import { CandidateTableClient } from "@/components/CandidateTableClient";
 
 export default async function TestDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
+  if (!session) {
+    redirect("/login");
+  }
+
   const isAdmin = session?.type === "admin";
   const { id } = await params;
 
-  const test = await getTestDetails(id);
+  const test = await getPortalTestDetails(id, session);
   if (!test) notFound();
 
-  const evaluators = await getEligibleEvaluators();
+  const evaluators = await getPortalEligibleEvaluators(session);
 
   const formattedDate = new Date(test.testDate).toLocaleDateString("pt-BR");
   const formattedTime = new Date(test.testDate).toLocaleTimeString("pt-BR", { hour: '2-digit', minute: '2-digit' });

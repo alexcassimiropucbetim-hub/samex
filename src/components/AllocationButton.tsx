@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { UserPlus, X } from "lucide-react";
-import { allocateToTest } from "@/actions/allocation";
+import { allocatePortalToTest } from "@/actions/portal-preEvaluation";
 
 export function AllocationButton({ preEvaluationId, testSchedules }: { preEvaluationId: string, testSchedules: any[] }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,7 +20,7 @@ export function AllocationButton({ preEvaluationId, testSchedules }: { preEvalua
     setError("");
     setIsLoading(true);
     try {
-      await allocateToTest(preEvaluationId, selectedTestId, masterKey);
+      await allocatePortalToTest(preEvaluationId, selectedTestId, masterKey);
       setIsOpen(false);
     } catch (err: any) {
       setError(err.message || "Erro desconhecido ao alocar.");

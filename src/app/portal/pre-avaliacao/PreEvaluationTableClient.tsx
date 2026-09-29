@@ -7,7 +7,7 @@ import { AllocationButton } from "@/components/AllocationButton";
 import { SchedulePreEvaluationModal } from "@/components/SchedulePreEvaluationModal";
 
 // Assuming we pass deletePreEvaluation as a prop or handle it via router.refresh
-import { deletePreEvaluation } from "@/actions/preEvaluation";
+import { deletePortalPreEvaluation } from "@/actions/portal-preEvaluation";
 
 export default function PreEvaluationTableClient({ 
   preEvaluations, 
@@ -386,7 +386,7 @@ export default function PreEvaluationTableClient({
                       <button 
                         onClick={async () => {
                           if (confirm("Tem certeza que deseja excluir esta pré-avaliação?")) {
-                            await deletePreEvaluation(evalReq.id);
+                            await deletePortalPreEvaluation(evalReq.id);
                           }
                         }} 
                         className="text-red-500 hover:bg-red-100 p-2 rounded-lg transition-colors"
@@ -606,7 +606,7 @@ export default function PreEvaluationTableClient({
                 <button 
                   onClick={async () => {
                     if (confirm("Tem certeza que deseja excluir esta pré-avaliação?")) {
-                      await deletePreEvaluation(evalReq.id);
+                      await deletePortalPreEvaluation(evalReq.id);
                     }
                   }} 
                   className="text-red-500 bg-red-100 hover:bg-red-200 p-2.5 rounded-xl transition-colors"

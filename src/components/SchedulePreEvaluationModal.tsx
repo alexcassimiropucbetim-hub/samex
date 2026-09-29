@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, Calendar } from "lucide-react";
-import { schedulePreEvaluationDate } from "@/actions/preEvaluation";
+import { schedulePortalPreEvaluationDate } from "@/actions/portal-preEvaluation";
 
 interface Props {
   preEvaluationId: string;
@@ -28,7 +28,7 @@ export function SchedulePreEvaluationModal({ preEvaluationId, candidateName, ini
     try {
       setIsSubmitting(true);
       const date = new Date(dateStr);
-      await schedulePreEvaluationDate(preEvaluationId, date, isAdmin ? evaluatorId : undefined);
+      await schedulePortalPreEvaluationDate(preEvaluationId, date, isAdmin ? evaluatorId : undefined);
       onClose();
     } catch (error) {
       console.error("Erro ao agendar data:", error);

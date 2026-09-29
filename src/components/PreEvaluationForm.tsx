@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { ChevronRight, ChevronLeft, CheckCircle2, User, Music, FileText, Check, X } from "lucide-react";
-import { createPreEvaluation, updatePreEvaluation } from "@/actions/preEvaluation";
+import { createPortalPreEvaluation, updatePortalPreEvaluation } from "@/actions/portal-preEvaluation";
 import Link from "next/link";
 
 type Props = {
@@ -173,9 +173,9 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
 
     try {
       if (initialData?.id) {
-        await updatePreEvaluation(initialData.id, data);
+        await updatePortalPreEvaluation(initialData.id, data);
       } else {
-        await createPreEvaluation(data);
+        await createPortalPreEvaluation(data);
       }
       setSuccess(true);
     } catch (error: any) {

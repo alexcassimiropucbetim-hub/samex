@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function getEvents() {
   try {
@@ -23,7 +24,9 @@ export async function createEvent(formData: FormData) {
   const isAdmin = session?.type === "admin";
   const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
 
-  if (!isAdmin && !isRegional) {
+  if (isAdmin) {
+    await requireSuperAdmin();
+  } else if (!isRegional) {
     throw new Error("Acesso negado");
   }
 
@@ -36,7 +39,6 @@ export async function createEvent(formData: FormData) {
     throw new Error("Preencha todos os campos obrigatórios");
   }
 
-  // dateStr expected in "YYYY-MM-DDTHH:mm"
   // Assuming America/Sao_Paulo timezone (-03:00)
   const date = new Date(dateStr + ":00-03:00");
 
@@ -57,7 +59,9 @@ export async function updateEvent(id: string, formData: FormData) {
   const isAdmin = session?.type === "admin";
   const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
 
-  if (!isAdmin && !isRegional) {
+  if (isAdmin) {
+    await requireSuperAdmin();
+  } else if (!isRegional) {
     throw new Error("Acesso negado");
   }
 
@@ -70,7 +74,6 @@ export async function updateEvent(id: string, formData: FormData) {
     throw new Error("Preencha todos os campos obrigatórios");
   }
 
-  // Assuming America/Sao_Paulo timezone (-03:00)
   const date = new Date(dateStr + ":00-03:00");
 
   await prisma.event.update({
@@ -91,7 +94,9 @@ export async function deleteEvent(id: string) {
   const isAdmin = session?.type === "admin";
   const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
 
-  if (!isAdmin && !isRegional) {
+  if (isAdmin) {
+    await requireSuperAdmin();
+  } else if (!isRegional) {
     throw new Error("Acesso negado");
   }
 

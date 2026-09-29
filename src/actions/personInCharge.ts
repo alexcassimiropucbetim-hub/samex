@@ -2,8 +2,12 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getAuthenticatedAdmin, buildAdministrationWhere, assertAdministrationAccess } from "@/lib/auth-scope";
 
 export async function createPersonInCharge(formData: FormData) {
+  const admin = await getAuthenticatedAdmin();
+  if (!admin) throw new Error("Acesso negado");
+
   const login = formData.get("login") as string;
   const fullName = formData.get("fullName") as string;
   const gender = formData.get("gender") as string;
@@ -14,6 +18,17 @@ export async function createPersonInCharge(formData: FormData) {
   const managedChurchIds = formData.getAll("managedChurchIds") as string[];
   
   if (!login || !fullName || !gender || !cardNumber || !churchId || !roleTypeId) return;
+
+  const church = await prisma.church.findUnique({ where: { id: churchId }, include: { sector: true } });
+  if (!church) throw new Error("Igreja inválida");
+  await assertAdministrationAccess(church.sector.administrationId);
+
+  if (managedChurchIds.length > 0) {
+    const managedChurches = await prisma.church.findMany({ where: { id: { in: managedChurchIds } }, include: { sector: true } });
+    for (const c of managedChurches) {
+      await assertAdministrationAccess(c.sector.administrationId);
+    }
+  }
 
   try {
     await prisma.personInCharge.create({
@@ -40,7 +55,9 @@ export async function createPersonInCharge(formData: FormData) {
 }
 
 export async function getPeopleInCharge() {
+  const where = await buildAdministrationWhere("PersonInCharge");
   return await prisma.personInCharge.findMany({
+    where,
     include: { church: true, roleType: true, allowedTestTypes: true, managedChurches: true },
     orderBy: { createdAt: "desc" },
   });
@@ -48,8 +65,9 @@ export async function getPeopleInCharge() {
 
 export async function getPeopleInChargePaginated(page: number = 1, pageSize: number = 10, query: string = "") {
   const skip = (page - 1) * pageSize;
+  const baseWhere = await buildAdministrationWhere("PersonInCharge");
   
-  const where = query ? {
+  const searchWhere = query ? {
     OR: [
       { fullName: { contains: query } },
       { login: { contains: query } },
@@ -58,6 +76,8 @@ export async function getPeopleInChargePaginated(page: number = 1, pageSize: num
       { roleType: { name: { contains: query } } }
     ]
   } : {};
+
+  const where = { AND: [baseWhere, searchWhere] };
 
   const [total, data] = await Promise.all([
     prisma.personInCharge.count({ where }),
@@ -80,13 +100,21 @@ export async function getPeopleInChargePaginated(page: number = 1, pageSize: num
 
 export async function getPersonInChargeById(id: string) {
   if (!id) return null;
-  return await prisma.personInCharge.findUnique({
-    where: { id },
+  const baseWhere = await buildAdministrationWhere("PersonInCharge");
+  
+  return await prisma.personInCharge.findFirst({
+    where: { id, ...baseWhere },
     include: { church: true, roleType: true, allowedTestTypes: true, managedChurches: true },
   });
 }
 
 export async function deletePersonInCharge(id: string) {
+  const baseWhere = await buildAdministrationWhere("PersonInCharge");
+  const existingPerson = await prisma.personInCharge.findFirst({
+    where: { id, ...baseWhere },
+  });
+  if (!existingPerson) throw new Error("Registro não encontrado ou sem permissão.");
+
   await prisma.personInCharge.delete({
     where: { id },
   });
@@ -95,6 +123,12 @@ export async function deletePersonInCharge(id: string) {
 }
 
 export async function updatePersonInCharge(id: string, formData: FormData) {
+  const baseWhere = await buildAdministrationWhere("PersonInCharge");
+  const existingPerson = await prisma.personInCharge.findFirst({
+    where: { id, ...baseWhere },
+  });
+  if (!existingPerson) throw new Error("Registro não encontrado ou sem permissão.");
+
   const login = formData.get("login") as string;
   const fullName = formData.get("fullName") as string;
   const gender = formData.get("gender") as string;
@@ -106,17 +140,30 @@ export async function updatePersonInCharge(id: string, formData: FormData) {
   
   if (!login || !fullName || !gender || !cardNumber || !churchId || !roleTypeId) return;
 
+  if (churchId !== existingPerson.churchId) {
+    const church = await prisma.church.findUnique({ where: { id: churchId }, include: { sector: true } });
+    if (!church) throw new Error("Igreja inválida");
+    await assertAdministrationAccess(church.sector.administrationId);
+  }
+
+  if (managedChurchIds.length > 0) {
+    const managedChurches = await prisma.church.findMany({ where: { id: { in: managedChurchIds } }, include: { sector: true } });
+    for (const c of managedChurches) {
+      await assertAdministrationAccess(c.sector.administrationId);
+    }
+  }
+
   try {
     await prisma.personInCharge.update({
       where: { id },
       data: { 
         login, fullName, gender, cardNumber, churchId, roleTypeId,
         allowedTestTypes: {
-          set: [], // Clear existing
+          set: [],
           connect: testTypeIds.map(tid => ({ id: tid }))
         },
         managedChurches: {
-          set: [], // Clear existing
+          set: [],
           connect: managedChurchIds.map(id => ({ id }))
         }
       },

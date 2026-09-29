@@ -13,6 +13,7 @@ async function main() {
       username: 'admin',
       password: hashedPassword,
       name: 'Administrador Master',
+      role: 'SUPER_ADMIN',
     },
   });
 

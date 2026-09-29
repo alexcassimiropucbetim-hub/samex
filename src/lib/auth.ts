@@ -10,6 +10,8 @@ export type SessionPayload = {
   name: string;
   roleName?: string; // Para encarregados (Local, Regional, etc)
   churchId?: string; // Para encarregados
+  role?: "SUPER_ADMIN" | "ADMINISTRATION_ADMIN";
+  administrationId?: string | null;
   expires: Date;
 };
 

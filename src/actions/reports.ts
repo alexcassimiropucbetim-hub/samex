@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { buildAdministrationWhere } from "@/lib/auth-scope";
 
 export async function getReportsData(year: number) {
   const session = await getSession();
@@ -12,28 +13,27 @@ export async function getReportsData(year: number) {
   const startDate = new Date(year, 0, 1);
   const endDate = new Date(year, 11, 31, 23, 59, 59);
 
+  const scheduleScope = await buildAdministrationWhere("TestSchedule");
+  const evalScope = await buildAdministrationWhere("PreEvaluation");
+
   // 1. Quantidade de Testes no Ano (Sessões de Teste)
   const totalTestSchedules = await prisma.testSchedule.count({
     where: {
-      testDate: {
-        gte: startDate,
-        lte: endDate,
-      },
+      AND: [
+        { testDate: { gte: startDate, lte: endDate } },
+        scheduleScope
+      ]
     },
   });
 
   // 2. Avaliações concluídas no ano
   const evaluations = await prisma.preEvaluation.findMany({
     where: {
-      status: {
-        in: ["APROVADO", "REPROVADO"],
-      },
-      evaluationResult: {
-        createdAt: {
-          gte: startDate,
-          lte: endDate,
-        },
-      },
+      AND: [
+        { status: { in: ["APROVADO", "REPROVADO"] } },
+        { evaluationResult: { createdAt: { gte: startDate, lte: endDate } } },
+        evalScope
+      ]
     },
     include: {
       testType: true,

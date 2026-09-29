@@ -4,12 +4,14 @@ import { Music, Plus, Trash2, ListMusic, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export default async function InstrumentsPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string, page?: string, q?: string }>;
 }) {
+  await requireSuperAdmin();
   const categories = await getCategories();
   const resolvedSearchParams = await searchParams;
   const page = Number(resolvedSearchParams?.page) || 1;

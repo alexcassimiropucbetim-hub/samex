@@ -2,7 +2,7 @@
 
 import { Search, Bell, MapPin, ChevronDown } from "lucide-react";
 
-export function DashboardHeader({ name, date, weekday }: { name: string, date: string, weekday: string }) {
+export function DashboardHeader({ name, date, weekday, administrationName }: { name: string, date: string, weekday: string, administrationName?: string }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
       <div>
@@ -34,7 +34,7 @@ export function DashboardHeader({ name, date, weekday }: { name: string, date: s
         {/* Region Selector */}
         <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-full hover:bg-slate-50 transition-colors shadow-sm">
           <MapPin className="w-4 h-4 text-blue-500" />
-          <span className="text-sm font-bold text-slate-700">Regional Sul</span>
+          <span className="text-sm font-bold text-slate-700">{administrationName || "Regional Sul"}</span>
           <ChevronDown className="w-4 h-4 text-slate-400" />
         </button>
       </div>

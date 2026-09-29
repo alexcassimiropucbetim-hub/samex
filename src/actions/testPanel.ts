@@ -5,21 +5,42 @@ import { revalidatePath } from "next/cache";
 import { uploadTestResultToDrive } from "@/lib/googleDrive";
 
 import { getSession } from "@/lib/auth";
+import { getAuthenticatedAdmin, assertAdministrationAccess } from "@/lib/auth-scope";
+
+async function assertCandidateAccess(candidateId: string) {
+  const candidate = await prisma.preEvaluation.findUnique({
+    where: { id: candidateId },
+    include: { church: { include: { sector: true } } }
+  });
+  if (!candidate) throw new Error("Registro não encontrado ou sem permissão.");
+  
+  const admin = await getAuthenticatedAdmin();
+  if (admin) {
+    await assertAdministrationAccess(candidate.church.sector.administrationId);
+  }
+  return candidate;
+}
 
 export async function assignEvaluator(candidateId: string, evaluatorId: string | null) {
   const session = await getSession();
+  const current = await assertCandidateAccess(candidateId);
 
-  const current = await prisma.preEvaluation.findUnique({
-    where: { id: candidateId },
-    select: { testEvaluatorId: true, candidateName: true }
-  });
+  if (evaluatorId) {
+    const pic = await prisma.personInCharge.findUnique({
+      where: { id: evaluatorId },
+      include: { church: { include: { sector: true } } }
+    });
+    if (!pic || pic.church.sector.administrationId !== current.church.sector.administrationId) {
+      throw new Error("Acesso negado. Avaliador inválido.");
+    }
+  }
 
   const dataToUpdate: any = {
     testEvaluatorId: evaluatorId,
     evaluatorConfirmed: false, // Reseta a confirmação ao trocar
   };
 
-  const isChangingEvaluator = current?.testEvaluatorId !== evaluatorId;
+  const isChangingEvaluator = current.testEvaluatorId !== evaluatorId;
 
   if (isChangingEvaluator && session) {
     if (session.type === "admin") {
@@ -41,7 +62,7 @@ export async function assignEvaluator(candidateId: string, evaluatorId: string |
         action: "APONTOU_AVALIADOR",
         entityType: "PreEvaluation",
         entityId: candidateId,
-        details: `Candidato ${current?.candidateName} apontado para avaliador ${evaluatorId || 'nenhum'}`,
+        details: `Candidato ${current.candidateName} apontado para avaliador ${evaluatorId || 'nenhum'}`,
         personInChargeId: session.type === "encarregado" ? session.id : null,
         adminUsername: session.type === "admin" ? session.name : null, 
       }
@@ -52,6 +73,7 @@ export async function assignEvaluator(candidateId: string, evaluatorId: string |
 }
 
 export async function confirmEvaluator(candidateId: string, confirmed: boolean) {
+  await assertCandidateAccess(candidateId);
   await prisma.preEvaluation.update({
     where: { id: candidateId },
     data: {
@@ -63,6 +85,7 @@ export async function confirmEvaluator(candidateId: string, confirmed: boolean) 
 }
 
 export async function startTest(candidateId: string) {
+  await assertCandidateAccess(candidateId);
   await prisma.preEvaluation.update({
     where: { id: candidateId },
     data: {
@@ -75,6 +98,7 @@ export async function startTest(candidateId: string) {
 }
 
 export async function submitTestResult(candidateId: string, status: string) {
+  await assertCandidateAccess(candidateId);
   await prisma.preEvaluation.update({
     where: { id: candidateId },
     data: {
@@ -96,6 +120,7 @@ export async function submitTestResult(candidateId: string, status: string) {
 }
 
 export async function updateCandidateStatus(candidateId: string, status: string) {
+  await assertCandidateAccess(candidateId);
   await prisma.preEvaluation.update({
     where: { id: candidateId },
     data: {

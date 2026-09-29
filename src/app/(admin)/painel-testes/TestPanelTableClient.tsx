@@ -46,9 +46,9 @@ export function TestPanelTableClient({
 
   const filteredCandidates = useMemo(() => {
     return candidates.filter((cand) => {
-      const matchName = cand.candidateName.toLowerCase().includes(searchName.toLowerCase());
-      const matchInstrument = cand.instrument.name.toLowerCase().includes(searchInstrument.toLowerCase());
-      const matchType = cand.testType.name.toLowerCase().includes(searchType.toLowerCase());
+      const matchName = cand.candidateName?.toLowerCase().includes(searchName.toLowerCase()) ?? false;
+      const matchInstrument = cand.instrument?.name?.toLowerCase().includes(searchInstrument.toLowerCase()) ?? false;
+      const matchType = cand.testType?.name?.toLowerCase().includes(searchType.toLowerCase()) ?? false;
       return matchName && matchInstrument && matchType;
     });
   }, [candidates, searchName, searchInstrument, searchType]);
@@ -239,13 +239,13 @@ export function TestPanelTableClient({
                   </td>
                   <td className="px-4 py-4 text-slate-500">{index + 1}</td>
                   <td className="px-3 py-4 font-bold text-slate-800">
-                    <div title={cand.candidateName.toUpperCase()}>
-                      {cand.candidateName.toUpperCase()}
+                    <div title={cand.candidateName?.toUpperCase() || ""}>
+                      {cand.candidateName?.toUpperCase() || ""}
                     </div>
                   </td>
                   <td className="px-3 py-4 text-slate-500 font-medium">
-                    <div className="truncate max-w-[140px]" title={cand.church.name.toUpperCase()}>
-                      {cand.church.name.toUpperCase()}
+                    <div className="truncate max-w-[140px]" title={cand.church?.name?.toUpperCase() || ""}>
+                      {cand.church?.name?.toUpperCase() || ""}
                     </div>
                   </td>
                   <td className="px-3 py-4 text-slate-500 font-medium">
@@ -254,8 +254,8 @@ export function TestPanelTableClient({
                     </div>
                   </td>
                   <td className="px-3 py-4 text-slate-500 font-medium">
-                    <div className="truncate max-w-[120px]" title={cand.instrument.name.toUpperCase()}>
-                      {cand.instrument.name.toUpperCase()}
+                    <div className="truncate max-w-[120px]" title={cand.instrument?.name?.toUpperCase() || ""}>
+                      {cand.instrument?.name?.toUpperCase() || ""}
                     </div>
                   </td>
                   <td className="px-3 py-4">
@@ -269,7 +269,7 @@ export function TestPanelTableClient({
                         <option value="">SELECIONE...</option>
                         {evaluators.filter(ev => {
                           const role = ev.roleType?.name?.toUpperCase() || "";
-                          const testName = cand.testType.name.toUpperCase();
+                          const testName = cand.testType?.name?.toUpperCase() || "";
                           if (cand.gender === "F") {
                             return role.includes("EXAMINADORA");
                           } else {
@@ -302,7 +302,7 @@ export function TestPanelTableClient({
                     </div>
                   </td>
                   <td className="px-3 py-4 text-slate-500 font-medium text-center whitespace-nowrap">
-                    {cand.testType.name.toUpperCase()}
+                    {cand.testType?.name?.toUpperCase() || ""}
                   </td>
                   <td className="px-4 py-4 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-3">
@@ -413,8 +413,8 @@ export function TestPanelTableClient({
                     onChange={() => handleSelectOne(cand.id)}
                   />
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-900 text-sm uppercase">{cand.candidateName}</span>
-                    <span className="text-xs text-slate-500 uppercase font-medium">#{index + 1} • {cand.instrument.name}</span>
+                    <span className="font-bold text-slate-900 text-sm uppercase">{cand.candidateName || ""}</span>
+                    <span className="text-xs text-slate-500 uppercase font-medium">#{index + 1} • {cand.instrument?.name || ""}</span>
                   </div>
                 </div>
                 
@@ -440,7 +440,7 @@ export function TestPanelTableClient({
               <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-100 mt-1">
                 <div className="col-span-2">
                   <p className="text-slate-400 font-medium mb-0.5">Congregação</p>
-                  <p className="font-medium text-slate-700 uppercase truncate" title={cand.church.name}>{cand.church.name}</p>
+                  <p className="font-medium text-slate-700 uppercase truncate" title={cand.church?.name || ""}>{cand.church?.name || ""}</p>
                 </div>
                 <div>
                   <p className="text-slate-400 font-medium mb-0.5">Setor</p>
@@ -448,7 +448,7 @@ export function TestPanelTableClient({
                 </div>
                 <div>
                   <p className="text-slate-400 font-medium mb-0.5">Tipo de Teste</p>
-                  <p className="font-medium text-slate-700 uppercase truncate" title={cand.testType.name}>{cand.testType.name}</p>
+                  <p className="font-medium text-slate-700 uppercase truncate" title={cand.testType?.name || ""}>{cand.testType?.name || ""}</p>
                 </div>
               </div>
 
@@ -464,7 +464,7 @@ export function TestPanelTableClient({
                     <option value="">SELECIONE...</option>
                     {evaluators.filter(ev => {
                       const role = ev.roleType?.name?.toUpperCase() || "";
-                      const testName = cand.testType.name.toUpperCase();
+                      const testName = cand.testType?.name?.toUpperCase() || "";
                       if (cand.gender === "F") {
                         return role.includes("EXAMINADORA");
                       } else {

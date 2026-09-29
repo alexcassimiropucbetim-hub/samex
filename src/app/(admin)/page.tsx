@@ -6,6 +6,8 @@ import { getSession } from "@/lib/auth";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { ActivitySummaryWidget } from "@/components/ActivitySummaryWidget";
 import { CalendarEventsWrapper } from "@/components/CalendarEventsWrapper";
+import { buildAdministrationWhere } from "@/lib/auth-scope";
+
 export default async function Home(props: { searchParams: Promise<{ year?: string }> | { year?: string } }) {
   const searchParams = await props.searchParams;
   const selectedYear = searchParams?.year ? parseInt(searchParams.year) : new Date().getFullYear();
@@ -15,6 +17,11 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
   
   const startOfYear = new Date(selectedYear, 0, 1);
   const endOfYear = new Date(selectedYear, 11, 31, 23, 59, 59, 999);
+
+  const sectorWhere = await buildAdministrationWhere("Sector");
+  const churchWhere = await buildAdministrationWhere("Church");
+  const preEvalWhere = await buildAdministrationWhere("PreEvaluation");
+  const testSchedWhere = await buildAdministrationWhere("TestSchedule");
 
   const [
     sectorsCount, 
@@ -41,18 +48,20 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
     testTypesWithEvaluations,
     allEvents
   ] = await Promise.all([
-    prisma.sector.count(),
-    prisma.church.count(),
+    prisma.sector.count({ where: sectorWhere }),
+    prisma.church.count({ where: churchWhere }),
     prisma.instrumentCategory.count(),
     prisma.instrument.count(),
     prisma.ministry.count(),
     prisma.preEvaluation.count({
       where: {
+        ...preEvalWhere,
         finalTestStatus: { not: "APROVADO" }
       }
     }),
     prisma.preEvaluation.count({ 
       where: { 
+        ...preEvalWhere,
         NOT: {
           status: {
             in: ["APROVADO", "REPROVADO"]
@@ -61,16 +70,17 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
       } 
     }),
     prisma.testSchedule.count({
-      where: { testDate: { gte: today } }
+      where: { ...testSchedWhere, testDate: { gte: today } }
     }),
     prisma.testSchedule.count({
-      where: { testDate: { gte: new Date(today.getFullYear(), 0, 1) } }
+      where: { ...testSchedWhere, testDate: { gte: new Date(today.getFullYear(), 0, 1) } }
     }),
     prisma.preEvaluation.count({
-      where: { testScheduleId: { not: null } }
+      where: { ...preEvalWhere, testScheduleId: { not: null } }
     }),
     prisma.testSchedule.findFirst({
       where: {
+        ...testSchedWhere,
         testDate: {
           gte: today
         },
@@ -85,6 +95,7 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
     }),
     prisma.preEvaluation.count({
       where: {
+        ...preEvalWhere,
         status: "APROVADO",
         finalTestStatus: "PENDENTE",
         gender: "M",
@@ -92,6 +103,7 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
     }),
     prisma.preEvaluation.count({
       where: {
+        ...preEvalWhere,
         status: "APROVADO",
         finalTestStatus: "PENDENTE",
         gender: "F",
@@ -99,24 +111,28 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
     }),
     prisma.preEvaluation.count({ 
       where: { 
+        ...preEvalWhere,
         NOT: { status: { in: ["APROVADO", "REPROVADO"] } },
         gender: "M"
       } 
     }),
     prisma.preEvaluation.count({ 
       where: { 
+        ...preEvalWhere,
         NOT: { status: { in: ["APROVADO", "REPROVADO"] } },
         gender: "F"
       } 
     }),
     prisma.preEvaluation.count({
       where: { 
+        ...preEvalWhere,
         NOT: { status: { in: ["APROVADO", "REPROVADO"] } },
         createdAt: { gte: startOfYear, lte: endOfYear } 
       }
     }),
     prisma.preEvaluation.count({
       where: { 
+        ...preEvalWhere,
         status: "APROVADO", 
         finalTestStatus: "PENDENTE", 
         createdAt: { gte: startOfYear, lte: endOfYear } 
@@ -124,12 +140,14 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
     }),
     prisma.preEvaluation.count({
       where: { 
+        ...preEvalWhere,
         finalTestStatus: "APROVADO", 
         createdAt: { gte: startOfYear, lte: endOfYear } 
       }
     }),
     prisma.preEvaluation.count({
       where: {
+        ...preEvalWhere,
         OR: [{ status: "REPROVADO" }, { finalTestStatus: "REPROVADO" }],
         createdAt: { gte: startOfYear, lte: endOfYear }
       }
@@ -141,7 +159,7 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
             _count: {
               select: { 
                 preEvaluations: {
-                  where: { finalTestStatus: { not: "APROVADO" } }
+                  where: { ...preEvalWhere, finalTestStatus: { not: "APROVADO" } }
                 }
               }
             }
@@ -150,11 +168,12 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
       }
     }),
     prisma.sector.findMany({
+      where: sectorWhere,
       include: {
         _count: {
           select: { 
             preEvaluations: {
-              where: { finalTestStatus: { not: "APROVADO" } }
+              where: { ...preEvalWhere, finalTestStatus: { not: "APROVADO" } }
             }
           }
         }
@@ -165,7 +184,7 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
         _count: {
           select: { 
             preEvaluations: {
-              where: { finalTestStatus: { not: "APROVADO" } }
+              where: { ...preEvalWhere, finalTestStatus: { not: "APROVADO" } }
             }
           }
         }
@@ -227,9 +246,25 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
   const dataExtenso = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'America/Sao_Paulo' }).format(today);
   const diaSemanaCapitalized = diaSemana.charAt(0).toUpperCase() + diaSemana.slice(1);
 
+  let administrationName = "Todas as Administrações";
+  if (session?.administrationId) {
+    const adminInst = await prisma.administration.findUnique({
+      where: { id: session.administrationId },
+      select: { name: true }
+    });
+    if (adminInst) {
+      administrationName = adminInst.name;
+    }
+  }
+
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
-      <DashboardHeader name={session?.name || "Administrador"} date={dataExtenso} weekday={diaSemanaCapitalized} />
+      <DashboardHeader 
+        name={session?.name || "Administrador"} 
+        date={dataExtenso} 
+        weekday={diaSemanaCapitalized} 
+        administrationName={administrationName}
+      />
 
       {/* Cadastros Base Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">

@@ -19,6 +19,7 @@ export default async function PortalLayout({
   const isAdmin = session.type === "admin";
   const isRegional = session.roleName?.toLowerCase().includes("regional") || session.roleName?.toLowerCase().includes("examinadora");
   const isExaminadora = session.roleName?.toLowerCase().includes("examinadora");
+  const adminRole = session.role; // Pass admin role
 
   let pendingTestsCount = 0;
   if (!isAdmin) {
@@ -40,7 +41,7 @@ export default async function PortalLayout({
   return (
     <>
       <InactivityTimer />
-      {isAdmin ? <Sidebar /> : <PortalSidebar isRegional={!!isRegional} isExaminadora={!!isExaminadora} pendingTestsCount={pendingTestsCount} />}
+      {isAdmin ? <Sidebar role={adminRole} /> : <PortalSidebar isRegional={!!isRegional} isExaminadora={!!isExaminadora} pendingTestsCount={pendingTestsCount} />}
       <div className="flex-1 ml-0 md:ml-64 p-4 md:p-8 pt-20 md:pt-8 min-h-screen">
         {!isAdmin && (
           <div className="mb-6 flex flex-col md:flex-row md:items-start justify-between gap-2">

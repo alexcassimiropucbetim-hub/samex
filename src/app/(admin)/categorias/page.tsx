@@ -2,12 +2,14 @@ import { getCategories, createCategory, deleteCategory, updateCategory } from "@
 import { ListMusic, Plus, Trash2, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export default async function CategoriesPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string }>;
 }) {
+  await requireSuperAdmin();
   const categories = await getCategories();
   const resolvedSearchParams = await searchParams;
   const editId = resolvedSearchParams?.edit;

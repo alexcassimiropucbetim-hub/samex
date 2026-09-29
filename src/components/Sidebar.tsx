@@ -2,73 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, MapPin, Church, ListMusic, Music, Music2, Users, UserCheck, ChevronDown, FolderOpen, Briefcase, FileSignature, CalendarClock, LogOut, Settings, Menu, X, Activity, UserCog, BookOpen, BellRing, Database } from "lucide-react";
+import { Home, MapPin, Church, ListMusic, Music, Music2, Users, UserCheck, ChevronDown, FolderOpen, Briefcase, FileSignature, CalendarClock, LogOut, Settings, Menu, X, Activity, UserCog, BookOpen, BellRing, Database, Network } from "lucide-react";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { logout } from "@/actions/auth-actions";
 
-const menuGroups = [
-  {
-    name: "Dashboard",
-    items: [
-      { name: "Início", href: "/", icon: Home },
-      { name: "Relatórios", href: "/relatorios", icon: Activity }
-    ]
-  },
-  {
-    name: "Cadastros Base",
-    icon: FolderOpen,
-    items: [
-      { name: "Setores", href: "/setores", icon: MapPin },
-      { name: "Igrejas", href: "/igrejas", icon: Church },
-      { name: "Categorias", href: "/categorias", icon: ListMusic },
-      { name: "Instrumentos", href: "/instrumentos", icon: Music },
-      { name: "Cargos", href: "/cargos", icon: Briefcase },
-      { name: "Tipos de Teste", href: "/tipos-teste", icon: FileSignature },
-      { name: "Ministérios", href: "/ministerios", icon: Users },
-      { name: "Métodos de Teoria", href: "/metodos-teoria", icon: BookOpen },
-      { name: "Métodos de Prática", href: "/metodos-pratica", icon: Music },
-    ]
-  },
-  {
-    name: "Agendamentos",
-    icon: CalendarClock,
-    items: [
-      { name: "Cadastro de Teste", href: "/portal/cadastro-teste", icon: CalendarClock },
-      { name: "Fila para Teste", href: "/fila-teste", icon: Users },
-      { name: "Pedido Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
-      { name: "Eventos", href: "/eventos", icon: CalendarClock }
-    ]
-  },
-  {
-    name: "Cadastro Pessoal",
-    icon: Users,
-    items: [
-      { name: "Encarregados", href: "/encarregados", icon: UserCheck },
-      { name: "Avaliadores", href: "/avaliadores", icon: Users },
-    ]
-  },
-  {
-    name: "Sistema",
-    icon: Settings,
-    items: [
-      { name: "Usuários (Admins)", href: "/usuarios", icon: UserCog },
-      { name: "Central de Notificações", href: "/notificacoes", icon: BellRing },
-      { name: "Configurações", href: "/configuracoes", icon: Settings },
-      { name: "Logs de Acesso", href: "/logs", icon: Activity },
-      { name: "Auditoria de Dados", href: "/auditoria", icon: Database },
-      { name: "Manual do Sistema", href: "/manual", icon: BookOpen }
-    ]
-  }
-];
-
-export function Sidebar() {
+export function Sidebar({ role, adminName, administrationId }: { role?: string, adminName?: string, administrationId?: string | null }) {
   const pathname = usePathname();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+    "Estrutura": true,
     "Cadastros Base": true,
     "Cadastro Pessoal": true,
   });
   const [isOpen, setIsOpen] = useState(false);
+  const [admNameStr, setAdmNameStr] = useState<string | null>(null);
+
+  // Fetch adminstration name if we have an id
+  useEffect(() => {
+    if (administrationId) {
+      fetch(`/api/administration-name?id=${administrationId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.name) setAdmNameStr(data.name);
+        })
+        .catch(console.error);
+    }
+  }, [administrationId]);
 
   const toggleGroup = (groupName: string) => {
     setOpenGroups(prev => ({ ...prev, [groupName]: !prev[groupName] }));
@@ -78,19 +37,101 @@ export function Sidebar() {
 
   const [logoError, setLogoError] = useState(false);
 
+  const isSuperAdmin = role === "SUPER_ADMIN";
+
+  const menuGroups = [
+    {
+      name: "Dashboard",
+      items: [
+        { name: "Início", href: "/", icon: Home },
+        { name: "Relatórios", href: "/relatorios", icon: Activity }
+      ]
+    },
+    ...(isSuperAdmin ? [{
+      name: "Estrutura",
+      icon: Network,
+      items: [
+        { name: "RRM", href: "/rrm", icon: Network },
+        { name: "Administrações", href: "/administracoes", icon: MapPin },
+      ]
+    }] : []),
+    {
+      name: "Cadastros Locais",
+      icon: FolderOpen,
+      items: [
+        { name: "Setores", href: "/setores", icon: MapPin },
+        { name: "Igrejas", href: "/igrejas", icon: Church },
+        { name: "Ministérios", href: "/ministerios", icon: Users },
+      ]
+    },
+    ...(isSuperAdmin ? [{
+      name: "Cadastros Globais",
+      icon: Database,
+      items: [
+        { name: "Categorias", href: "/categorias", icon: ListMusic },
+        { name: "Instrumentos", href: "/instrumentos", icon: Music },
+        { name: "Cargos", href: "/cargos", icon: Briefcase },
+        { name: "Tipos de Teste", href: "/tipos-teste", icon: FileSignature },
+        { name: "Métodos de Teoria", href: "/metodos-teoria", icon: BookOpen },
+        { name: "Métodos de Prática", href: "/metodos-pratica", icon: Music },
+      ]
+    }] : []),
+    {
+      name: "Agendamentos",
+      icon: CalendarClock,
+      items: [
+        { name: "Cadastro de Teste", href: "/portal/cadastro-teste", icon: CalendarClock },
+        { name: "Fila para Teste", href: "/fila-teste", icon: Users },
+        { name: "Pedido Pré-Avaliação", href: "/portal/pre-avaliacao", icon: FileSignature },
+        { name: "Eventos", href: "/eventos", icon: CalendarClock }
+      ]
+    },
+    {
+      name: "Cadastro Pessoal",
+      icon: Users,
+      items: [
+        { name: "Encarregados", href: "/encarregados", icon: UserCheck },
+        { name: "Avaliadores", href: "/avaliadores", icon: Users },
+      ]
+    },
+    ...(isSuperAdmin ? [{
+      name: "Sistema",
+      icon: Settings,
+      items: [
+        { name: "Administradores", href: "/usuarios", icon: UserCog },
+        { name: "Central de Notificações", href: "/notificacoes", icon: BellRing },
+        { name: "Configurações", href: "/configuracoes", icon: Settings },
+        { name: "Logs de Acesso", href: "/logs", icon: Activity },
+        { name: "Auditoria de Dados", href: "/auditoria", icon: Database }
+      ]
+    }] : []),
+    {
+      name: "Ajuda",
+      icon: BookOpen,
+      items: [
+        { name: "Manual do Sistema", href: "/manual", icon: BookOpen }
+      ]
+    }
+  ];
+
   return (
     <>
       {/* Mobile Top Header */}
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-slate-900 border-b border-slate-800 z-40 flex items-center justify-between px-4 shadow-sm">
-        <div className="flex items-center gap-3">
-           {!logoError ? (
-             <img src="/api/config/logo" alt="Logo" className="h-8 object-contain brightness-0 invert" onError={() => setLogoError(true)} />
-           ) : (
-             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-               <Music2 className="text-white w-5 h-5" />
-             </div>
-           )}
-           <span className="font-bold text-white text-sm">Painel Admin</span>
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3">
+             {!logoError ? (
+               <img src="/api/config/logo" alt="Logo" className="h-6 object-contain brightness-0 invert" onError={() => setLogoError(true)} />
+             ) : (
+               <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center">
+                 <Music2 className="text-white w-4 h-4" />
+               </div>
+             )}
+             <span className="font-bold text-white text-sm">Painel Admin</span>
+          </div>
+          <span className="text-[10px] text-slate-400 mt-1">
+            {isSuperAdmin ? "Acesso Global" : (admNameStr ? `Administração: ${admNameStr}` : "")}
+          </span>
         </div>
         <button onClick={() => setIsOpen(true)} className="p-2 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
           <Menu className="w-6 h-6" />
@@ -108,35 +149,38 @@ export function Sidebar() {
         isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
       )}>
         
-        <div className="p-6 flex items-center justify-center border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 h-24">
+        <div className="p-4 flex flex-col items-center justify-center border-b border-slate-800 sticky top-0 bg-slate-900/95 backdrop-blur-md z-10 min-h-[96px]">
           <div className="md:hidden absolute top-4 right-4 z-50">
             <button onClick={closeSidebar} className="p-2 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
-          <div className="w-full h-full flex items-center justify-center relative">
+          <div className="w-full flex justify-center mb-2">
             {!logoError && (
               <img 
                 src="/api/config/logo" 
                 alt="Logo" 
-                className="max-w-full max-h-full object-contain z-10 brightness-0 invert"
+                className="h-10 object-contain brightness-0 invert"
                 onError={() => setLogoError(true)}
               />
             )}
             {logoError && (
-              <div className="absolute inset-0 flex items-center justify-center -z-10">
-                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
-                  <Music2 className="text-white w-7 h-7" />
-                </div>
+              <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                <Music2 className="text-white w-6 h-6" />
               </div>
             )}
+          </div>
+          <div className="text-center w-full">
+             <div className="text-xs font-semibold text-white truncate px-2">{adminName || "Administrador"}</div>
+             <div className="text-[10px] text-blue-400 font-medium px-2 truncate">
+               {isSuperAdmin ? "ACESSO GLOBAL" : (admNameStr ? `ADMINISTRAÇÃO: ${admNameStr}` : "ADMINISTRADOR LOCAL")}
+             </div>
           </div>
         </div>
         
         <nav className="flex-1 p-4 flex flex-col gap-6">
           {menuGroups.map((group) => {
             if (!group.icon) {
-              // Render direct items (like Dashboard)
               return (
                 <div key={group.name} className="flex flex-col gap-2">
                   {group.items.map(item => {
@@ -163,7 +207,6 @@ export function Sidebar() {
               );
             }
 
-            // Render collapsible groups
             const GroupIcon = group.icon;
             const isOpenGroup = openGroups[group.name];
             

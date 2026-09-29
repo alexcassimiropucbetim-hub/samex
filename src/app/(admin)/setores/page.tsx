@@ -1,16 +1,32 @@
 import { getSectors, createSector, deleteSector, updateSector } from "@/actions/sector";
-import { MapPin, Plus, Trash2, Edit2, Save, X } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { MapPin, Trash2, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SectorForm } from "@/components/SectorForm";
 
 export default async function SectorsPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string }>;
 }) {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
   const sectors = await getSectors();
   const resolvedSearchParams = await searchParams;
   const editId = resolvedSearchParams?.edit;
+
+  const isSuperAdmin = session.role === "SUPER_ADMIN";
+  
+  const rrms = isSuperAdmin ? await prisma.rRM.findMany({
+    where: { active: true },
+    include: {
+      administrations: { where: { active: true }, select: { id: true, name: true } }
+    },
+    orderBy: { name: "asc" }
+  }) : [];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -25,24 +41,7 @@ export default async function SectorsPage({
         {/* Form */}
         <div className="glass-card h-fit">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Novo Setor</h2>
-          <form action={createSector} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
-                Nome do Setor
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                placeholder="Ex: Brás, Vila Maria..."
-                className="input-glass"
-              />
-            </div>
-            <button type="submit" className="btn-primary w-full flex justify-center items-center gap-2">
-              <Plus className="w-5 h-5" /> Cadastrar Setor
-            </button>
-          </form>
+          <SectorForm rrms={rrms} isSuperAdmin={isSuperAdmin} />
         </div>
 
         {/* List */}
@@ -69,14 +68,27 @@ export default async function SectorsPage({
                       <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
                         <MapPin className="w-5 h-5" />
                       </div>
-                      <input 
-                        type="text" 
-                        name="name" 
-                        defaultValue={sector.name} 
-                        className="input-glass flex-1 py-1 px-3 uppercase" 
-                        required 
-                        autoFocus
-                      />
+                      <div className="flex-1 space-y-2">
+                        <input 
+                          type="text" 
+                          name="name" 
+                          defaultValue={sector.name} 
+                          className="input-glass w-full py-1 px-3 uppercase" 
+                          required 
+                          autoFocus
+                        />
+                        {isSuperAdmin && (
+                          <select name="administrationId" defaultValue={sector.administrationId} className="input-glass w-full py-1 px-3" required>
+                            {rrms.map(rrm => (
+                              <optgroup key={rrm.id} label={rrm.name}>
+                                {rrm.administrations.map(adm => (
+                                  <option key={adm.id} value={adm.id}>{adm.name}</option>
+                                ))}
+                              </optgroup>
+                            ))}
+                          </select>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <button type="submit" className="text-green-600 hover:bg-green-50 p-2 rounded-lg transition-colors" title="Salvar">
                           <Save className="w-5 h-5" />
@@ -92,7 +104,10 @@ export default async function SectorsPage({
                         <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 shrink-0">
                           <MapPin className="w-5 h-5" />
                         </div>
-                        <span className="text-lg font-medium text-slate-900 uppercase">{sector.name}</span>
+                        <div className="flex flex-col">
+                          <span className="text-lg font-medium text-slate-900 uppercase">{sector.name}</span>
+                          {/* Preciso trazer o administration se for superadmin, porem não está no include do getSectors. Vamos adicionar temporario via API ou ignorar por hora, o user só pediu a selecao na criacao */}
+                        </div>
                       </div>
                       
                       <div className="flex items-center gap-2">

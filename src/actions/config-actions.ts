@@ -2,8 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function saveConfig(key: string, value: string) {
+  await requireSuperAdmin();
   try {
     await prisma.systemConfig.upsert({
       where: { key },

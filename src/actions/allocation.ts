@@ -2,11 +2,15 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { getAuthenticatedAdmin, assertAdministrationAccess } from "@/lib/auth-scope";
 
 export async function allocateToTest(preEvaluationId: string, testScheduleId: string, masterKey: string) {
   try {
+    const admin = await getAuthenticatedAdmin();
+    
     const testSchedule = await prisma.testSchedule.findUnique({
-      where: { id: testScheduleId }
+      where: { id: testScheduleId },
+      include: { church: { include: { sector: true } } }
     });
 
     if (!testSchedule) {
@@ -17,7 +21,28 @@ export async function allocateToTest(preEvaluationId: string, testScheduleId: st
       throw new Error("Chave do Teste inválida.");
     }
 
-    const evaluation = await prisma.preEvaluation.update({
+    const evaluation = await prisma.preEvaluation.findUnique({
+      where: { id: preEvaluationId },
+      include: { church: { include: { sector: true } } }
+    });
+
+    if (!evaluation) {
+      throw new Error("Candidato não encontrado.");
+    }
+
+    const testAdminId = testSchedule.church.sector.administrationId;
+    const candAdminId = evaluation.church.sector.administrationId;
+
+    if (testAdminId !== candAdminId) {
+      throw new Error("Acesso negado. O Candidato e a Agenda de Exames devem pertencer à mesma Administração.");
+    }
+
+    // Se for admin, garante o isolamento da Administração
+    if (admin) {
+      await assertAdministrationAccess(testAdminId);
+    }
+
+    await prisma.preEvaluation.update({
       where: { id: preEvaluationId },
       data: { testScheduleId }
     });

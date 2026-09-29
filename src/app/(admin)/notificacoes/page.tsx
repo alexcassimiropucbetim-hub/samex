@@ -1,6 +1,8 @@
 import { NotificationsClient } from "./NotificationsClient";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
-export default function NotificationsPage() {
+export default async function NotificationsPage() {
+  await requireSuperAdmin();
   return (
     <div className="p-8 pb-32 md:pb-8">
       <div className="max-w-5xl mx-auto mb-8">

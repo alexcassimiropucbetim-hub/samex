@@ -2,8 +2,10 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function createInstrument(formData: FormData) {
+  await requireSuperAdmin();
   const name = formData.get("name") as string;
   const categoryId = formData.get("categoryId") as string;
   if (!name || !categoryId) return;
@@ -52,6 +54,7 @@ export async function getInstrumentsPaginated(page: number = 1, pageSize: number
 }
 
 export async function updateInstrument(id: string, formData: FormData) {
+  await requireSuperAdmin();
   const name = formData.get("name") as string;
   const categoryId = formData.get("categoryId") as string;
   if (!name || !categoryId) return;
@@ -65,6 +68,21 @@ export async function updateInstrument(id: string, formData: FormData) {
 }
 
 export async function deleteInstrument(id: string) {
+  await requireSuperAdmin();
+
+  const preEvals = await prisma.preEvaluation.count({
+    where: {
+      OR: [
+        { instrumentId: id },
+        { currentInstrumentId: id }
+      ]
+    }
+  });
+
+  if (preEvals > 0) {
+    throw new Error(`Este instrumento não pode ser excluído porque está em uso por ${preEvals} teste(s) ou pré-avaliação(ões).`);
+  }
+
   await prisma.instrument.delete({
     where: { id },
   });

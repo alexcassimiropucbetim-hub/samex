@@ -8,13 +8,43 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum AdminRole {
+  SUPER_ADMIN
+  ADMINISTRATION_ADMIN
+}
+
+model RRM {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  administrations Administration[]
+}
+
+model Administration {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  rrmId     String
+  rrm       RRM      @relation(fields: [rrmId], references: [id], onDelete: Restrict)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  active    Boolean  @default(true)
+  
+  sectors    Sector[]
+  admin      Admin?   // 1:1 relation
+  evaluators Evaluator[]
+}
+
 model Sector {
-  id             String          @id @default(cuid())
-  name           String          @unique
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  churches       Church[]
-  preEvaluations PreEvaluation[]
+  id               String          @id @default(cuid())
+  name             String          @unique
+  administrationId String
+  administration   Administration  @relation(fields: [administrationId], references: [id], onDelete: Restrict)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  churches         Church[]
+  preEvaluations   PreEvaluation[]
 }
 
 model Church {
@@ -91,10 +121,12 @@ model PersonInCharge {
 }
 
 model Evaluator {
-  id        String   @id @default(cuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String          @id @default(cuid())
+  name             String
+  administrationId String
+  administration   Administration  @relation(fields: [administrationId], references: [id], onDelete: Restrict)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model RoleType {
@@ -219,12 +251,17 @@ model TestSchedule {
 }
 
 model Admin {
-  id        String   @id @default(cuid())
-  username  String   @unique
-  password  String
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id               String          @id @default(cuid())
+  username         String          @unique
+  password         String
+  name             String
+  
+  role             AdminRole
+  administrationId String?         @unique // 1 Admin per Administration max
+  administration   Administration? @relation(fields: [administrationId], references: [id], onDelete: Restrict)
+  
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
 }
 
 model SystemConfig {

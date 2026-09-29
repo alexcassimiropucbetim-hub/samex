@@ -198,6 +198,8 @@ export async function loginAdmin(formData: FormData) {
     id: admin.id,
     type: "admin",
     name: admin.name,
+    role: admin.role,
+    administrationId: admin.administrationId,
   });
 
   await prisma.loginAttempt.create({ data: { ipAddress, login: username, success: true } });

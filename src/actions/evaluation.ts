@@ -2,9 +2,9 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-
 import { getSession } from "@/lib/auth";
 import { sendNotificationToUser } from "@/lib/webpush";
+import { getAuthenticatedAdmin, assertAdministrationAccess } from "@/lib/auth-scope";
 
 export async function saveEvaluation(data: {
   preEvaluationId: string;
@@ -24,7 +24,7 @@ export async function saveEvaluation(data: {
 }) {
   try {
     const session = await getSession();
-    const evaluatorId = session?.type === "encarregado" ? session.id : null;
+    const admin = await getAuthenticatedAdmin();
 
     const { 
       preEvaluationId, 
@@ -33,7 +33,33 @@ export async function saveEvaluation(data: {
       observacao, msaLessons, methodLessons, hymns 
     } = data;
 
-    // Save or update the PreEvaluationResult
+    const evaluation = await prisma.preEvaluation.findUnique({
+      where: { id: preEvaluationId },
+      include: { church: { include: { sector: true } } }
+    });
+
+    if (!evaluation) {
+      throw new Error("Registro não encontrado ou sem permissão.");
+    }
+
+    const candAdminId = evaluation.church.sector.administrationId;
+
+    if (admin) {
+      await assertAdministrationAccess(candAdminId);
+    }
+
+    const evaluatorId = session?.type === "encarregado" ? session.id : null;
+
+    if (evaluatorId) {
+      const pic = await prisma.personInCharge.findUnique({
+        where: { id: evaluatorId },
+        include: { church: { include: { sector: true } } }
+      });
+      if (!pic || pic.church.sector.administrationId !== candAdminId) {
+        throw new Error("Acesso negado. Avaliador não pertence à mesma Administração.");
+      }
+    }
+
     await prisma.preEvaluationResult.upsert({
       where: { preEvaluationId },
       update: {
@@ -58,19 +84,15 @@ export async function saveEvaluation(data: {
     let autoAllocatedTestId: string | null = null;
 
     if (isApproved) {
-      // Find a valid test > 24 hours away
       const twentyFourHoursFromNow = new Date();
       twentyFourHoursFromNow.setHours(twentyFourHoursFromNow.getHours() + 24);
 
       const nextValidTest = await prisma.testSchedule.findFirst({
         where: {
-          testDate: {
-            gte: twentyFourHoursFromNow
-          }
+          testDate: { gte: twentyFourHoursFromNow },
+          church: { sector: { administrationId: candAdminId } }
         },
-        orderBy: {
-          testDate: 'asc'
-        }
+        orderBy: { testDate: 'asc' }
       });
 
       if (nextValidTest) {

@@ -1,15 +1,21 @@
 import { getChurchesPaginated, createChurch, deleteChurch, updateChurch } from "@/actions/church";
 import { getSectors } from "@/actions/sector";
+import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { Church, Plus, Trash2, MapPin, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
+import { ChurchForm } from "@/components/ChurchForm";
 
 export default async function ChurchesPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string, page?: string, q?: string }>;
 }) {
+  const session = await getSession();
+  if (!session) redirect("/login");
+
   const resolvedSearchParams = await searchParams;
   const page = Number(resolvedSearchParams?.page) || 1;
   const q = resolvedSearchParams?.q || "";
@@ -17,6 +23,20 @@ export default async function ChurchesPage({
 
   const { data: churches, total, totalPages } = await getChurchesPaginated(page, 10, q);
   const sectors = await getSectors();
+
+  const isSuperAdmin = session.role === "SUPER_ADMIN";
+  
+  const rrms = isSuperAdmin ? await prisma.rRM.findMany({
+    where: { active: true },
+    include: {
+      administrations: { 
+        where: { active: true }, 
+        select: { id: true, name: true, sectors: { select: { id: true, name: true } } },
+        orderBy: { name: "asc" }
+      }
+    },
+    orderBy: { name: "asc" }
+  }) : [];
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -31,42 +51,7 @@ export default async function ChurchesPage({
         {/* Form */}
         <div className="glass-card h-fit">
           <h2 className="text-xl font-semibold text-slate-900 mb-4">Nova Igreja</h2>
-          <form action={createChurch} className="space-y-4">
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
-                Nome da Comum
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                required
-                placeholder="Ex: Central..."
-                className="input-glass"
-              />
-            </div>
-            
-            <div>
-              <label htmlFor="sectorId" className="block text-sm font-medium text-slate-600 mb-1">
-                Setor
-              </label>
-              <select defaultValue=""
-                id="sectorId"
-                name="sectorId"
-                required
-                className="input-glass"
-              >
-                <option value="" disabled >Selecione um setor...</option>
-                {sectors.map(sector => (
-                  <option key={sector.id} value={sector.id}>{sector.name}</option>
-                ))}
-              </select>
-            </div>
-
-            <button type="submit" className="btn-primary w-full flex justify-center items-center gap-2">
-              <Plus className="w-5 h-5" /> Cadastrar Igreja
-            </button>
-          </form>
+          <ChurchForm rrms={rrms} sectors={sectors} isSuperAdmin={isSuperAdmin} />
         </div>
 
         {/* List */}
@@ -117,16 +102,35 @@ export default async function ChurchesPage({
                                   autoFocus
                                   placeholder="Nome da Igreja"
                                 />
-                                <select
-                                  name="sectorId"
-                                  defaultValue={church.sectorId}
-                                  required
-                                  className="input-glass py-1.5 px-3 uppercase text-sm"
-                                >
-                                  {sectors.map(sector => (
-                                    <option key={sector.id} value={sector.id}>{sector.name}</option>
-                                  ))}
-                                </select>
+                                {isSuperAdmin ? (
+                                  <select
+                                    name="sectorId"
+                                    defaultValue={church.sectorId}
+                                    required
+                                    className="input-glass py-1.5 px-3 uppercase text-sm"
+                                  >
+                                    {rrms.map(rrm => (
+                                      <optgroup key={rrm.id} label={rrm.name}>
+                                        {rrm.administrations.map(adm => (
+                                          adm.sectors.map(sec => (
+                                            <option key={sec.id} value={sec.id}>{adm.name} - {sec.name}</option>
+                                          ))
+                                        ))}
+                                      </optgroup>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <select
+                                    name="sectorId"
+                                    defaultValue={church.sectorId}
+                                    required
+                                    className="input-glass py-1.5 px-3 uppercase text-sm"
+                                  >
+                                    {sectors.map(sector => (
+                                      <option key={sector.id} value={sector.id}>{sector.name}</option>
+                                    ))}
+                                  </select>
+                                )}
                               </div>
                               <div className="flex items-center gap-2 shrink-0 md:justify-end">
                                 <button type="submit" className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors" title="Salvar">
@@ -233,16 +237,35 @@ export default async function ChurchesPage({
                         autoFocus
                         placeholder="Nome da Igreja"
                       />
-                      <select
-                        name="sectorId"
-                        defaultValue={church.sectorId}
-                        required
-                        className="input-glass py-1.5 px-3 uppercase text-sm"
-                      >
-                        {sectors.map(sector => (
-                          <option key={sector.id} value={sector.id}>{sector.name}</option>
-                        ))}
-                      </select>
+                      {isSuperAdmin ? (
+                        <select
+                          name="sectorId"
+                          defaultValue={church.sectorId}
+                          required
+                          className="input-glass py-1.5 px-3 uppercase text-sm"
+                        >
+                          {rrms.map(rrm => (
+                            <optgroup key={rrm.id} label={rrm.name}>
+                              {rrm.administrations.map(adm => (
+                                adm.sectors.map(sec => (
+                                  <option key={sec.id} value={sec.id}>{adm.name} - {sec.name}</option>
+                                ))
+                              ))}
+                            </optgroup>
+                          ))}
+                        </select>
+                      ) : (
+                        <select
+                          name="sectorId"
+                          defaultValue={church.sectorId}
+                          required
+                          className="input-glass py-1.5 px-3 uppercase text-sm"
+                        >
+                          {sectors.map(sector => (
+                            <option key={sector.id} value={sector.id}>{sector.name}</option>
+                          ))}
+                        </select>
+                      )}
                       <div className="flex items-center gap-2 justify-end pt-2 border-t border-blue-200/50 mt-1">
                         <button type="submit" className="text-green-600 bg-green-100 hover:bg-green-200 p-2.5 rounded-xl transition-colors" title="Salvar">
                           <Save className="w-5 h-5" />

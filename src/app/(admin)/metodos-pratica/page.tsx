@@ -3,12 +3,14 @@ import { Music, Plus, Trash2, Pencil, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export default async function MetodosPraticaPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string }>;
 }) {
+  await requireSuperAdmin();
   const resolvedParams = await searchParams;
   const methods = await getPracticalMethods();
   const instruments = await prisma.instrument.findMany({ orderBy: { name: "asc" } });

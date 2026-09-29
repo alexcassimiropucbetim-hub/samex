@@ -2,12 +2,14 @@ import { getTheoryMethods, createTheoryMethod, updateTheoryMethod, deleteTheoryM
 import { BookOpen, Plus, Trash2, Pencil, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export default async function MetodosTeoriaPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string }>;
 }) {
+  await requireSuperAdmin();
   const resolvedParams = await searchParams;
   const methods = await getTheoryMethods();
   

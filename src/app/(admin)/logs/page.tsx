@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Activity, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
 import SearchInput from "@/components/SearchInput";
+import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export const dynamic = "force-dynamic";
 
@@ -10,6 +11,7 @@ export default async function LogsPage({
 }: {
   searchParams: Promise<{ page?: string; q?: string }>;
 }) {
+  await requireSuperAdmin();
   const resolvedParams = await searchParams;
   const page = Number(resolvedParams?.page) || 1;
   const q = resolvedParams?.q || "";

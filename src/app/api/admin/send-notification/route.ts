@@ -1,13 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSession } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 import { sendNotificationToUser } from '@/lib/webpush';
+import { getAuthenticatedAdmin } from '@/lib/auth-scope';
 
 export async function POST(req: NextRequest) {
   try {
-    const authPayload = await getSession();
-    if (!authPayload || authPayload.type !== 'admin') {
+    const admin = await getAuthenticatedAdmin();
+    if (!admin) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    if (admin.role !== 'SUPER_ADMIN') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     const { title, message, priority, targetType } = await req.json();

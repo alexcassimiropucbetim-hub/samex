@@ -6,9 +6,10 @@ import { getSession } from "@/lib/auth";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { ActivitySummaryWidget } from "@/components/ActivitySummaryWidget";
 import { CalendarEventsWrapper } from "@/components/CalendarEventsWrapper";
-import { buildAdministrationWhere } from "@/lib/auth-scope";
+import { requireAuthenticatedAdminPage, buildAdministrationWhere } from "@/lib/auth-scope";
 
 export default async function Home(props: { searchParams: Promise<{ year?: string }> | { year?: string } }) {
+  await requireAuthenticatedAdminPage();
   const searchParams = await props.searchParams;
   const selectedYear = searchParams?.year ? parseInt(searchParams.year) : new Date().getFullYear();
   const today = new Date();

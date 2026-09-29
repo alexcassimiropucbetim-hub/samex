@@ -26,9 +26,37 @@ export default async function PortalDashboard() {
   const isAdmin = session?.type === "admin";
   const isLocal = !isRegional && !isExaminadora && !isAdmin;
 
-  const [allPreEvaluations, testSchedules, categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations, allEvents] = await Promise.all([
-    getPreEvaluations(),
-    getTestSchedules(),
+  if (!session) {
+    redirect("/login");
+  }
+
+  let allPreEvaluations: any[] = [];
+  let testSchedules: any[] = [];
+
+  if (isAdmin) {
+    allPreEvaluations = await getPreEvaluations();
+    testSchedules = await getTestSchedules();
+  } else {
+    allPreEvaluations = await prisma.preEvaluation.findMany({
+      where: { finalTestStatus: { not: "APROVADO" } },
+      include: {
+        sector: true, church: true, personInCharge: true, testType: true,
+        scheduler: true, testEvaluator: true, instrument: true, currentInstrument: true,
+        evaluationResult: { include: { evaluator: true } }
+      },
+      orderBy: { createdAt: "desc" }
+    });
+    testSchedules = await prisma.testSchedule.findMany({
+      include: {
+        church: { include: { sector: true } },
+        candidates: true
+      },
+      orderBy: { testDate: "desc" }
+    });
+  }
+
+  const [categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations, allEvents] = await Promise.all([
+
     prisma.instrumentCategory.findMany({
       include: {
         instruments: {

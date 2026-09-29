@@ -1,10 +1,10 @@
-import { requireSuperAdmin } from "@/lib/auth-scope";
+import { requireSuperAdminPage } from "@/lib/auth-scope";
 
 export default async function ConfiguracoesLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  await requireSuperAdmin();
+  await requireSuperAdminPage();
   return <>{children}</>;
 }

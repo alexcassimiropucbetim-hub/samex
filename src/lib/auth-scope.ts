@@ -38,16 +38,48 @@ export async function getAuthenticatedAdmin(): Promise<Admin | null> {
 }
 
 /**
- * Exige que o usuário atual seja um SUPER_ADMIN.
+ * Exige que o usuário atual seja um SUPER_ADMIN (Uso em Server Actions).
  * Será utilizado para gestão global, RRMs e criação de outros Admins.
  */
 export async function requireSuperAdmin(): Promise<Admin> {
   const admin = await getAuthenticatedAdmin();
-  if (!admin || admin.role !== "SUPER_ADMIN") {
-    throw new Error("Acesso negado. Apenas SUPER_ADMIN possui permissão para esta ação.");
-  }
+  if (!admin) throw new Error("Acesso negado. Administrador não autenticado.");
+  if (admin.role !== "SUPER_ADMIN") throw new Error("Acesso restrito a Super Administradores.");
   return admin;
 }
+
+/**
+ * Exige que o usuário atual seja um SUPER_ADMIN (Uso em Páginas e Layouts).
+ * Redireciona de forma silenciosa e amigável em vez de lançar 500.
+ */
+export async function requireSuperAdminPage(): Promise<Admin> {
+  const { redirect } = await import("next/navigation");
+  const admin = await getAuthenticatedAdmin();
+  if (!admin) {
+    redirect("/admin-login");
+    return null as never;
+  }
+  if (admin.role !== "SUPER_ADMIN") {
+    // Redireciona o ADMIN_ADMIN para o painel principal caso não tenha permissão de SUPER
+    redirect("/");
+    return null as never;
+  }
+  return admin as Admin;
+}
+
+/**
+ * Exige que o administrador esteja autenticado (Uso em Páginas e Layouts).
+ */
+export async function requireAuthenticatedAdminPage(): Promise<Admin> {
+  const { redirect } = await import("next/navigation");
+  const admin = await getAuthenticatedAdmin();
+  if (!admin) {
+    redirect("/admin-login");
+    return null as never;
+  }
+  return admin as Admin;
+}
+
 
 /**
  * Valida o acesso de gravação ou visualização direta para uma Administração específica.

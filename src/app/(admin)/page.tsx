@@ -282,24 +282,26 @@ export default async function Home(props: { searchParams: Promise<{ year?: strin
       />
 
       {/* Cadastros Base Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-6">
+      <div className={`grid grid-cols-2 md:grid-cols-4 ${isSuperAdmin ? 'xl:grid-cols-7' : 'xl:grid-cols-5'} gap-3 md:gap-4`}>
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.name} className={`glass-card p-5 rounded-[18px] transition-all duration-300 hover:shadow-md border border-slate-200/60`}>
-              <div className="flex items-start justify-between mb-4">
-                <div className={`p-3 rounded-2xl ${stat.bg} border ${stat.border}`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+            <div key={stat.name} className={`glass-card p-4 rounded-[16px] transition-all duration-300 hover:shadow-md border border-slate-200/60`}>
+              <div className="flex items-start justify-between mb-3">
+                <div className={`p-2.5 rounded-xl ${stat.bg} border ${stat.border}`}>
+                  <Icon className={`w-5 h-5 ${stat.color}`} />
                 </div>
-                <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2 py-1 rounded-full">
-                  <span className={`text-xs font-bold ${stat.trend.startsWith('+') ? 'text-emerald-500' : 'text-slate-500'}`}>
-                    {stat.trend}
-                  </span>
-                </div>
+                {stat.trend && (
+                  <div className="flex items-center gap-1 bg-slate-50 border border-slate-100 px-2 py-0.5 rounded-full">
+                    <span className={`text-[10px] font-bold ${stat.trend.startsWith('+') ? 'text-emerald-500' : 'text-slate-500'}`}>
+                      {stat.trend}
+                    </span>
+                  </div>
+                )}
               </div>
-              <div>
-                <p className="text-3xl font-black text-slate-900 leading-none mb-1">{stat.value}</p>
-                <p className="text-sm font-semibold text-slate-500">{stat.name}</p>
+              <div className="overflow-hidden">
+                <p className="text-2xl font-black text-slate-900 leading-none mb-1 truncate">{stat.value}</p>
+                <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-wide truncate" title={stat.name}>{stat.name}</p>
               </div>
             </div>
           );

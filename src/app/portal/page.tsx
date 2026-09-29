@@ -12,6 +12,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getPreEvaluations } from "@/actions/preEvaluation";
 import { getTestSchedules } from "@/actions/testSchedule";
+import { buildAdministrationWhere } from "@/lib/auth-scope";
 import { prisma } from "@/lib/prisma";
 import DashboardCharts from "@/components/DashboardCharts";
 import { LatestRegistrations } from "@/components/LatestRegistrations";
@@ -32,13 +33,40 @@ export default async function PortalDashboard() {
 
   let allPreEvaluations: any[] = [];
   let testSchedules: any[] = [];
+  let preEvalScope: any = {};
+  let testScheduleScope: any = {};
 
   if (isAdmin) {
     allPreEvaluations = await getPreEvaluations();
     testSchedules = await getTestSchedules();
+    preEvalScope = await buildAdministrationWhere("PreEvaluation");
+    testScheduleScope = await buildAdministrationWhere("TestSchedule");
   } else {
+    const encarregado = await prisma.personInCharge.findUnique({
+      where: { id: session.id },
+      include: { managedChurches: true }
+    });
+    
+    if (encarregado) {
+      const authorizedChurchIds = [
+        encarregado.churchId,
+        ...encarregado.managedChurches.map(c => c.id)
+      ];
+      preEvalScope = { churchId: { in: authorizedChurchIds } };
+      testScheduleScope = { churchId: { in: authorizedChurchIds } };
+
+      if (isExaminadora) {
+        preEvalScope.gender = 'F';
+      }
+    }
+
     allPreEvaluations = await prisma.preEvaluation.findMany({
-      where: { finalTestStatus: { not: "APROVADO" } },
+      where: { 
+        AND: [
+          { finalTestStatus: { not: "APROVADO" } },
+          preEvalScope
+        ]
+      },
       include: {
         sector: true, church: true, personInCharge: true, testType: true,
         scheduler: true, testEvaluator: true, instrument: true, currentInstrument: true,
@@ -47,6 +75,7 @@ export default async function PortalDashboard() {
       orderBy: { createdAt: "desc" }
     });
     testSchedules = await prisma.testSchedule.findMany({
+      where: testScheduleScope,
       include: {
         church: { include: { sector: true } },
         candidates: true
@@ -64,7 +93,12 @@ export default async function PortalDashboard() {
             _count: {
               select: { 
                 preEvaluations: {
-                  where: { finalTestStatus: { not: "APROVADO" } }
+                  where: { 
+                    AND: [
+                      { finalTestStatus: { not: "APROVADO" } },
+                      preEvalScope
+                    ]
+                  }
                 }
               }
             }
@@ -77,7 +111,12 @@ export default async function PortalDashboard() {
         _count: {
           select: { 
             preEvaluations: {
-              where: { finalTestStatus: { not: "APROVADO" } }
+              where: { 
+                AND: [
+                  { finalTestStatus: { not: "APROVADO" } },
+                  preEvalScope
+                ]
+              }
             }
           }
         }
@@ -88,7 +127,12 @@ export default async function PortalDashboard() {
         _count: {
           select: { 
             preEvaluations: {
-              where: { finalTestStatus: { not: "APROVADO" } }
+              where: { 
+                AND: [
+                  { finalTestStatus: { not: "APROVADO" } },
+                  preEvalScope
+                ]
+              }
             }
           }
         }
@@ -101,15 +145,7 @@ export default async function PortalDashboard() {
     })
   ]);
 
-  let preEvaluations = allPreEvaluations;
-
-  if (isExaminadora) {
-    preEvaluations = allPreEvaluations.filter(p => p.gender === 'F');
-  } else if (isRegional) {
-    preEvaluations = allPreEvaluations;
-  } else if (!isAdmin) {
-    preEvaluations = allPreEvaluations.filter(p => p.churchId === session?.churchId);
-  }
+  const preEvaluations = allPreEvaluations;
 
   const pendentes = preEvaluations.filter(p => !p.status || p.status === "PENDENTE");
   const alocados = preEvaluations.filter(p => p.testScheduleId !== null);

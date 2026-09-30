@@ -67,7 +67,7 @@ export async function createPortalPreEvaluation(formData: FormData) {
   const candidateAdministrationId = church.sector.administrationId;
 
   // 2. Validar Instructor Church (mesma administração)
-  let finalInstructorChurchId = gender === "F" ? (instructorChurchId === "OUTRA" ? null : instructorChurchId) : null;
+  let finalInstructorChurchId = gender === "F" ? (instructorChurchId === "OUTRA" || !instructorChurchId ? null : instructorChurchId) : null;
   if (finalInstructorChurchId) {
     const instChurch = await prisma.church.findUnique({ where: { id: finalInstructorChurchId }, include: { sector: true } });
     if (!instChurch) throw new Error("Igreja da instrutora inválida.");
@@ -93,25 +93,25 @@ export async function createPortalPreEvaluation(formData: FormData) {
       gender,
       sectorId,
       churchId,
-      instructorName,
+      instructorName: gender === "F" ? instructorName : null,
       instructorChurchId: finalInstructorChurchId,
-      instructorChurchName: finalInstructorChurchId ? null : instructorChurchName,
+      instructorChurchName: gender === "F" ? (instructorChurchId === "OUTRA" ? instructorChurchName : null) : null,
       instrumentId,
       personInChargeId,
       testTypeId,
       msaStatus,
-      msaJustification,
-      currentInstrumentId,
-      currentTonality,
-      desiredTonality,
-      officializationDate,
-      candidateLevel,
+      msaJustification: msaStatus === "INCOMPLETO" ? msaJustification : null,
+      currentInstrumentId: currentInstrumentId || null,
+      currentTonality: currentTonality || null,
+      desiredTonality: desiredTonality || null,
+      officializationDate: officializationDate || null,
+      candidateLevel: candidateLevel || null,
       orchestraNeed,
       illness,
       approvedInSectorMeeting,
-      meetingDate,
-      meetingLocality,
-      meetingElderName,
+      meetingDate: meetingDate || null,
+      meetingLocality: meetingLocality || null,
+      meetingElderName: meetingElderName || null,
       status: isExempt ? "APROVADO" : "PENDENTE",
       finalTestStatus: "PENDENTE",
     },
@@ -224,7 +224,7 @@ export async function updatePortalPreEvaluation(id: string, formData: FormData) 
   
   const candidateAdministrationId = church.sector.administrationId;
 
-  let finalInstructorChurchId = gender === "F" ? (instructorChurchId === "OUTRA" ? null : instructorChurchId) : null;
+  let finalInstructorChurchId = gender === "F" ? (instructorChurchId === "OUTRA" || !instructorChurchId ? null : instructorChurchId) : null;
   if (finalInstructorChurchId) {
     const instChurch = await prisma.church.findUnique({ where: { id: finalInstructorChurchId }, include: { sector: true } });
     if (!instChurch) throw new Error("Igreja da instrutora inválida.");
@@ -271,25 +271,25 @@ export async function updatePortalPreEvaluation(id: string, formData: FormData) 
       gender,
       sectorId,
       churchId,
-      instructorName,
+      instructorName: gender === "F" ? instructorName : null,
       instructorChurchId: finalInstructorChurchId,
-      instructorChurchName: finalInstructorChurchId ? null : instructorChurchName,
+      instructorChurchName: gender === "F" ? (instructorChurchId === "OUTRA" ? instructorChurchName : null) : null,
       instrumentId,
       personInChargeId,
       testTypeId,
       msaStatus,
-      msaJustification,
-      currentInstrumentId,
-      currentTonality,
-      desiredTonality,
-      officializationDate,
-      candidateLevel,
+      msaJustification: msaStatus === "INCOMPLETO" ? msaJustification : null,
+      currentInstrumentId: currentInstrumentId || null,
+      currentTonality: currentTonality || null,
+      desiredTonality: desiredTonality || null,
+      officializationDate: officializationDate || null,
+      candidateLevel: candidateLevel || null,
       orchestraNeed,
       illness,
       approvedInSectorMeeting,
-      meetingDate,
-      meetingLocality,
-      meetingElderName,
+      meetingDate: meetingDate || null,
+      meetingLocality: meetingLocality || null,
+      meetingElderName: meetingElderName || null,
       status: initialStatus,
       testScheduleId: autoAllocatedTestId,
     },

@@ -22,7 +22,8 @@ export async function generateMusicoLetter(preEvaluation: any): Promise<Uint8Arr
   const month = monthNames[today.getMonth()];
   const year = today.getFullYear().toString();
 
-  page.drawText("Betim", { x: 270, y: 765, size: fontSize, color });
+  const cityName = preEvaluation.church?.sector?.administration?.name || "Betim";
+  page.drawText(cityName, { x: 270, y: 765, size: fontSize, color });
   page.drawText(day, { x: 430, y: 765, size: fontSize, color });
   page.drawText(month, { x: 470, y: 765, size: fontSize, color });
   page.drawText(year, { x: 545, y: 765, size: fontSize, color });
@@ -186,7 +187,8 @@ export async function generateOrganistaLetter(preEvaluation: any): Promise<Uint8
   const month = monthNames[today.getMonth()];
   const year = today.getFullYear().toString();
 
-  page.drawText("Betim", { x: 270, y: 765, size: fontSize, color });
+  const cityName = preEvaluation.church?.sector?.administration?.name || "Betim";
+  page.drawText(cityName, { x: 270, y: 765, size: fontSize, color });
   page.drawText(day, { x: 430, y: 765, size: fontSize, color });
   page.drawText(month, { x: 470, y: 765, size: fontSize, color });
   page.drawText(year, { x: 545, y: 765, size: fontSize, color });
@@ -359,7 +361,8 @@ export async function generateTrocaInstrumentoLetter(preEvaluation: any): Promis
   const month = monthNames[today.getMonth()];
   const year = today.getFullYear().toString();
 
-  page.drawText("Betim", { x: 270, y: 765, size: fontSize, color });
+  const cityName = preEvaluation.church?.sector?.administration?.name || "Betim";
+  page.drawText(cityName, { x: 270, y: 765, size: fontSize, color });
   page.drawText(day, { x: 430, y: 765, size: fontSize, color });
   page.drawText(month, { x: 470, y: 765, size: fontSize, color });
   page.drawText(year, { x: 545, y: 765, size: fontSize, color });

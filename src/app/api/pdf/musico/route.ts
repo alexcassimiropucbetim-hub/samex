@@ -17,6 +17,11 @@ export async function GET(request: Request) {
         church: {
           include: {
             ministry: true,
+            sector: {
+              include: {
+                administration: true
+              }
+            }
           }
         },
         instrument: true,

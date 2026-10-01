@@ -100,7 +100,7 @@ export async function assertAdministrationAccess(targetAdministrationId: string)
   throw new Error("Acesso negado a esta Administração. Violação de Isolamento.");
 }
 
-export type ScopedModel = "Sector" | "Church" | "PreEvaluation" | "TestSchedule" | "PersonInCharge" | "Evaluator";
+export type ScopedModel = "Sector" | "Church" | "Ministry" | "PreEvaluation" | "TestSchedule" | "PersonInCharge" | "Evaluator";
 
 /**
  * Retorna o objeto `where` apropriado do Prisma para isolar os registros 
@@ -124,6 +124,9 @@ export async function buildAdministrationWhere(model: ScopedModel): Promise<any>
       
     case "Church":
       return { sector: { administrationId: admId } };
+      
+    case "Ministry":
+      return { church: { sector: { administrationId: admId } } };
       
     case "PreEvaluation":
       // PreEvaluation -> Church -> Sector -> Administration

@@ -91,7 +91,6 @@ export function Sidebar({ role, adminName, administrationId }: { role?: string, 
       icon: Users,
       items: [
         { name: "Encarregados", href: "/encarregados", icon: UserCheck },
-        { name: "Avaliadores", href: "/avaliadores", icon: Users },
       ]
     },
     ...(isSuperAdmin ? [{

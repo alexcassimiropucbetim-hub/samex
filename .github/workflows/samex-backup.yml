@@ -1,0 +1,61 @@
+name: SAMEX Database Backup
+
+on:
+  # Permite execução manual
+  workflow_dispatch:
+  
+  # Executa automaticamente todos os dias às 02:00 horário de Brasília (BRT / UTC-3)
+  # 02:00 BRT = 05:00 UTC
+  schedule:
+    - cron: '0 5 * * *'
+
+jobs:
+  backup:
+    name: Gerar Backup do Banco de Dados
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Instalar Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Obter data e hora atual
+        id: timestamp
+        run: echo "TIMESTAMP=$(date +'%Y-%m-%d-%H%M%S')" >> $GITHUB_ENV
+
+      - name: Gerar arquivos de backup (Supabase CLI)
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          echo "Iniciando geração de backup..."
+          
+          # 1. Extrair roles
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f roles.sql --role-only
+          
+          # 2. Extrair schema
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
+          
+          # 3. Extrair dados (usando COPY para otimização)
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f data.sql --use-copy --data-only
+
+          echo "Arquivos de backup gerados com sucesso."
+
+      - name: Compactar arquivos em ZIP
+        run: |
+          FOLDER_NAME="samex-backup-${{ env.TIMESTAMP }}"
+          ZIP_NAME="${FOLDER_NAME}.zip"
+          
+          mkdir -p $FOLDER_NAME
+          mv roles.sql schema.sql data.sql $FOLDER_NAME/
+          
+          zip -r $ZIP_NAME $FOLDER_NAME/
+          
+          echo "ZIP_NAME=$ZIP_NAME" >> $GITHUB_ENV
+
+      - name: Armazenar ZIP como Artifact (Retenção 30 dias)
+        uses: actions/upload-artifact@v4
+        with:
+          name: samex-backup-${{ env.TIMESTAMP }}
+          path: ${{ env.ZIP_NAME }}
+          retention-days: 30

@@ -101,7 +101,8 @@ export function Sidebar({ role, adminName, administrationId }: { role?: string, 
         { name: "Central de Notificações", href: "/notificacoes", icon: BellRing },
         { name: "Configurações", href: "/configuracoes", icon: Settings },
         { name: "Logs de Acesso", href: "/logs", icon: Activity },
-        { name: "Auditoria de Dados", href: "/auditoria", icon: Database }
+        { name: "Auditoria de Dados", href: "/auditoria", icon: Database },
+        { name: "Backup e Restauração", href: "/backup-restauracao", icon: Database }
       ]
     }] : []),
     {

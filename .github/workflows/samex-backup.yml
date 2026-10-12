@@ -1,7 +1,7 @@
 name: SAMEX Database Backup
 
 on:
-  # Permite execução manual
+ # Permite execução manual do backup
   workflow_dispatch:
   
   # Executa automaticamente todos os dias às 02:00 horário de Brasília (BRT / UTC-3)

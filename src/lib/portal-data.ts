@@ -21,24 +21,46 @@ export async function getPortalScopes(session: any) {
   } else {
     const encarregado = await prisma.personInCharge.findUnique({
       where: { id: session?.id },
-      include: { managedChurches: true }
+      include: {
+        managedChurches: true,
+        church: {
+          include: { sector: true }
+        }
+      }
     });
     
     if (encarregado) {
-      const authorizedChurchIds = [
-        encarregado.churchId,
-        ...encarregado.managedChurches.map(c => c.id)
-      ];
-      
-      preEvalScope = { churchId: { in: authorizedChurchIds } };
-      if (isExaminadora) {
-        preEvalScope.gender = 'F';
+      const admId = encarregado.church?.sector?.administrationId;
+
+      if ((isRegional || isExaminadora) && admId) {
+        // Encarregado Regional e Examinadoras possuem visão de toda a sua Administração
+        churchScope = { sector: { administrationId: admId } };
+        sectorScope = { administrationId: admId };
+        personInChargeScope = { church: { sector: { administrationId: admId } } };
+        testScheduleScope = { church: { sector: { administrationId: admId } } };
+
+        if (isExaminadora) {
+          preEvalScope = {
+            church: { sector: { administrationId: admId } },
+            gender: 'F'
+          };
+        } else {
+          preEvalScope = {
+            church: { sector: { administrationId: admId } }
+          };
+        }
+      } else {
+        const authorizedChurchIds = [
+          encarregado.churchId,
+          ...encarregado.managedChurches.map(c => c.id)
+        ];
+        
+        preEvalScope = { churchId: { in: authorizedChurchIds } };
+        testScheduleScope = { churchId: { in: authorizedChurchIds } };
+        personInChargeScope = { churchId: { in: authorizedChurchIds } };
+        churchScope = { id: { in: authorizedChurchIds } };
+        sectorScope = { churches: { some: { id: { in: authorizedChurchIds } } } };
       }
-      
-      testScheduleScope = { churchId: { in: authorizedChurchIds } };
-      personInChargeScope = { churchId: { in: authorizedChurchIds } };
-      churchScope = { id: { in: authorizedChurchIds } };
-      sectorScope = { churches: { some: { id: { in: authorizedChurchIds } } } };
     } else {
       // Fallback for invalid session without encarregado record
       preEvalScope = { id: "INVALID" };
@@ -134,11 +156,11 @@ export async function getPortalEligibleEvaluators(session: any) {
       AND: [
         personInChargeScope,
         {
-          roleType: {
-            name: {
-              in: ["Examinadora", "Encarregado Regional", "Encarregado Local"]
-            }
-          }
+          OR: [
+            { roleType: { name: { contains: "examinadora", mode: "insensitive" } } },
+            { roleType: { name: { contains: "regional", mode: "insensitive" } } },
+            { roleType: { name: { contains: "local", mode: "insensitive" } } },
+          ]
         }
       ]
     },

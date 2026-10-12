@@ -8,11 +8,11 @@ export async function GET(request: Request) {
     const session = await getSession();
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
-    const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
-    const isAdmin = session?.type === "admin";
+    const { getPortalScopes } = await import("@/lib/portal-data");
+    const { preEvalScope } = await getPortalScopes(session);
 
     let preEvaluations = await prisma.preEvaluation.findMany({
+      where: preEvalScope,
       include: {
         sector: true,
         church: true,
@@ -28,14 +28,6 @@ export async function GET(request: Request) {
       },
       orderBy: { createdAt: "desc" }
     });
-
-    if (isExaminadora) {
-      preEvaluations = preEvaluations.filter(p => p.gender === "F");
-    } else if (isRegional) {
-      // all
-    } else if (!isAdmin) {
-      preEvaluations = preEvaluations.filter(p => p.churchId === session?.churchId);
-    }
 
     const pdfDoc = await PDFDocument.create();
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);

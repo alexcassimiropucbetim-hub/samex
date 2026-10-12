@@ -10,9 +10,7 @@ import {
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getPreEvaluations } from "@/actions/preEvaluation";
-import { getTestSchedules } from "@/actions/testSchedule";
-import { buildAdministrationWhere } from "@/lib/auth-scope";
+import { getPortalScopes } from "@/lib/portal-data";
 import { prisma } from "@/lib/prisma";
 import DashboardCharts from "@/components/DashboardCharts";
 import { LatestRegistrations } from "@/components/LatestRegistrations";
@@ -22,45 +20,15 @@ import { PendingLettersWidget } from "@/components/PendingLettersWidget";
 export default async function PortalDashboard() {
   const session = await getSession();
   
-  const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
-  const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
-  const isAdmin = session?.type === "admin";
-  const isLocal = !isRegional && !isExaminadora && !isAdmin;
-
   if (!session) {
     redirect("/login");
   }
 
-  let allPreEvaluations: any[] = [];
-  let testSchedules: any[] = [];
-  let preEvalScope: any = {};
-  let testScheduleScope: any = {};
+  const { preEvalScope, testScheduleScope, sectorScope, isRegional, isExaminadora, isAdmin } = await getPortalScopes(session);
+  const isLocal = !isRegional && !isExaminadora && !isAdmin;
 
-  if (isAdmin) {
-    allPreEvaluations = await getPreEvaluations();
-    testSchedules = await getTestSchedules();
-    preEvalScope = await buildAdministrationWhere("PreEvaluation");
-    testScheduleScope = await buildAdministrationWhere("TestSchedule");
-  } else {
-    const encarregado = await prisma.personInCharge.findUnique({
-      where: { id: session.id },
-      include: { managedChurches: true }
-    });
-    
-    if (encarregado) {
-      const authorizedChurchIds = [
-        encarregado.churchId,
-        ...encarregado.managedChurches.map(c => c.id)
-      ];
-      preEvalScope = { churchId: { in: authorizedChurchIds } };
-      testScheduleScope = { churchId: { in: authorizedChurchIds } };
-
-      if (isExaminadora) {
-        preEvalScope.gender = 'F';
-      }
-    }
-
-    allPreEvaluations = await prisma.preEvaluation.findMany({
+  const [allPreEvaluations, testSchedules] = await Promise.all([
+    prisma.preEvaluation.findMany({
       where: { 
         AND: [
           { finalTestStatus: { not: "APROVADO" } },
@@ -73,16 +41,16 @@ export default async function PortalDashboard() {
         evaluationResult: { include: { evaluator: true } }
       },
       orderBy: { createdAt: "desc" }
-    });
-    testSchedules = await prisma.testSchedule.findMany({
+    }),
+    prisma.testSchedule.findMany({
       where: testScheduleScope,
       include: {
         church: { include: { sector: true } },
         candidates: true
       },
       orderBy: { testDate: "desc" }
-    });
-  }
+    })
+  ]);
 
   const [categoriesWithInstruments, sectorsWithEvaluations, testTypesWithEvaluations, allEvents] = await Promise.all([
 
@@ -107,6 +75,7 @@ export default async function PortalDashboard() {
       }
     }),
     prisma.sector.findMany({
+      where: sectorScope,
       include: {
         _count: {
           select: { 

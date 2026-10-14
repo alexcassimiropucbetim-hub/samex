@@ -55,7 +55,10 @@ export async function saveEvaluation(data: {
         where: { id: evaluatorId },
         include: { church: { include: { sector: true } } }
       });
-      if (!pic || pic.church.sector.administrationId !== candAdminId) {
+      if (!pic) {
+        throw new Error("Acesso negado. Avaliador não encontrado.");
+      }
+      if (pic.church.sector.administrationId !== candAdminId && evaluation.testEvaluatorId !== evaluatorId) {
         throw new Error("Acesso negado. Avaliador não pertence à mesma Administração.");
       }
     }

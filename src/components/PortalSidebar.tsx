@@ -6,8 +6,23 @@ import { FileSignature, CalendarClock, LogOut, Menu, X, BookOpen, Settings, Home
 import clsx from "clsx";
 import { logout } from "@/actions/auth-actions"; 
 import { NotificationBell } from "./NotificationBell";
+import { ChurchSwitcher } from "./ChurchSwitcher";
 
-export function PortalSidebar({ isRegional, isExaminadora = false, pendingTestsCount = 0 }: { isRegional: boolean, isExaminadora?: boolean, pendingTestsCount?: number }) {
+export function PortalSidebar({ 
+  isRegional, 
+  isExaminadora = false, 
+  pendingTestsCount = 0,
+  userChurches = [],
+  activeChurchId = "",
+  logoUrl,
+}: { 
+  isRegional: boolean;
+  isExaminadora?: boolean;
+  pendingTestsCount?: number;
+  userChurches?: any[];
+  activeChurchId?: string;
+  logoUrl?: string | null;
+}) {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
@@ -63,7 +78,18 @@ export function PortalSidebar({ isRegional, isExaminadora = false, pendingTestsC
       <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-40 flex items-center justify-between px-4 shadow-sm">
         <div className="flex items-center gap-3">
            {!logoError ? (
-             <img src="/api/config/logo" alt="Logo" className="h-8 object-contain" onError={() => setLogoError(true)} />
+             <img 
+               src={logoUrl || "/api/config/logo?v=samex"} 
+               alt="Logo" 
+               className="h-8 object-contain" 
+               onError={(e) => {
+                 if (!e.currentTarget.src.includes("samex-logo.png")) {
+                   e.currentTarget.src = "/samex-logo.png";
+                 } else {
+                   setLogoError(true);
+                 }
+               }} 
+             />
            ) : (
              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
                <span className="text-white font-bold text-sm">P</span>
@@ -91,19 +117,22 @@ export function PortalSidebar({ isRegional, isExaminadora = false, pendingTestsC
       )}>
         <div className="p-6 flex items-center justify-between border-b border-slate-200 h-24 relative">
           <div className="w-full h-full flex items-center justify-center relative">
-            {!logoError && (
+            {!logoError ? (
               <img 
-                src="/api/config/logo" 
+                src={logoUrl || "/api/config/logo?v=samex"} 
                 alt="Logo" 
-                className="max-w-full max-h-full object-contain z-10"
-                onError={() => setLogoError(true)}
+                className="max-w-full max-h-full object-contain"
+                onError={(e) => {
+                  if (!e.currentTarget.src.includes("samex-logo.png")) {
+                    e.currentTarget.src = "/samex-logo.png";
+                  } else {
+                    setLogoError(true);
+                  }
+                }}
               />
-            )}
-            {logoError && (
-              <div className="absolute inset-0 flex items-center justify-center -z-10">
-                <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
-                  <span className="text-white font-bold text-lg">P</span>
-                </div>
+            ) : (
+              <div className="w-12 h-12 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/30">
+                <span className="text-white font-bold text-lg">P</span>
               </div>
             )}
           </div>
@@ -118,6 +147,16 @@ export function PortalSidebar({ isRegional, isExaminadora = false, pendingTestsC
             </button>
           </div>
         </div>
+
+        {userChurches && userChurches.length > 1 && (
+          <div className="p-3 border-b border-slate-100 bg-slate-50/70">
+            <ChurchSwitcher
+              churches={userChurches}
+              activeChurchId={activeChurchId}
+              isSidebar
+            />
+          </div>
+        )}
 
         <nav className="flex-1 overflow-y-auto p-4 flex flex-col gap-6">
           {menuGroups.map((group) => {

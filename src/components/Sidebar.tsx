@@ -7,7 +7,7 @@ import clsx from "clsx";
 import { useState, useEffect } from "react";
 import { logout } from "@/actions/auth-actions";
 
-export function Sidebar({ role, adminName, administrationId }: { role?: string, adminName?: string, administrationId?: string | null }) {
+export function Sidebar({ role, adminName, administrationId, logoUrl }: { role?: string, adminName?: string, administrationId?: string | null, logoUrl?: string | null }) {
   const pathname = usePathname();
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
     "Estrutura": true,
@@ -121,7 +121,20 @@ export function Sidebar({ role, adminName, administrationId }: { role?: string, 
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
              {!logoError ? (
-               <img src="/api/config/logo" alt="Logo" className="h-6 object-contain brightness-0 invert" onError={() => setLogoError(true)} />
+               <div className="bg-white rounded-lg px-2 py-0.5 inline-flex items-center justify-center">
+                 <img 
+                   src="/api/config/logo" 
+                   alt="Logo" 
+                   className="h-6 object-contain" 
+                   onError={(e) => {
+                     if (!e.currentTarget.src.includes("logo.png")) {
+                       e.currentTarget.src = "/logo.png";
+                     } else {
+                       setLogoError(true);
+                     }
+                   }} 
+                 />
+               </div>
              ) : (
                <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center">
                  <Music2 className="text-white w-4 h-4" />
@@ -156,15 +169,22 @@ export function Sidebar({ role, adminName, administrationId }: { role?: string, 
             </button>
           </div>
           <div className="w-full flex justify-center mb-2">
-            {!logoError && (
-              <img 
-                src="/api/config/logo" 
-                alt="Logo" 
-                className="h-10 object-contain brightness-0 invert"
-                onError={() => setLogoError(true)}
-              />
-            )}
-            {logoError && (
+            {!logoError ? (
+              <div className="bg-white rounded-xl px-3 py-1.5 shadow-sm inline-flex items-center justify-center max-w-[200px]">
+                <img 
+                  src="/api/config/logo" 
+                  alt="Logo SAMEX" 
+                  className="h-8 max-w-full object-contain"
+                  onError={(e) => {
+                    if (!e.currentTarget.src.includes("logo.png")) {
+                      e.currentTarget.src = "/logo.png";
+                    } else {
+                      setLogoError(true);
+                    }
+                  }}
+                />
+              </div>
+            ) : (
               <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/30">
                 <Music2 className="text-white w-6 h-6" />
               </div>

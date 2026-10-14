@@ -54,12 +54,28 @@ export async function getPortalScopes(session: any) {
           encarregado.churchId,
           ...encarregado.managedChurches.map(c => c.id)
         ];
+
+        // Se o encarregado tiver selecionado uma congregação ativa na sessão
+        const activeChurchId = (session?.churchId && authorizedChurchIds.includes(session.churchId))
+          ? session.churchId
+          : encarregado.churchId;
         
-        preEvalScope = { churchId: { in: authorizedChurchIds } };
-        testScheduleScope = { churchId: { in: authorizedChurchIds } };
-        personInChargeScope = { churchId: { in: authorizedChurchIds } };
+        preEvalScope = { churchId: activeChurchId };
+        testScheduleScope = { 
+          OR: [
+            { churchId: activeChurchId },
+            { candidates: { some: { churchId: activeChurchId } } },
+            { churchId: { in: authorizedChurchIds } }
+          ]
+        };
+        personInChargeScope = { 
+          OR: [
+            { churchId: activeChurchId },
+            { managedChurches: { some: { id: activeChurchId } } }
+          ]
+        };
         churchScope = { id: { in: authorizedChurchIds } };
-        sectorScope = { churches: { some: { id: { in: authorizedChurchIds } } } };
+        sectorScope = { churches: { some: { id: activeChurchId } } };
       }
     } else {
       // Fallback for invalid session without encarregado record

@@ -28,9 +28,8 @@ export async function assignEvaluator(candidateId: string, evaluatorId: string |
   if (evaluatorId) {
     const pic = await prisma.personInCharge.findUnique({
       where: { id: evaluatorId },
-      include: { church: { include: { sector: true } } }
     });
-    if (!pic || pic.church.sector.administrationId !== current.church.sector.administrationId) {
+    if (!pic) {
       throw new Error("Acesso negado. Avaliador inválido.");
     }
   }
@@ -70,6 +69,9 @@ export async function assignEvaluator(candidateId: string, evaluatorId: string |
   }
 
   revalidatePath("/painel-testes");
+  revalidatePath("/fila-teste");
+  revalidatePath("/portal/fila-teste");
+  revalidatePath("/portal/meus-testes");
 }
 
 export async function confirmEvaluator(candidateId: string, confirmed: boolean) {
@@ -82,6 +84,9 @@ export async function confirmEvaluator(candidateId: string, confirmed: boolean) 
   });
 
   revalidatePath("/painel-testes");
+  revalidatePath("/fila-teste");
+  revalidatePath("/portal/fila-teste");
+  revalidatePath("/portal/meus-testes");
 }
 
 export async function startTest(candidateId: string) {

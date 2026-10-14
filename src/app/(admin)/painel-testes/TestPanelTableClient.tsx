@@ -36,6 +36,12 @@ export function TestPanelTableClient({
   evaluators: Evaluator[];
   testScheduleId: string;
 }) {
+  const [candidatesList, setCandidatesList] = useState<Candidate[]>(candidates);
+
+  useEffect(() => {
+    setCandidatesList(candidates);
+  }, [candidates]);
+
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -45,13 +51,13 @@ export function TestPanelTableClient({
   const [searchType, setSearchType] = useState("");
 
   const filteredCandidates = useMemo(() => {
-    return candidates.filter((cand) => {
+    return candidatesList.filter((cand) => {
       const matchName = cand.candidateName?.toLowerCase().includes(searchName.toLowerCase()) ?? false;
       const matchInstrument = cand.instrument?.name?.toLowerCase().includes(searchInstrument.toLowerCase()) ?? false;
       const matchType = cand.testType?.name?.toLowerCase().includes(searchType.toLowerCase()) ?? false;
       return matchName && matchInstrument && matchType;
     });
-  }, [candidates, searchName, searchInstrument, searchType]);
+  }, [candidatesList, searchName, searchInstrument, searchType]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -88,22 +94,42 @@ export function TestPanelTableClient({
   };
 
   const handleStatusChange = async (candidateId: string, status: string) => {
-    const candidate = candidates.find(c => c.id === candidateId);
+    const candidate = candidatesList.find(c => c.id === candidateId);
     if (!candidate?.testEvaluatorId) {
       alert("Por favor, selecione um avaliador antes de registrar o resultado.");
       return;
     }
     
     setOpenMenuId(null);
+    setCandidatesList(prev => prev.map(c => c.id === candidateId ? { ...c, finalTestStatus: status } : c));
     await updateCandidateStatus(candidateId, status);
   };
 
   const handleEvaluatorChange = async (candidateId: string, evaluatorId: string) => {
-    await assignEvaluator(candidateId, evaluatorId === "" ? null : evaluatorId);
+    const val = evaluatorId === "" ? null : evaluatorId;
+    const previous = candidatesList.find(c => c.id === candidateId);
+    setCandidatesList(prev => prev.map(c => c.id === candidateId ? { ...c, testEvaluatorId: val, evaluatorConfirmed: false } : c));
+    try {
+      await assignEvaluator(candidateId, val);
+    } catch (err: any) {
+      alert(err?.message || "Erro ao apontar avaliador.");
+      if (previous) {
+        setCandidatesList(prev => prev.map(c => c.id === candidateId ? previous : c));
+      }
+    }
   };
 
-  const handleConfirmEvaluator = async (candidateId: string) => {
-    await confirmEvaluator(candidateId, true);
+  const handleConfirmEvaluator = async (candidateId: string, confirmed: boolean = true) => {
+    const previous = candidatesList.find(c => c.id === candidateId);
+    setCandidatesList(prev => prev.map(c => c.id === candidateId ? { ...c, evaluatorConfirmed: confirmed } : c));
+    try {
+      await confirmEvaluator(candidateId, confirmed);
+    } catch (err: any) {
+      alert(err?.message || "Erro ao confirmar avaliador.");
+      if (previous) {
+        setCandidatesList(prev => prev.map(c => c.id === candidateId ? previous : c));
+      }
+    }
   };
 
   return (
@@ -261,10 +287,9 @@ export function TestPanelTableClient({
                   <td className="px-3 py-4">
                     <div className="flex items-center gap-2">
                       <select
-                        className={`bg-white border text-xs rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-36 lg:w-44 truncate ${cand.evaluatorConfirmed ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : 'border-slate-200 text-slate-500'}`}
+                        className={`bg-white border text-xs rounded-md px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500/50 w-36 lg:w-44 truncate cursor-pointer transition-colors ${cand.evaluatorConfirmed ? 'border-emerald-300 text-emerald-800 bg-emerald-50/70 font-medium' : 'border-slate-200 text-slate-700 hover:border-slate-300'}`}
                         value={cand.testEvaluatorId || ""}
                         onChange={(e) => handleEvaluatorChange(cand.id, e.target.value)}
-                        disabled={cand.evaluatorConfirmed}
                       >
                         <option value="">SELECIONE...</option>
                         {evaluators.filter(ev => {
@@ -287,7 +312,8 @@ export function TestPanelTableClient({
                       </select>
                       {cand.testEvaluatorId && !cand.evaluatorConfirmed && (
                         <button
-                          onClick={() => handleConfirmEvaluator(cand.id)}
+                          type="button"
+                          onClick={() => handleConfirmEvaluator(cand.id, true)}
                           className="flex items-center justify-center p-1.5 rounded-md bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors"
                           title="Confirmar Avaliador"
                         >
@@ -295,9 +321,14 @@ export function TestPanelTableClient({
                         </button>
                       )}
                       {cand.evaluatorConfirmed && (
-                        <div title="Avaliador Confirmado" className="text-emerald-500">
+                        <button
+                          type="button"
+                          onClick={() => handleConfirmEvaluator(cand.id, false)}
+                          className="flex items-center justify-center p-1 rounded-md text-emerald-600 hover:text-amber-600 hover:bg-amber-50 transition-colors cursor-pointer"
+                          title="Avaliador Confirmado. Clique para alterar ou desconfirmar"
+                        >
                           <CheckCircle className="w-5 h-5" />
-                        </div>
+                        </button>
                       )}
                     </div>
                   </td>
@@ -456,10 +487,9 @@ export function TestPanelTableClient({
                 <p className="text-xs text-slate-500 font-medium mb-1">Avaliador</p>
                 <div className="flex items-center gap-2">
                   <select
-                    className={`flex-1 bg-white border text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase ${cand.evaluatorConfirmed ? 'border-emerald-200 text-emerald-700 bg-emerald-50' : 'border-slate-200 text-slate-600'}`}
+                    className={`flex-1 bg-white border text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase cursor-pointer transition-colors ${cand.evaluatorConfirmed ? 'border-emerald-300 text-emerald-800 bg-emerald-50/70 font-medium' : 'border-slate-200 text-slate-700 hover:border-slate-300'}`}
                     value={cand.testEvaluatorId || ""}
                     onChange={(e) => handleEvaluatorChange(cand.id, e.target.value)}
-                    disabled={cand.evaluatorConfirmed}
                   >
                     <option value="">SELECIONE...</option>
                     {evaluators.filter(ev => {
@@ -482,7 +512,8 @@ export function TestPanelTableClient({
                   </select>
                   {cand.testEvaluatorId && !cand.evaluatorConfirmed && (
                     <button
-                      onClick={() => handleConfirmEvaluator(cand.id)}
+                      type="button"
+                      onClick={() => handleConfirmEvaluator(cand.id, true)}
                       className="flex items-center justify-center p-2 rounded-lg bg-blue-100 text-blue-600 hover:bg-blue-200 transition-colors shrink-0"
                       title="Confirmar Avaliador"
                     >
@@ -490,9 +521,14 @@ export function TestPanelTableClient({
                     </button>
                   )}
                   {cand.evaluatorConfirmed && (
-                    <div title="Avaliador Confirmado" className="text-emerald-500 p-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => handleConfirmEvaluator(cand.id, false)}
+                      className="flex items-center justify-center p-2 rounded-lg text-emerald-600 hover:text-amber-600 hover:bg-amber-50 transition-colors shrink-0 cursor-pointer"
+                      title="Avaliador Confirmado. Clique para alterar ou desconfirmar"
+                    >
                       <CheckCircle className="w-6 h-6" />
-                    </div>
+                    </button>
                   )}
                 </div>
               </div>

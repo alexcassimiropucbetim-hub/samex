@@ -2,26 +2,60 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-import { requireSuperAdmin } from "@/lib/auth-scope";
+import fs from "fs";
+import path from "path";
+import { getAuthenticatedAdmin } from "@/lib/auth-scope";
 
 export async function saveConfig(key: string, value: string) {
-  await requireSuperAdmin();
+  const admin = await getAuthenticatedAdmin();
+  if (!admin) {
+    throw new Error("Acesso negado. Administrador não autenticado.");
+  }
+
   try {
     await prisma.systemConfig.upsert({
       where: { key },
       update: { value },
       create: { key, value },
     });
+
+    // Sincronizar arquivos estáticos em disco para compatibilidade máxima (PDFs, SSR, PWA, navegadores)
+    if (key === "logo" && typeof value === "string" && value.startsWith("data:")) {
+      const matches = value.match(/^data:(.+);base64,(.+)$/);
+      if (matches && matches[2]) {
+        const buffer = Buffer.from(matches[2], "base64");
+        const logoPng = path.join(process.cwd(), "public", "logo.png");
+        const samexPng = path.join(process.cwd(), "public", "samex-logo.png");
+        fs.writeFileSync(logoPng, buffer);
+        fs.writeFileSync(samexPng, buffer);
+      }
+    }
+
+    if (key === "favicon" && typeof value === "string" && value.startsWith("data:")) {
+      const matches = value.match(/^data:(.+);base64,(.+)$/);
+      if (matches && matches[2]) {
+        const buffer = Buffer.from(matches[2], "base64");
+        const iconPng = path.join(process.cwd(), "public", "icon-192x192.png");
+        const pubFavicon = path.join(process.cwd(), "public", "favicon.ico");
+        const appFavicon = path.join(process.cwd(), "src", "app", "favicon.ico");
+        fs.writeFileSync(iconPng, buffer);
+        fs.writeFileSync(pubFavicon, buffer);
+        if (fs.existsSync(path.dirname(appFavicon))) {
+          fs.writeFileSync(appFavicon, buffer);
+        }
+      }
+    }
     
     // Revalidar rotas para aplicar imediatamente
-    revalidatePath("/");
-    revalidatePath("/portal");
+    revalidatePath("/", "layout");
+    revalidatePath("/portal", "layout");
     revalidatePath("/(admin)", "layout");
+    revalidatePath("/configuracoes");
     
     return { success: true };
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Erro ao salvar config ${key}:`, error);
-    return { success: false, error: "Erro interno ao salvar." };
+    return { success: false, error: error?.message || "Erro interno ao salvar." };
   }
 }
 

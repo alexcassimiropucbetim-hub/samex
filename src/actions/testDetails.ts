@@ -95,9 +95,8 @@ export async function updateCandidateTestRecord(candidateId: string, evaluatorId
   if (evaluatorId) {
     const pic = await prisma.personInCharge.findUnique({
       where: { id: evaluatorId },
-      include: { church: { include: { sector: true } } }
     });
-    if (!pic || pic.church.sector.administrationId !== candAdminId) {
+    if (!pic) {
       throw new Error("Acesso negado. Avaliador inválido.");
     }
   }

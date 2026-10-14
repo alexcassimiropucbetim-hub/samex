@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({
@@ -10,17 +13,17 @@ export async function GET() {
     });
 
     if (config && config.value) {
-      const matches = config.value.match(/^data:(.+);base64,(.+)$/);
+      const matches = config.value.match(/^data:(.+);base64,([\s\S]+)$/);
       if (matches && matches.length === 3) {
         const mimeType = matches[1];
-        const base64Data = matches[2];
+        const base64Data = matches[2].replace(/\s/g, "");
         const buffer = Buffer.from(base64Data, "base64");
 
         return new NextResponse(buffer, {
           status: 200,
           headers: {
             "Content-Type": mimeType,
-            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
             "Pragma": "no-cache",
             "Expires": "0",
           },
@@ -29,14 +32,17 @@ export async function GET() {
     }
 
     // Fallback para favicon padrão local
-    const defaultFaviconPath = path.join(process.cwd(), "public", "icon-192x192.png");
-    if (fs.existsSync(defaultFaviconPath)) {
-      const buffer = fs.readFileSync(defaultFaviconPath);
+    const faviconIco = path.join(process.cwd(), "public", "favicon.ico");
+    const iconPng = path.join(process.cwd(), "public", "icon-192x192.png");
+    const fallbackPath = fs.existsSync(faviconIco) ? faviconIco : (fs.existsSync(iconPng) ? iconPng : null);
+    
+    if (fallbackPath && fs.existsSync(fallbackPath)) {
+      const buffer = fs.readFileSync(fallbackPath);
       return new NextResponse(buffer, {
         status: 200,
         headers: {
-          "Content-Type": "image/png",
-          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Content-Type": fallbackPath.endsWith(".ico") ? "image/x-icon" : "image/png",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
           "Pragma": "no-cache",
           "Expires": "0",
         },
@@ -49,3 +55,4 @@ export async function GET() {
     return new NextResponse(null, { status: 500 });
   }
 }
+

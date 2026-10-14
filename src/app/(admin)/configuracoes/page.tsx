@@ -42,6 +42,8 @@ function processImageFile(file: File, maxWidth: number, maxHeight: number): Prom
 export default function ConfiguracoesPage() {
   const [logoBase64, setLogoBase64] = useState<string | null>(null);
   const [faviconBase64, setFaviconBase64] = useState<string | null>(null);
+  const [savedLogo, setSavedLogo] = useState<string | null>(null);
+  const [savedFavicon, setSavedFavicon] = useState<string | null>(null);
   const [logoChanged, setLogoChanged] = useState(false);
   const [faviconChanged, setFaviconChanged] = useState(false);
   const [driveFolderId, setDriveFolderId] = useState("");
@@ -65,8 +67,15 @@ export default function ConfiguracoesPage() {
         ]);
         if (folderId) setDriveFolderId(folderId);
         if (serviceAccount) setDriveServiceAccount(serviceAccount);
-        if (currentLogo) setLogoBase64(currentLogo);
-        if (currentFavicon) setFaviconBase64(currentFavicon);
+        if (currentLogo) {
+          setLogoBase64(currentLogo);
+          setSavedLogo(currentLogo);
+        }
+        if (currentFavicon) {
+          setFaviconBase64(currentFavicon);
+          setSavedFavicon(currentFavicon);
+        }
+        setTimestamp(Date.now());
       } catch (err) {
         console.error("Erro ao carregar configurações:", err);
       }
@@ -109,6 +118,7 @@ export default function ConfiguracoesPage() {
         if (!resLogo.success) {
           throw new Error(resLogo.error || "Erro ao salvar a Logo.");
         }
+        setSavedLogo(logoBase64);
       }
 
       if (faviconChanged && faviconBase64) {
@@ -116,6 +126,7 @@ export default function ConfiguracoesPage() {
         if (!resFav.success) {
           throw new Error(resFav.error || "Erro ao salvar o Favicon.");
         }
+        setSavedFavicon(faviconBase64);
       }
 
       const resDrive = await saveConfig("google_drive_folder_id", driveFolderId);
@@ -200,12 +211,20 @@ export default function ConfiguracoesPage() {
             {/* Imagem Atual em Produção */}
             <div className="text-xs text-slate-500 flex items-center gap-2 pt-1">
               <span>Logo ativa:</span>
-              <img 
-                src={timestamp ? `/api/config/logo?t=${timestamp}` : "/api/config/logo"} 
-                alt="logo atual" 
-                className="h-6 object-contain border border-slate-200 rounded px-1.5 py-0.5 bg-white" 
-                onError={(e) => (e.currentTarget.style.display = 'none')} 
-              />
+              {(savedLogo || timestamp) ? (
+                <img 
+                  src={savedLogo || `/api/config/logo?t=${timestamp}`} 
+                  alt="logo atual" 
+                  className="h-6 object-contain border border-slate-200 rounded px-1.5 py-0.5 bg-white shadow-xs" 
+                  onError={(e) => {
+                    if (!e.currentTarget.src.includes("samex-logo.png")) {
+                      e.currentTarget.src = "/samex-logo.png";
+                    }
+                  }} 
+                />
+              ) : (
+                <span className="text-slate-400 italic">Carregando...</span>
+              )}
             </div>
           </div>
 
@@ -250,12 +269,20 @@ export default function ConfiguracoesPage() {
             {/* Favicon Atual em Produção */}
             <div className="text-xs text-slate-500 flex items-center gap-2 pt-1">
               <span>Favicon ativo:</span>
-              <img 
-                src={timestamp ? `/api/config/favicon?t=${timestamp}` : "/api/config/favicon"} 
-                alt="favicon atual" 
-                className="h-5 w-5 object-contain border border-slate-200 rounded p-0.5 bg-white" 
-                onError={(e) => (e.currentTarget.style.display = 'none')} 
-              />
+              {(savedFavicon || timestamp) ? (
+                <img 
+                  src={savedFavicon || `/api/config/favicon?t=${timestamp}`} 
+                  alt="favicon atual" 
+                  className="h-5 w-5 object-contain border border-slate-200 rounded p-0.5 bg-white shadow-xs" 
+                  onError={(e) => {
+                    if (!e.currentTarget.src.includes("favicon.ico")) {
+                      e.currentTarget.src = "/favicon.ico";
+                    }
+                  }} 
+                />
+              ) : (
+                <span className="text-slate-400 italic">Carregando...</span>
+              )}
             </div>
           </div>
         </div>

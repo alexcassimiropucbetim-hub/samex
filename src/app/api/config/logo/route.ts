@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import fs from "fs";
 import path from "path";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export async function GET() {
   try {
     const config = await prisma.systemConfig.findUnique({
@@ -11,17 +14,17 @@ export async function GET() {
 
     if (config && config.value) {
       // value is stored as "data:image/png;base64,iVBORw0KGgo..."
-      const matches = config.value.match(/^data:(.+);base64,(.+)$/);
+      const matches = config.value.match(/^data:(.+);base64,([\s\S]+)$/);
       if (matches && matches.length === 3) {
         const mimeType = matches[1];
-        const base64Data = matches[2];
+        const base64Data = matches[2].replace(/\s/g, "");
         const buffer = Buffer.from(base64Data, "base64");
 
         return new NextResponse(buffer, {
           status: 200,
           headers: {
             "Content-Type": mimeType,
-            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
             "Pragma": "no-cache",
             "Expires": "0",
           },
@@ -29,17 +32,18 @@ export async function GET() {
       }
     }
 
-    // Fallback para imagem padrão local
-    const logoPath = path.join(process.cwd(), "public", "logo.png");
-    const fallbackPath = fs.existsSync(logoPath) ? logoPath : path.join(process.cwd(), "public", "icon-192x192.png");
+    // Fallback para imagem padrão local do SAMEX
+    const samexLogo = path.join(process.cwd(), "public", "samex-logo.png");
+    const logoPng = path.join(process.cwd(), "public", "logo.png");
+    const fallbackPath = fs.existsSync(samexLogo) ? samexLogo : (fs.existsSync(logoPng) ? logoPng : null);
     
-    if (fs.existsSync(fallbackPath)) {
+    if (fallbackPath && fs.existsSync(fallbackPath)) {
       const buffer = fs.readFileSync(fallbackPath);
       return new NextResponse(buffer, {
         status: 200,
         headers: {
           "Content-Type": "image/png",
-          "Cache-Control": "no-cache, no-store, must-revalidate",
+          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
           "Pragma": "no-cache",
           "Expires": "0",
         },
@@ -52,3 +56,4 @@ export async function GET() {
     return new NextResponse(null, { status: 500 });
   }
 }
+

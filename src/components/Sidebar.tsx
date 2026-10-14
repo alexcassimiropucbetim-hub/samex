@@ -123,12 +123,12 @@ export function Sidebar({ role, adminName, administrationId, logoUrl }: { role?:
              {!logoError ? (
                <div className="bg-white rounded-lg px-2 py-0.5 inline-flex items-center justify-center">
                  <img 
-                   src="/api/config/logo" 
+                   src={logoUrl || "/api/config/logo"} 
                    alt="Logo" 
                    className="h-6 object-contain" 
                    onError={(e) => {
-                     if (!e.currentTarget.src.includes("logo.png")) {
-                       e.currentTarget.src = "/logo.png";
+                     if (!e.currentTarget.src.includes("samex-logo.png") && !e.currentTarget.src.includes("logo.png")) {
+                       e.currentTarget.src = "/samex-logo.png";
                      } else {
                        setLogoError(true);
                      }
@@ -172,12 +172,12 @@ export function Sidebar({ role, adminName, administrationId, logoUrl }: { role?:
             {!logoError ? (
               <div className="bg-white rounded-xl px-3 py-1.5 shadow-sm inline-flex items-center justify-center max-w-[200px]">
                 <img 
-                  src="/api/config/logo" 
+                  src={logoUrl || "/api/config/logo"} 
                   alt="Logo SAMEX" 
                   className="h-8 max-w-full object-contain"
                   onError={(e) => {
-                    if (!e.currentTarget.src.includes("logo.png")) {
-                      e.currentTarget.src = "/logo.png";
+                    if (!e.currentTarget.src.includes("samex-logo.png") && !e.currentTarget.src.includes("logo.png")) {
+                      e.currentTarget.src = "/samex-logo.png";
                     } else {
                       setLogoError(true);
                     }

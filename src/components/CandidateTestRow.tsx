@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { updateCandidateTestRecord } from "@/actions/testDetails";
-import { MoreVertical, CheckCircle2, XCircle, Eye, Printer, FileText, BookOpen } from "lucide-react";
+import { MoreVertical, CheckCircle2, XCircle, Eye, Printer, FileText, BookOpen, FileCheck } from "lucide-react";
 import Link from "next/link";
 
 type Evaluator = {
@@ -126,7 +126,7 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
         </button>
 
         {showMenu && !isClosed && (
-          <div className="absolute top-8 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden w-56 flex flex-col py-1">
+          <div className="absolute top-8 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden w-64 flex flex-col py-1">
             <button onClick={() => handleStatusChange("APROVADO")} className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors">
               <CheckCircle2 className="w-4 h-4 text-orange-400" /> Aprovar
             </button>
@@ -143,6 +143,9 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
             )}
             <Link href={`/imprimir-resultado/${candidate.id}`} target="_blank" onClick={() => setShowMenu(false)} className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors">
               <FileText className="w-4 h-4 text-slate-500" /> Imprimir Resultado
+            </Link>
+            <Link href={`/imprimir-resultado-modelo-2/${candidate.id}`} target="_blank" onClick={() => setShowMenu(false)} className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors">
+              <FileCheck className="w-4 h-4 text-slate-500" /> Imprimir Resultado Modelo 2
             </Link>
           </div>
         )}

@@ -38,8 +38,19 @@ export function CandidateTableClient({ test, evaluators }: { test: any, evaluato
               window.open(url, "_blank");
             }
           }}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border ${selectedIds.length > 0 ? 'bg-blue-500/20 text-blue-400 border-blue-500/30 hover:bg-blue-500/30' : 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed'}`}>
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border ${selectedIds.length > 0 ? 'bg-blue-500/20 text-blue-600 border-blue-500/30 hover:bg-blue-500/30' : 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed'}`}>
           <FileCheck className="w-4 h-4" /> Imprimir Resultados {selectedIds.length > 0 ? `(${selectedIds.length})` : ""}
+        </button>
+        <button 
+          disabled={selectedIds.length === 0}
+          onClick={() => {
+            if (selectedIds.length > 0) {
+              const url = `/imprimir-resultado-modelo-2/lote?ids=${selectedIds.join(",")}`;
+              window.open(url, "_blank");
+            }
+          }}
+          className={`px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-colors border ${selectedIds.length > 0 ? 'bg-indigo-500/20 text-indigo-600 border-indigo-500/30 hover:bg-indigo-500/30' : 'bg-slate-100 text-slate-500 border-slate-200 cursor-not-allowed'}`}>
+          <FileCheck className="w-4 h-4" /> Imprimir Modelo 2 {selectedIds.length > 0 ? `(${selectedIds.length})` : ""}
         </button>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText, Search } from "lucide-react";
+import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText, Search, FileCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { assignEvaluator, updateCandidateStatus, confirmEvaluator } from "@/actions/testPanel";
 
@@ -185,6 +185,17 @@ export function TestPanelTableClient({
                 <FileText className="w-4 h-4 text-orange-500" />
                 Imprimir Resultados
               </button>
+              <button 
+                onClick={() => {
+                  if (selectedIds.length === 0) return alert("Selecione pelo menos um candidato.");
+                  setOpenMenuId(null);
+                  window.open(`/imprimir-resultado-modelo-2/lote?ids=${selectedIds.join(",")}`, '_blank');
+                }}
+                className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors border-t border-slate-100"
+              >
+                <FileCheck className="w-4 h-4 text-orange-500" />
+                Imprimir Resultados Modelo 2
+              </button>
             </div>
           )}
         </div>
@@ -363,7 +374,7 @@ export function TestPanelTableClient({
                         </button>
                         
                         {openMenuId === cand.id && (
-                          <div className="absolute right-0 mt-1 w-56 bg-white border border-slate-100 rounded-lg shadow-xl z-50 overflow-hidden py-1">
+                          <div className="absolute right-0 mt-1 w-64 bg-white border border-slate-100 rounded-lg shadow-xl z-50 overflow-hidden py-1">
                             <button 
                               onClick={() => handleStatusChange(cand.id, "APROVADO")}
                               className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"
@@ -407,6 +418,16 @@ export function TestPanelTableClient({
                             >
                               <FileText className="w-4 h-4 text-orange-500" />
                               Imprimir Resultado
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                window.open(`/imprimir-resultado-modelo-2/${cand.id}`, '_blank');
+                              }}
+                              className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors"
+                            >
+                              <FileCheck className="w-4 h-4 text-orange-500" />
+                              Imprimir Resultado Modelo 2
                             </button>
                           </div>
                         )}
@@ -569,6 +590,13 @@ export function TestPanelTableClient({
                     className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors"
                   >
                     <FileText className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => window.open(`/imprimir-resultado-modelo-2/${cand.id}`, '_blank')}
+                    title="Imprimir Resultado Modelo 2"
+                    className="flex items-center justify-center w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+                  >
+                    <FileCheck className="w-5 h-5" />
                   </button>
                 </div>
               </div>

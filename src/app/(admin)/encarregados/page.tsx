@@ -6,13 +6,15 @@ import { UserCheck, Plus, Trash2, Church, BadgeCheck, Pencil, X, Briefcase, File
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
+import ManagedChurchesSelector from "@/components/ManagedChurchesSelector";
 
 export default async function EncarregadosPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string, page?: string, q?: string, error?: string }>;
 }) {
-  const churches = await getChurches();
+  const rawChurches = await getChurches();
+  const churches = [...rawChurches].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   const cargos = await getRoleTypes();
   const tiposTeste = await getTestTypes();
   
@@ -26,6 +28,7 @@ export default async function EncarregadosPage({
 
   // Extrair IDs dos tipos de teste permitidos para preencher os checkboxes no modo de edição
   const allowedTestTypeIds = editingPerson ? editingPerson.allowedTestTypes.map(t => t.id) : [];
+  const initialManagedChurchIds = editingPerson?.managedChurches ? editingPerson.managedChurches.map((mc: any) => mc.id) : [];
   
   const editParam = editingId ? `&edit=${editingId}` : "";
   const errorMsg = resolvedParams?.error;
@@ -198,30 +201,10 @@ export default async function EncarregadosPage({
               )}
             </div>
 
-            <div className="pt-2">
-              <label className="block text-sm font-medium text-slate-600 mb-2">
-                Igrejas de Atuação (Opcional - Múltiplas)
-              </label>
-              {churches.length === 0 ? (
-                <p className="text-xs text-amber-500">Cadastre Igrejas primeiro.</p>
-              ) : (
-                <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar border border-slate-100 rounded-lg p-2 bg-slate-50/50">
-                  <p className="text-[11px] text-slate-400 mb-2">Selecione além da Comum Congregação, quais outras igrejas ele gerencia.</p>
-                  {churches.map(church => (
-                    <label key={church.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors uppercase">
-                      <input 
-                        type="checkbox" 
-                        name="managedChurchIds" 
-                        value={church.id}
-                        defaultChecked={editingPerson?.managedChurches?.some((mc: any) => mc.id === church.id) || false}
-                        className="rounded border-slate-300 bg-slate-100 text-blue-500 focus:ring-blue-500/50"
-                      />
-                      {church.name}
-                    </label>
-                  ))}
-                </div>
-              )}
-            </div>
+            <ManagedChurchesSelector
+              churches={churches}
+              initialSelectedIds={initialManagedChurchIds}
+            />
 
             <button type="submit" className="btn-primary w-full flex justify-center items-center gap-2 mt-4">
               {editingPerson ? (

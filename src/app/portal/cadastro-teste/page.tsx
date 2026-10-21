@@ -4,6 +4,7 @@ import { CalendarClock, MapPin, Church, Pencil, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import SearchableChurchSelect from "@/components/SearchableChurchSelect";
 
 export default async function CadastroTestePage({
   searchParams,
@@ -64,20 +65,15 @@ export default async function CadastroTestePage({
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-600 mb-1">Igreja que será realizada o teste</label>
-              <select
-                name="churchId"
+              <SearchableChurchSelect
+                churches={[...churches].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"))}
                 defaultValue={defaultChurchId}
+                name="churchId"
+                id="churchId"
+                label="Igreja que será realizada o teste"
+                placeholder="Selecione uma congregação..."
                 required
-                className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase"
-              >
-                <option value="" className="bg-white">Selecione uma congregação...</option>
-                {churches.map((church) => (
-                  <option key={church.id} value={church.id} className="bg-white">
-                    {church.name.toUpperCase()} - {church.sector?.name.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+              />
             </div>
             
             <div>

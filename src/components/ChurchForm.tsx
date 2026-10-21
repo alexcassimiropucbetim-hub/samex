@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { createChurch } from "@/actions/church";
+import SearchableSelect from "@/components/SearchableSelect";
 
 type RRMTree = {
   id: string;
@@ -37,73 +38,55 @@ export function ChurchForm({
       {isSuperAdmin ? (
         <>
           <div>
-            <label htmlFor="rrmId" className="block text-sm font-medium text-slate-600 mb-1">
-              RRM
-            </label>
-            <select 
-              id="rrmId" 
+            <SearchableSelect
+              id="rrmId"
+              label="RRM"
               value={selectedRRM}
-              onChange={(e) => setSelectedRRM(e.target.value)}
-              className="input-glass w-full"
-            >
-              <option value="">Selecione uma RRM...</option>
-              {rrms.map(rrm => (
-                <option key={rrm.id} value={rrm.id}>{rrm.name}</option>
-              ))}
-            </select>
+              onChange={(val) => {
+                setSelectedRRM(val);
+                setSelectedAdm("");
+              }}
+              placeholder="Selecione uma RRM..."
+              searchPlaceholder="Pesquisar RRM..."
+              options={rrms.map(rrm => ({ value: rrm.id, label: rrm.name }))}
+            />
           </div>
           <div>
-            <label htmlFor="admId" className="block text-sm font-medium text-slate-600 mb-1">
-              Administração
-            </label>
-            <select 
-              id="admId" 
+            <SearchableSelect
+              id="admId"
+              label="Administração"
               value={selectedAdm}
-              onChange={(e) => setSelectedAdm(e.target.value)}
+              onChange={(val) => setSelectedAdm(val)}
               disabled={!selectedRRM}
-              className="input-glass w-full"
-            >
-              <option value="">Selecione uma Administração...</option>
-              {administracoes.map(adm => (
-                <option key={adm.id} value={adm.id}>{adm.name}</option>
-              ))}
-            </select>
+              placeholder="Selecione uma Administração..."
+              searchPlaceholder="Pesquisar Administração..."
+              options={administracoes.map(adm => ({ value: adm.id, label: adm.name }))}
+            />
           </div>
           <div>
-            <label htmlFor="sectorId" className="block text-sm font-medium text-slate-600 mb-1">
-              Setor
-            </label>
-            <select 
-              id="sectorId" 
-              name="sectorId" 
-              required 
+            <SearchableSelect
+              id="sectorId"
+              name="sectorId"
+              label="Setor"
+              required
               disabled={!selectedAdm}
-              className="input-glass w-full"
-            >
-              <option value="" disabled>Selecione um Setor...</option>
-              {admSectors.map(sec => (
-                <option key={sec.id} value={sec.id}>{sec.name}</option>
-              ))}
-            </select>
+              placeholder="Selecione um Setor..."
+              searchPlaceholder="Pesquisar Setor..."
+              options={admSectors.map(sec => ({ value: sec.id, label: sec.name }))}
+            />
           </div>
         </>
       ) : (
         <div>
-          <label htmlFor="sectorId" className="block text-sm font-medium text-slate-600 mb-1">
-            Setor
-          </label>
-          <select 
-            id="sectorId" 
-            name="sectorId" 
-            required 
-            defaultValue=""
-            className="input-glass w-full"
-          >
-            <option value="" disabled>Selecione um Setor...</option>
-            {sectors.map(sector => (
-              <option key={sector.id} value={sector.id}>{sector.name}</option>
-            ))}
-          </select>
+          <SearchableSelect
+            id="sectorId"
+            name="sectorId"
+            label="Setor"
+            required
+            placeholder="Selecione um Setor..."
+            searchPlaceholder="Pesquisar Setor..."
+            options={sectors.map(sector => ({ value: sector.id, label: sector.name }))}
+          />
         </div>
       )}
 

@@ -4,6 +4,7 @@ import { UserCog, Plus, Trash2, Pencil, X, KeyRound, ShieldAlert } from "lucide-
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireSuperAdmin } from "@/lib/auth-scope";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export default async function UsuariosAdminPage({
   searchParams,
@@ -107,36 +108,37 @@ export default async function UsuariosAdminPage({
             </div>
 
             <div>
-              <label htmlFor="role" className="block text-sm font-medium text-slate-600 mb-1">
-                Nível de Acesso (Role)
-              </label>
-              <select
+              <SearchableSelect
                 id="role"
                 name="role"
+                label="Nível de Acesso (Role)"
                 required
                 defaultValue={editingAdmin?.role || (autoSelectAdm ? "ADMINISTRATION_ADMIN" : "ADMINISTRATION_ADMIN")}
-                className="input-glass focus:ring-orange-500"
-              >
-                <option value="ADMINISTRATION_ADMIN">ADMINISTRATION_ADMIN (Local)</option>
-                <option value="SUPER_ADMIN">SUPER_ADMIN (Global)</option>
-              </select>
+                searchable={false}
+                options={[
+                  { value: "ADMINISTRATION_ADMIN", label: "ADMINISTRATION_ADMIN (Local)" },
+                  { value: "SUPER_ADMIN", label: "SUPER_ADMIN (Global)" },
+                ]}
+              />
             </div>
 
             <div>
-              <label htmlFor="administrationId" className="block text-sm font-medium text-slate-600 mb-1">
-                Administração (se aplicável)
-              </label>
-              <select
+              <SearchableSelect
                 id="administrationId"
                 name="administrationId"
+                label="Administração (se aplicável)"
                 defaultValue={editingAdmin?.administrationId || autoSelectAdm || ""}
-                className="input-glass focus:ring-orange-500"
-              >
-                <option value="">-- Nenhuma (Apenas Super Admin) --</option>
-                {administracoes.map(adm => (
-                  <option key={adm.id} value={adm.id}>{adm.rrm.name} - {adm.name}</option>
-                ))}
-              </select>
+                placeholder="-- Nenhuma (Apenas Super Admin) --"
+                searchPlaceholder="Pesquisar administração ou RRM..."
+                options={[
+                  { value: "", label: "-- Nenhuma (Apenas Super Admin) --" },
+                  ...administracoes.map(adm => ({
+                    value: adm.id,
+                    label: adm.name,
+                    sublabel: adm.rrm.name,
+                  })),
+                ]}
+              />
             </div>
 
             <div>

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { createSector } from "@/actions/sector";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export function SectorForm({ 
   rrms, 
@@ -21,37 +22,27 @@ export function SectorForm({
       {isSuperAdmin && (
         <>
           <div>
-            <label htmlFor="rrmId" className="block text-sm font-medium text-slate-600 mb-1">
-              RRM
-            </label>
-            <select 
-              id="rrmId" 
+            <SearchableSelect
+              id="rrmId"
+              label="RRM"
               value={selectedRRM}
-              onChange={(e) => setSelectedRRM(e.target.value)}
-              className="input-glass w-full"
-            >
-              <option value="">Selecione uma RRM...</option>
-              {rrms.map(rrm => (
-                <option key={rrm.id} value={rrm.id}>{rrm.name}</option>
-              ))}
-            </select>
+              onChange={(val) => setSelectedRRM(val)}
+              placeholder="Selecione uma RRM..."
+              searchPlaceholder="Pesquisar RRM..."
+              options={rrms.map(rrm => ({ value: rrm.id, label: rrm.name }))}
+            />
           </div>
           <div>
-            <label htmlFor="administrationId" className="block text-sm font-medium text-slate-600 mb-1">
-              Administração
-            </label>
-            <select 
-              id="administrationId" 
-              name="administrationId" 
-              required 
+            <SearchableSelect
+              id="administrationId"
+              name="administrationId"
+              label="Administração"
+              required
               disabled={!selectedRRM}
-              className="input-glass w-full"
-            >
-              <option value="">Selecione uma Administração...</option>
-              {administracoes.map(adm => (
-                <option key={adm.id} value={adm.id}>{adm.name}</option>
-              ))}
-            </select>
+              placeholder="Selecione uma Administração..."
+              searchPlaceholder="Pesquisar Administração..."
+              options={administracoes.map(adm => ({ value: adm.id, label: adm.name }))}
+            />
           </div>
         </>
       )}

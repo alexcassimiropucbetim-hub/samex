@@ -4,6 +4,7 @@ import { MapPin, Plus, Trash2, Edit2, Save, X, ToggleLeft, ToggleRight, Network,
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export default async function AdministrationsPage({
   searchParams,
@@ -41,13 +42,15 @@ export default async function AdministrationsPage({
           ) : (
             <form action={createAdministration} className="space-y-4">
               <div>
-                <label htmlFor="rrmId" className="block text-sm font-medium text-slate-600 mb-1">
-                  RRM
-                </label>
-                <select id="rrmId" name="rrmId" required className="input-glass">
-                  <option value="">Selecione uma RRM</option>
-                  {rrms.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                </select>
+                <SearchableSelect
+                  id="rrmId"
+                  name="rrmId"
+                  label="RRM"
+                  required
+                  placeholder="Selecione uma RRM..."
+                  searchPlaceholder="Pesquisar RRM..."
+                  options={rrms.map(r => ({ value: r.id, label: r.name }))}
+                />
               </div>
               <div>
                 <label htmlFor="name" className="block text-sm font-medium text-slate-600 mb-1">
@@ -103,9 +106,14 @@ export default async function AdministrationsPage({
                             required 
                             autoFocus
                           />
-                          <select name="rrmId" defaultValue={adm.rrmId} className="input-glass w-full py-1 px-3" required>
-                            {rrms.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
-                          </select>
+                          <SearchableSelect
+                            name="rrmId"
+                            defaultValue={adm.rrmId}
+                            required
+                            placeholder="Selecione RRM..."
+                            searchPlaceholder="Pesquisar RRM..."
+                            options={rrms.map(r => ({ value: r.id, label: r.name }))}
+                          />
                         </div>
                         <div className="flex flex-col items-center gap-2 shrink-0">
                           <label className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer">

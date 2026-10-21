@@ -4,13 +4,15 @@ import { Users, Plus, Trash2, Church, User, Edit2, Save, X } from "lucide-react"
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
+import SearchableChurchSelect from "@/components/SearchableChurchSelect";
 
 export default async function MinistriesPage({
   searchParams,
 }: {
   searchParams: Promise<{ edit?: string, page?: string, q?: string }>;
 }) {
-  const churches = await getChurches();
+  const rawChurches = await getChurches();
+  const churches = [...rawChurches].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   const resolvedSearchParams = await searchParams;
   const page = Number(resolvedSearchParams?.page) || 1;
   const q = resolvedSearchParams?.q || "";
@@ -34,20 +36,14 @@ export default async function MinistriesPage({
           <form action={async (fd) => { "use server"; await createMinistry(fd); }} className="space-y-4">
             
             <div>
-              <label htmlFor="churchId" className="block text-sm font-medium text-slate-600 mb-1">
-                Igreja
-              </label>
-              <select defaultValue=""
-                id="churchId"
+              <SearchableChurchSelect
+                churches={churches}
                 name="churchId"
+                id="churchId"
+                label="Igreja"
+                placeholder="Selecione uma igreja..."
                 required
-                className="input-glass uppercase"
-              >
-                <option value="" disabled >Selecione uma igreja...</option>
-                {churches.map(church => (
-                  <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>
@@ -124,16 +120,13 @@ export default async function MinistriesPage({
                               redirect(`/ministerios?page=${page}&q=${q}`);
                             }} className="flex flex-col md:flex-row items-center gap-4 p-3 w-full">
                               <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
-                                <select
-                                  name="churchId"
+                                <SearchableChurchSelect
+                                  churches={churches}
                                   defaultValue={ministry.churchId}
+                                  name="churchId"
                                   required
-                                  className="input-glass py-1.5 px-3 uppercase text-sm"
-                                >
-                                  {churches.map(church => (
-                                    <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
-                                  ))}
-                                </select>
+                                  placeholder="Selecione..."
+                                />
                                 <input 
                                   type="text" 
                                   name="elderName" 
@@ -252,16 +245,13 @@ export default async function MinistriesPage({
                       await updateMinistry(ministry.id, formData);
                       redirect(`/ministerios?page=${page}&q=${q}`);
                     }} className="flex flex-col gap-3 w-full">
-                      <select
-                        name="churchId"
+                      <SearchableChurchSelect
+                        churches={churches}
                         defaultValue={ministry.churchId}
+                        name="churchId"
                         required
-                        className="input-glass py-1.5 px-3 uppercase text-sm"
-                      >
-                        {churches.map(church => (
-                          <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
-                        ))}
-                      </select>
+                        placeholder="Selecione..."
+                      />
                       <input 
                         type="text" 
                         name="elderName" 

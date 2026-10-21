@@ -7,6 +7,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
 import ManagedChurchesSelector from "@/components/ManagedChurchesSelector";
+import SearchableChurchSelect from "@/components/SearchableChurchSelect";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export default async function EncarregadosPage({
   searchParams,
@@ -109,20 +111,19 @@ export default async function EncarregadosPage({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="gender" className="block text-sm font-medium text-slate-600 mb-1">
-                  Sexo
-                </label>
-                <select
+                <SearchableSelect
                   id="gender"
                   name="gender"
+                  label="Sexo"
                   required
                   defaultValue={editingPerson?.gender || ""}
-                  className="input-glass"
-                >
-                  <option value="" disabled>Selecione...</option>
-                  <option value="M">Masculino</option>
-                  <option value="F">Feminino</option>
-                </select>
+                  placeholder="Selecione..."
+                  options={[
+                    { value: "M", label: "Masculino" },
+                    { value: "F", label: "Feminino" },
+                  ]}
+                  searchable={false}
+                />
               </div>
 
               <div>
@@ -142,39 +143,28 @@ export default async function EncarregadosPage({
             </div>
             
             <div>
-              <label htmlFor="roleTypeId" className="block text-sm font-medium text-slate-600 mb-1">
-                Cargo
-              </label>
-              <select
+              <SearchableSelect
                 id="roleTypeId"
                 name="roleTypeId"
+                label="Cargo"
                 required
                 defaultValue={editingPerson?.roleTypeId || ""}
-                className="input-glass"
-              >
-                <option value="" disabled>Selecione um cargo...</option>
-                {cargos.map(cargo => (
-                  <option key={cargo.id} value={cargo.id}>{cargo.name}</option>
-                ))}
-              </select>
+                placeholder="Selecione um cargo..."
+                searchPlaceholder="Pesquisar cargo..."
+                options={cargos.map(cargo => ({ value: cargo.id, label: cargo.name }))}
+              />
             </div>
 
             <div>
-              <label htmlFor="churchId" className="block text-sm font-medium text-slate-600 mb-1">
-                Igreja
-              </label>
-              <select
-                id="churchId"
-                name="churchId"
-                required
+              <SearchableChurchSelect
+                churches={churches}
                 defaultValue={editingPerson?.churchId || ""}
-                className="input-glass uppercase"
-              >
-                <option value="" disabled>Selecione uma comum...</option>
-                {churches.map(church => (
-                  <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
-                ))}
-              </select>
+                name="churchId"
+                id="churchId"
+                label="Igreja"
+                placeholder="Selecione uma comum..."
+                required
+              />
             </div>
 
             <div className="pt-2">

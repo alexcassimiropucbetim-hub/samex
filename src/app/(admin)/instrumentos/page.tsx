@@ -4,6 +4,7 @@ import { Music, Plus, Trash2, ListMusic, Edit2, Save, X } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
+import SearchableSelect from "@/components/SearchableSelect";
 import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export default async function InstrumentsPage({
@@ -49,20 +50,15 @@ export default async function InstrumentsPage({
             </div>
             
             <div>
-              <label htmlFor="categoryId" className="block text-sm font-medium text-slate-600 mb-1">
-                Categoria
-              </label>
-              <select defaultValue=""
+              <SearchableSelect
                 id="categoryId"
                 name="categoryId"
+                label="Categoria"
                 required
-                className="input-glass focus:ring-pink-500"
-              >
-                <option value="" disabled >Selecione uma categoria...</option>
-                {categories.map(category => (
-                  <option key={category.id} value={category.id}>{category.name}</option>
-                ))}
-              </select>
+                placeholder="Selecione uma categoria..."
+                searchPlaceholder="Pesquisar categoria..."
+                options={categories.map(category => ({ value: category.id, label: category.name }))}
+              />
             </div>
 
             <button type="submit" className="btn-primary w-full flex justify-center items-center gap-2">
@@ -119,16 +115,14 @@ export default async function InstrumentsPage({
                                   autoFocus
                                   placeholder="Nome do Instrumento"
                                 />
-                                <select
+                                <SearchableSelect
                                   name="categoryId"
                                   defaultValue={instrument.categoryId}
                                   required
-                                  className="input-glass py-1.5 px-3 uppercase text-sm focus:ring-pink-500"
-                                >
-                                  {categories.map(category => (
-                                    <option key={category.id} value={category.id}>{category.name}</option>
-                                  ))}
-                                </select>
+                                  placeholder="Categoria..."
+                                  searchPlaceholder="Pesquisar categoria..."
+                                  options={categories.map(c => ({ value: c.id, label: c.name }))}
+                                />
                               </div>
                               <div className="flex items-center gap-2 shrink-0 md:justify-end">
                                 <button type="submit" className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors" title="Salvar">
@@ -235,16 +229,14 @@ export default async function InstrumentsPage({
                         autoFocus
                         placeholder="Nome do Instrumento"
                       />
-                      <select
+                      <SearchableSelect
                         name="categoryId"
                         defaultValue={instrument.categoryId}
                         required
-                        className="input-glass py-1.5 px-3 uppercase text-sm focus:ring-pink-500"
-                      >
-                        {categories.map(category => (
-                          <option key={category.id} value={category.id}>{category.name}</option>
-                        ))}
-                      </select>
+                        placeholder="Categoria..."
+                        searchPlaceholder="Pesquisar categoria..."
+                        options={categories.map(c => ({ value: c.id, label: c.name }))}
+                      />
                       <div className="flex items-center gap-2 justify-end pt-2 border-t border-blue-200/50 mt-1">
                         <button type="submit" className="text-green-600 bg-green-100 hover:bg-green-200 p-2.5 rounded-xl transition-colors" title="Salvar">
                           <Save className="w-5 h-5" />

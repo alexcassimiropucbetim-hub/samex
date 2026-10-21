@@ -7,6 +7,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import SearchInput from "@/components/SearchInput";
 import { ChurchForm } from "@/components/ChurchForm";
+import SearchableSelect from "@/components/SearchableSelect";
 
 export default async function ChurchesPage({
   searchParams,
@@ -37,6 +38,21 @@ export default async function ChurchesPage({
     },
     orderBy: { name: "asc" }
   }) : [];
+
+  const sectorOptions = isSuperAdmin
+    ? rrms.flatMap(rrm =>
+        rrm.administrations.flatMap(adm =>
+          adm.sectors.map(sec => ({
+            value: sec.id,
+            label: sec.name,
+            sublabel: `${adm.name} (${rrm.name})`,
+          }))
+        )
+      )
+    : sectors.map(sec => ({
+        value: sec.id,
+        label: sec.name,
+      }));
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -102,35 +118,14 @@ export default async function ChurchesPage({
                                   autoFocus
                                   placeholder="Nome da Igreja"
                                 />
-                                {isSuperAdmin ? (
-                                  <select
-                                    name="sectorId"
-                                    defaultValue={church.sectorId}
-                                    required
-                                    className="input-glass py-1.5 px-3 uppercase text-sm"
-                                  >
-                                    {rrms.map(rrm => (
-                                      <optgroup key={rrm.id} label={rrm.name}>
-                                        {rrm.administrations.map(adm => (
-                                          adm.sectors.map(sec => (
-                                            <option key={sec.id} value={sec.id}>{adm.name} - {sec.name}</option>
-                                          ))
-                                        ))}
-                                      </optgroup>
-                                    ))}
-                                  </select>
-                                ) : (
-                                  <select
-                                    name="sectorId"
-                                    defaultValue={church.sectorId}
-                                    required
-                                    className="input-glass py-1.5 px-3 uppercase text-sm"
-                                  >
-                                    {sectors.map(sector => (
-                                      <option key={sector.id} value={sector.id}>{sector.name}</option>
-                                    ))}
-                                  </select>
-                                )}
+                                <SearchableSelect
+                                  name="sectorId"
+                                  defaultValue={church.sectorId}
+                                  required
+                                  placeholder="Selecione um Setor..."
+                                  searchPlaceholder="Pesquisar setor ou administração..."
+                                  options={sectorOptions}
+                                />
                               </div>
                               <div className="flex items-center gap-2 shrink-0 md:justify-end">
                                 <button type="submit" className="text-green-600 hover:bg-green-100 p-2 rounded-lg transition-colors" title="Salvar">
@@ -237,35 +232,14 @@ export default async function ChurchesPage({
                         autoFocus
                         placeholder="Nome da Igreja"
                       />
-                      {isSuperAdmin ? (
-                        <select
-                          name="sectorId"
-                          defaultValue={church.sectorId}
-                          required
-                          className="input-glass py-1.5 px-3 uppercase text-sm"
-                        >
-                          {rrms.map(rrm => (
-                            <optgroup key={rrm.id} label={rrm.name}>
-                              {rrm.administrations.map(adm => (
-                                adm.sectors.map(sec => (
-                                  <option key={sec.id} value={sec.id}>{adm.name} - {sec.name}</option>
-                                ))
-                              ))}
-                            </optgroup>
-                          ))}
-                        </select>
-                      ) : (
-                        <select
-                          name="sectorId"
-                          defaultValue={church.sectorId}
-                          required
-                          className="input-glass py-1.5 px-3 uppercase text-sm"
-                        >
-                          {sectors.map(sector => (
-                            <option key={sector.id} value={sector.id}>{sector.name}</option>
-                          ))}
-                        </select>
-                      )}
+                      <SearchableSelect
+                        name="sectorId"
+                        defaultValue={church.sectorId}
+                        required
+                        placeholder="Selecione um Setor..."
+                        searchPlaceholder="Pesquisar setor ou administração..."
+                        options={sectorOptions}
+                      />
                       <div className="flex items-center gap-2 justify-end pt-2 border-t border-blue-200/50 mt-1">
                         <button type="submit" className="text-green-600 bg-green-100 hover:bg-green-200 p-2.5 rounded-xl transition-colors" title="Salvar">
                           <Save className="w-5 h-5" />

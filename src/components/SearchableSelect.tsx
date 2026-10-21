@@ -139,7 +139,7 @@ export default function SearchableSelect({
   };
 
   return (
-    <div className={`relative ${className}`} ref={containerRef}>
+    <div className={`relative ${isOpen ? "z-50" : "z-10"} ${className}`} ref={containerRef}>
       {label && (
         <label htmlFor={id} className="block text-sm font-medium text-slate-600 mb-1">
           {label}

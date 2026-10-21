@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo } from "react";
-import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText, Search, FileCheck } from "lucide-react";
+import { Printer, MoreVertical, CheckCircle, XCircle, BookOpen, FileText, Search, FileCheck, Pencil } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { assignEvaluator, updateCandidateStatus, confirmEvaluator } from "@/actions/testPanel";
+import EditCandidateModal from "@/components/EditCandidateModal";
 
 type Candidate = {
   id: string;
@@ -44,6 +45,7 @@ export function TestPanelTableClient({
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [editingCandidate, setEditingCandidate] = useState<any | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const [searchName, setSearchName] = useState("");
@@ -276,8 +278,16 @@ export function TestPanelTableClient({
                   </td>
                   <td className="px-4 py-4 text-slate-500">{index + 1}</td>
                   <td className="px-3 py-4 font-bold text-slate-800">
-                    <div title={cand.candidateName?.toUpperCase() || ""}>
-                      {cand.candidateName?.toUpperCase() || ""}
+                    <div className="flex items-center gap-1.5 group" title={cand.candidateName?.toUpperCase() || ""}>
+                      <span className="truncate">{cand.candidateName?.toUpperCase() || ""}</span>
+                      <button
+                        type="button"
+                        onClick={() => setEditingCandidate(cand)}
+                        className="opacity-0 group-hover:opacity-100 p-1 text-slate-400 hover:text-blue-600 rounded transition-all shrink-0 hover:bg-slate-100"
+                        title="Editar dados do candidato"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </td>
                   <td className="px-3 py-4 text-slate-500 font-medium">
@@ -375,6 +385,17 @@ export function TestPanelTableClient({
                         
                         {openMenuId === cand.id && (
                           <div className="absolute right-0 mt-1 w-64 bg-white border border-slate-100 rounded-lg shadow-xl z-50 overflow-hidden py-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setOpenMenuId(null);
+                                setEditingCandidate(cand);
+                              }}
+                              className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors border-b border-slate-100 font-medium"
+                            >
+                              <Pencil className="w-4 h-4 text-blue-500" />
+                              Editar Dados do Candidato
+                            </button>
                             <button 
                               onClick={() => handleStatusChange(cand.id, "APROVADO")}
                               className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 flex items-center gap-3 transition-colors"
@@ -465,7 +486,17 @@ export function TestPanelTableClient({
                     onChange={() => handleSelectOne(cand.id)}
                   />
                   <div className="flex flex-col">
-                    <span className="font-bold text-slate-900 text-sm uppercase">{cand.candidateName || ""}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-900 text-sm uppercase">{cand.candidateName || ""}</span>
+                      <button
+                        type="button"
+                        onClick={() => setEditingCandidate(cand)}
+                        className="p-1 text-slate-400 hover:text-blue-600 rounded transition-colors"
+                        title="Editar dados do candidato"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                     <span className="text-xs text-slate-500 uppercase font-medium">#{index + 1} • {cand.instrument?.name || ""}</span>
                   </div>
                 </div>
@@ -610,6 +641,19 @@ export function TestPanelTableClient({
         <span className="font-bold text-sm text-slate-800">Total</span>
         <span className="font-black text-sm text-slate-900">{filteredCandidates.length}</span>
       </div>
+
+      {editingCandidate && (
+        <EditCandidateModal
+          isOpen={!!editingCandidate}
+          onClose={() => setEditingCandidate(null)}
+          candidate={editingCandidate}
+          onSaved={(updated) => {
+            setCandidatesList((prev) =>
+              prev.map((c) => (c.id === updated.id ? { ...c, ...updated } : c))
+            );
+          }}
+        />
+      )}
     </div>
   );
 }

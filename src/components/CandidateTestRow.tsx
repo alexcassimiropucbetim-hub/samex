@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { updateCandidateTestRecord } from "@/actions/testDetails";
-import { MoreVertical, CheckCircle2, XCircle, Eye, Printer, FileText, BookOpen, FileCheck } from "lucide-react";
+import { MoreVertical, CheckCircle2, XCircle, Eye, Printer, FileText, BookOpen, FileCheck, Pencil } from "lucide-react";
 import Link from "next/link";
+import EditCandidateModal from "./EditCandidateModal";
 
 type Evaluator = {
   id: string;
@@ -23,19 +24,25 @@ type CandidateTestRowProps = {
 };
 
 export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSelected, onSelect }: CandidateTestRowProps) {
+  const [candData, setCandData] = useState(candidate);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [evaluatorId, setEvaluatorId] = useState(candidate.testEvaluatorId || "");
   const [status, setStatus] = useState(candidate.finalTestStatus || "PENDENTE");
   const [isSaving, setIsSaving] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
+  useEffect(() => {
+    setCandData(candidate);
+  }, [candidate]);
+
   // Filtrar avaliadores disponíveis para este candidato
   const availableEvaluators = evaluators.filter(ev => {
     // 1. O encarregado tem permissão para este tipo de teste?
-    const canDoTestType = ev.allowedTestTypes?.some(t => t.id === candidate.testTypeId);
+    const canDoTestType = ev.allowedTestTypes?.some(t => t.id === candData.testTypeId);
     if (!canDoTestType) return false;
 
     // 2. Regra de gênero: mulher avalia mulher, homem avalia homem
-    if (ev.gender !== candidate.gender) return false;
+    if (ev.gender !== candData.gender) return false;
 
     return true;
   });
@@ -72,20 +79,32 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
         <span className="text-slate-500 text-sm">{index}</span>
       </div>
       
-      <div className="flex-[1.5] min-w-0">
-        <span className="text-sm font-semibold text-slate-900 uppercase truncate block">{candidate.candidateName}</span>
+      <div className="flex-[1.5] min-w-0 flex items-center gap-1.5 group">
+        <span className="text-sm font-semibold text-slate-900 uppercase truncate block">
+          {candData.candidateName}
+        </span>
+        {!isClosed && (
+          <button
+            type="button"
+            onClick={() => setIsEditModalOpen(true)}
+            className="p-1 text-slate-400 hover:text-blue-600 rounded transition-all shrink-0 hover:bg-slate-100 sm:opacity-0 sm:group-hover:opacity-100"
+            title="Editar dados do candidato"
+          >
+            <Pencil className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
       
       <div className="flex-[1.5] min-w-0">
-        <span className="text-sm text-slate-600 uppercase truncate block">{candidate.church.name}</span>
+        <span className="text-sm text-slate-600 uppercase truncate block">{candData.church?.name}</span>
       </div>
       
       <div className="flex-1 min-w-0">
-        <span className="text-sm text-slate-600 uppercase truncate block">{candidate.sector.name}</span>
+        <span className="text-sm text-slate-600 uppercase truncate block">{candData.sector?.name}</span>
       </div>
       
       <div className="flex-1 min-w-0">
-        <span className="text-sm text-slate-600 uppercase truncate block">{candidate.instrument.name}</span>
+        <span className="text-sm text-slate-600 uppercase truncate block">{candData.instrument?.name}</span>
       </div>
       
       <div className="w-40 shrink-0">
@@ -103,7 +122,7 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
       </div>
       
       <div className="w-24 shrink-0 text-center">
-        <span className="text-sm text-slate-600 truncate block uppercase">{candidate.testType.name.split(" ")[0]}</span>
+        <span className="text-sm text-slate-600 truncate block uppercase">{candData.testType?.name?.split(" ")[0]}</span>
       </div>
       
       <div className="w-24 shrink-0 flex items-center justify-end gap-2 relative">
@@ -127,6 +146,17 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
 
         {showMenu && !isClosed && (
           <div className="absolute top-8 right-0 bg-white border border-slate-200 rounded-lg shadow-xl z-50 overflow-hidden w-64 flex flex-col py-1">
+            <button
+              type="button"
+              onClick={() => {
+                setShowMenu(false);
+                setIsEditModalOpen(true);
+              }}
+              className="w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 flex items-center gap-3 transition-colors border-b border-slate-100 font-medium"
+            >
+              <Pencil className="w-4 h-4 text-blue-500" /> Editar Dados do Candidato
+            </button>
+            
             <button onClick={() => handleStatusChange("APROVADO")} className="w-full text-left px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-100 flex items-center gap-3 transition-colors">
               <CheckCircle2 className="w-4 h-4 text-orange-400" /> Aprovar
             </button>
@@ -150,6 +180,15 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
           </div>
         )}
       </div>
+
+      <EditCandidateModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        candidate={candData}
+        onSaved={(updated) => {
+          setCandData(updated);
+        }}
+      />
     </div>
   );
 }

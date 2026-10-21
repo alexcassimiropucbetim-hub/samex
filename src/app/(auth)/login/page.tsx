@@ -131,11 +131,11 @@ export default function LoginPage() {
                     name="selectedChurchId"
                     required 
                     defaultValue=""
-                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm" 
+                    className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3.5 text-slate-900 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500/50 transition-all shadow-sm uppercase" 
                   >
                     <option value="" disabled>Selecione uma igreja...</option>
                     {churchSelectionOptions.map((church) => (
-                      <option key={church.id} value={church.id}>{church.name}</option>
+                      <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
                     ))}
                   </select>
                   <p className="text-xs text-slate-500 mt-2">Você possui acesso a múltiplas igrejas. Selecione qual deseja administrar nesta sessão.</p>

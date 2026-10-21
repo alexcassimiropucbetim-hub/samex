@@ -69,14 +69,14 @@ export function AllocationButton({ preEvaluationId, testSchedules }: { preEvalua
                 <select
                   value={selectedTestId}
                   onChange={(e) => setSelectedTestId(e.target.value)}
-                  className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                  className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase"
                 >
                   <option value="" className="bg-white">Selecione...</option>
                   {testSchedules.map((test) => {
                     const d = new Date(test.testDate);
                     return (
                       <option key={test.id} value={test.id} className="bg-white">
-                        {d.toLocaleDateString('pt-BR')} às {d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - {test.church?.name}
+                        {d.toLocaleDateString('pt-BR')} às {d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })} - {test.church?.name?.toUpperCase()}
                       </option>
                     );
                   })}

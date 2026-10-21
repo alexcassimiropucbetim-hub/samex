@@ -6,7 +6,7 @@ import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function createRoleType(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) return;
 
   await prisma.roleType.create({
@@ -39,7 +39,7 @@ export async function deleteRoleType(id: string) {
 
 export async function updateRoleType(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) return;
 
   await prisma.roleType.update({

@@ -14,14 +14,14 @@ export async function createPortalPreEvaluation(formData: FormData) {
   const session = await getSession();
   if (!session) throw new Error("Acesso negado. Sessão inválida.");
 
-  const candidateName = formData.get("candidateName") as string;
+  const candidateName = (formData.get("candidateName") as string)?.trim().toUpperCase();
   const gender = formData.get("gender") as string;
   const sectorId = formData.get("sectorId") as string;
   const churchId = formData.get("churchId") as string;
   
-  const instructorName = formData.get("instructorName") as string | null;
+  const instructorName = (formData.get("instructorName") as string | null)?.trim().toUpperCase() || null;
   const instructorChurchId = formData.get("instructorChurchId") as string | null;
-  const instructorChurchName = formData.get("instructorChurchName") as string | null;
+  const instructorChurchName = (formData.get("instructorChurchName") as string | null)?.trim().toUpperCase() || null;
   
   const instrumentId = formData.get("instrumentId") as string;
   const personInChargeId = formData.get("personInChargeId") as string;
@@ -41,8 +41,8 @@ export async function createPortalPreEvaluation(formData: FormData) {
   const illness = parseBoolean(formData.get("illness") as string | null);
   const approvedInSectorMeeting = parseBoolean(formData.get("approvedInSectorMeeting") as string | null);
   const meetingDate = formData.get("meetingDate") as string | null;
-  const meetingLocality = formData.get("meetingLocality") as string | null;
-  const meetingElderName = formData.get("meetingElderName") as string | null;
+  const meetingLocality = (formData.get("meetingLocality") as string | null)?.trim().toUpperCase() || null;
+  const meetingElderName = (formData.get("meetingElderName") as string | null)?.trim().toUpperCase() || null;
 
   if (!candidateName || !gender || !sectorId || !churchId || !instrumentId || !personInChargeId || !testTypeId || !msaStatus) {
     throw new Error("Preencha todos os campos obrigatórios.");
@@ -177,14 +177,14 @@ export async function updatePortalPreEvaluation(id: string, formData: FormData) 
 
   if (!existing) throw new Error("Registro não encontrado ou sem permissão.");
 
-  const candidateName = formData.get("candidateName") as string;
+  const candidateName = (formData.get("candidateName") as string)?.trim().toUpperCase();
   const gender = formData.get("gender") as string;
   const sectorId = formData.get("sectorId") as string;
   const churchId = formData.get("churchId") as string;
   
-  const instructorName = formData.get("instructorName") as string | null;
+  const instructorName = (formData.get("instructorName") as string | null)?.trim().toUpperCase() || null;
   const instructorChurchId = formData.get("instructorChurchId") as string | null;
-  const instructorChurchName = formData.get("instructorChurchName") as string | null;
+  const instructorChurchName = (formData.get("instructorChurchName") as string | null)?.trim().toUpperCase() || null;
   
   const instrumentId = formData.get("instrumentId") as string;
   const personInChargeId = formData.get("personInChargeId") as string;
@@ -204,8 +204,8 @@ export async function updatePortalPreEvaluation(id: string, formData: FormData) 
   const illness = parseBoolean(formData.get("illness") as string | null);
   const approvedInSectorMeeting = parseBoolean(formData.get("approvedInSectorMeeting") as string | null);
   const meetingDate = formData.get("meetingDate") as string | null;
-  const meetingLocality = formData.get("meetingLocality") as string | null;
-  const meetingElderName = formData.get("meetingElderName") as string | null;
+  const meetingLocality = (formData.get("meetingLocality") as string | null)?.trim().toUpperCase() || null;
+  const meetingElderName = (formData.get("meetingElderName") as string | null)?.trim().toUpperCase() || null;
 
   // 1. Validar a nova Church + Sector
   const { churchScope } = await getPortalScopes(session);

@@ -45,7 +45,7 @@ export default async function MinistriesPage({
               >
                 <option value="" disabled >Selecione uma igreja...</option>
                 {churches.map(church => (
-                  <option key={church.id} value={church.id}>{church.name}</option>
+                  <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
                 ))}
               </select>
             </div>
@@ -131,7 +131,7 @@ export default async function MinistriesPage({
                                   className="input-glass py-1.5 px-3 uppercase text-sm"
                                 >
                                   {churches.map(church => (
-                                    <option key={church.id} value={church.id}>{church.name}</option>
+                                    <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
                                   ))}
                                 </select>
                                 <input 
@@ -259,7 +259,7 @@ export default async function MinistriesPage({
                         className="input-glass py-1.5 px-3 uppercase text-sm"
                       >
                         {churches.map(church => (
-                          <option key={church.id} value={church.id}>{church.name}</option>
+                          <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
                         ))}
                       </select>
                       <input 

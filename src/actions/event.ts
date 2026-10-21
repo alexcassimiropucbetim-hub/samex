@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
-import { requireSuperAdmin } from "@/lib/auth-scope";
+import { getAuthenticatedAdmin } from "@/lib/auth-scope";
 
 export async function getEvents() {
   try {
@@ -20,20 +20,18 @@ export async function getEvents() {
 }
 
 export async function createEvent(formData: FormData) {
+  const admin = await getAuthenticatedAdmin();
   const session = await getSession();
-  const isAdmin = session?.type === "admin";
   const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
 
-  if (isAdmin) {
-    await requireSuperAdmin();
-  } else if (!isRegional) {
+  if (!admin && !isRegional) {
     throw new Error("Acesso negado");
   }
 
-  const title = formData.get("title") as string;
+  const title = (formData.get("title") as string)?.trim().toUpperCase();
   const dateStr = formData.get("date") as string;
   const type = formData.get("type") as string;
-  const description = formData.get("description") as string;
+  const description = (formData.get("description") as string)?.trim() || null;
 
   if (!title || !dateStr || !type) {
     throw new Error("Preencha todos os campos obrigatórios");
@@ -55,20 +53,18 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(id: string, formData: FormData) {
+  const admin = await getAuthenticatedAdmin();
   const session = await getSession();
-  const isAdmin = session?.type === "admin";
   const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
 
-  if (isAdmin) {
-    await requireSuperAdmin();
-  } else if (!isRegional) {
+  if (!admin && !isRegional) {
     throw new Error("Acesso negado");
   }
 
-  const title = formData.get("title") as string;
+  const title = (formData.get("title") as string)?.trim().toUpperCase();
   const dateStr = formData.get("date") as string;
   const type = formData.get("type") as string;
-  const description = formData.get("description") as string;
+  const description = (formData.get("description") as string)?.trim() || null;
 
   if (!title || !dateStr || !type) {
     throw new Error("Preencha todos os campos obrigatórios");
@@ -90,13 +86,11 @@ export async function updateEvent(id: string, formData: FormData) {
 }
 
 export async function deleteEvent(id: string) {
+  const admin = await getAuthenticatedAdmin();
   const session = await getSession();
-  const isAdmin = session?.type === "admin";
   const isRegional = session?.roleName?.toLowerCase().includes("regional") || session?.roleName?.toLowerCase().includes("examinadora");
 
-  if (isAdmin) {
-    await requireSuperAdmin();
-  } else if (!isRegional) {
+  if (!admin && !isRegional) {
     throw new Error("Acesso negado");
   }
 

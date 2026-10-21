@@ -8,7 +8,7 @@ export async function createChurch(formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado");
 
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const sectorId = formData.get("sectorId") as string;
   if (!name || !sectorId) return;
 
@@ -73,7 +73,7 @@ export async function updateChurch(id: string, formData: FormData) {
   if (!existingChurch) throw new Error("Registro não encontrado ou sem permissão.");
   await assertAdministrationAccess(existingChurch.sector.administrationId);
 
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const sectorId = formData.get("sectorId") as string;
   if (!name || !sectorId) return;
 

@@ -6,7 +6,7 @@ import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function createTestType(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) return;
 
   await prisma.testType.create({
@@ -46,7 +46,7 @@ export async function deleteTestType(id: string) {
 
 export async function updateTestType(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) return;
 
   await prisma.testType.update({

@@ -10,14 +10,14 @@ export async function createPreEvaluation(formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado. Administrador não autenticado.");
 
-  const candidateName = formData.get("candidateName") as string;
+  const candidateName = (formData.get("candidateName") as string)?.trim().toUpperCase();
   const gender = formData.get("gender") as string;
   const sectorId = formData.get("sectorId") as string;
   const churchId = formData.get("churchId") as string;
   
-  const instructorName = formData.get("instructorName") as string | null;
+  const instructorName = (formData.get("instructorName") as string | null)?.trim().toUpperCase() || null;
   const instructorChurchId = formData.get("instructorChurchId") as string | null;
-  const instructorChurchName = formData.get("instructorChurchName") as string | null;
+  const instructorChurchName = (formData.get("instructorChurchName") as string | null)?.trim().toUpperCase() || null;
   
   const instrumentId = formData.get("instrumentId") as string;
   const personInChargeId = formData.get("personInChargeId") as string;
@@ -37,8 +37,8 @@ export async function createPreEvaluation(formData: FormData) {
   const illness = parseBoolean(formData.get("illness") as string | null);
   const approvedInSectorMeeting = parseBoolean(formData.get("approvedInSectorMeeting") as string | null);
   const meetingDate = formData.get("meetingDate") as string | null;
-  const meetingLocality = formData.get("meetingLocality") as string | null;
-  const meetingElderName = formData.get("meetingElderName") as string | null;
+  const meetingLocality = (formData.get("meetingLocality") as string | null)?.trim().toUpperCase() || null;
+  const meetingElderName = (formData.get("meetingElderName") as string | null)?.trim().toUpperCase() || null;
 
   if (!candidateName || !gender || !sectorId || !churchId || !instrumentId || !personInChargeId || !testTypeId || !msaStatus) {
     throw new Error("Preencha todos os campos obrigatórios.");
@@ -280,14 +280,14 @@ export async function updatePreEvaluation(id: string, formData: FormData) {
   if (!existing) throw new Error("Registro não encontrado ou sem permissão.");
   await assertAdministrationAccess(existing.church.sector.administrationId);
 
-  const candidateName = formData.get("candidateName") as string;
+  const candidateName = (formData.get("candidateName") as string)?.trim().toUpperCase();
   const gender = formData.get("gender") as string;
   const sectorId = formData.get("sectorId") as string;
   const churchId = formData.get("churchId") as string;
   
-  const instructorName = formData.get("instructorName") as string | null;
+  const instructorName = (formData.get("instructorName") as string | null)?.trim().toUpperCase() || null;
   const instructorChurchId = formData.get("instructorChurchId") as string | null;
-  const instructorChurchName = formData.get("instructorChurchName") as string | null;
+  const instructorChurchName = (formData.get("instructorChurchName") as string | null)?.trim().toUpperCase() || null;
   
   const instrumentId = formData.get("instrumentId") as string;
   const personInChargeId = formData.get("personInChargeId") as string;
@@ -307,8 +307,8 @@ export async function updatePreEvaluation(id: string, formData: FormData) {
   const illness = parseBoolean(formData.get("illness") as string | null);
   const approvedInSectorMeeting = parseBoolean(formData.get("approvedInSectorMeeting") as string | null);
   const meetingDate = formData.get("meetingDate") as string | null;
-  const meetingLocality = formData.get("meetingLocality") as string | null;
-  const meetingElderName = formData.get("meetingElderName") as string | null;
+  const meetingLocality = (formData.get("meetingLocality") as string | null)?.trim().toUpperCase() || null;
+  const meetingElderName = (formData.get("meetingElderName") as string | null)?.trim().toUpperCase() || null;
 
   if (!candidateName || !gender || !sectorId || !churchId || !instrumentId || !personInChargeId || !testTypeId || !msaStatus) {
     throw new Error("Preencha todos os campos obrigatórios.");

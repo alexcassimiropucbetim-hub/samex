@@ -178,7 +178,7 @@ export function ChurchSwitcher({ churches, activeChurchId, isSidebar = false }: 
                         )}
                       </div>
                       {church.sector?.name && (
-                        <span className="text-[10px] text-slate-400 block truncate mt-0.5 font-normal">
+                        <span className="text-[10px] text-slate-400 block truncate mt-0.5 font-normal uppercase">
                           Setor: {church.sector.name}
                         </span>
                       )}

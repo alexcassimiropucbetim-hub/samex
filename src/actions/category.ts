@@ -6,7 +6,7 @@ import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function createCategory(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) return;
 
   await prisma.instrumentCategory.create({
@@ -24,7 +24,7 @@ export async function getCategories() {
 
 export async function updateCategory(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) return;
 
   await prisma.instrumentCategory.update({

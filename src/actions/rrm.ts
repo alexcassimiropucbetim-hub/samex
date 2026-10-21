@@ -23,7 +23,7 @@ export async function getActiveRRMs() {
 
 export async function createRRM(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   if (!name) throw new Error("Nome é obrigatório.");
 
   await prisma.rRM.create({ data: { name } });
@@ -32,7 +32,7 @@ export async function createRRM(formData: FormData) {
 
 export async function updateRRM(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const active = formData.get("active") === "true";
 
   if (!name) throw new Error("Nome é obrigatório.");

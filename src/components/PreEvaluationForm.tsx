@@ -283,23 +283,23 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Setor</label>
-                <select value={formData.sectorId} onChange={e => updateForm("sectorId", e.target.value)} className="input-glass">
+                <select value={formData.sectorId} onChange={e => updateForm("sectorId", e.target.value)} className="input-glass uppercase">
                   <option value="">Selecione um setor...</option>
-                  {sectors.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                  {sectors.map(s => <option key={s.id} value={s.id}>{s.name.toUpperCase()}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1">Congregação</label>
-                <select value={formData.churchId} onChange={e => updateForm("churchId", e.target.value)} disabled={!formData.sectorId} className="input-glass disabled:opacity-50">
+                <select value={formData.churchId} onChange={e => updateForm("churchId", e.target.value)} disabled={!formData.sectorId} className="input-glass disabled:opacity-50 uppercase">
                   <option value="">Selecione uma congregação...</option>
-                  {filteredChurches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  {filteredChurches.map(c => <option key={c.id} value={c.id}>{c.name.toUpperCase()}</option>)}
                 </select>
               </div>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-600 mb-1">Nome Completo do(a) Candidato(a)</label>
-              <input type="text" value={formData.candidateName} onChange={e => updateForm("candidateName", e.target.value)} className="input-glass" placeholder="Nome sem abreviações" />
+              <input type="text" value={formData.candidateName} onChange={e => updateForm("candidateName", e.target.value)} className="input-glass uppercase" placeholder="Nome sem abreviações" />
             </div>
 
             <div>
@@ -316,20 +316,20 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
                 <h4 className="text-sm sm:text-base text-orange-400 font-medium">Dados da Instrutora</h4>
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-1">Nome completo da Instrutora</label>
-                  <input type="text" value={formData.instructorName} onChange={e => updateForm("instructorName", e.target.value)} className="input-glass" placeholder="Nome sem abreviações" />
+                  <input type="text" value={formData.instructorName} onChange={e => updateForm("instructorName", e.target.value)} className="input-glass uppercase" placeholder="Nome sem abreviações" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-600 mb-1">Comum congregação da Instrutora</label>
-                  <select value={formData.instructorChurchId} onChange={e => updateForm("instructorChurchId", e.target.value)} className="input-glass">
+                  <select value={formData.instructorChurchId} onChange={e => updateForm("instructorChurchId", e.target.value)} className="input-glass uppercase">
                     <option value="">Selecione a igreja...</option>
-                    {churches.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                    {churches.map(c => <option key={c.id} value={c.id}>{c.name.toUpperCase()}</option>)}
                     <option value="OUTRA">OUTRA (Digitar Manualmente)</option>
                   </select>
                 </div>
                 {formData.instructorChurchId === "OUTRA" && (
                   <div>
                     <label className="block text-sm font-medium text-slate-600 mb-1">Nome da Congregação (Instrutora)</label>
-                    <input type="text" value={formData.instructorChurchName || ""} onChange={e => updateForm("instructorChurchName", e.target.value)} className="input-glass" placeholder="Digite o nome da comum da instrutora" />
+                    <input type="text" value={formData.instructorChurchName || ""} onChange={e => updateForm("instructorChurchName", e.target.value)} className="input-glass uppercase" placeholder="Digite o nome da comum da instrutora" />
                   </div>
                 )}
               </div>
@@ -533,7 +533,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <p className="text-slate-500">Candidato(a)</p>
-                  <p className="text-slate-600 font-medium">{formData.candidateName || "-"}</p>
+                  <p className="text-slate-600 font-medium uppercase">{formData.candidateName || "-"}</p>
                 </div>
                 <div>
                   <p className="text-slate-500">Sexo</p>
@@ -541,19 +541,19 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
                 </div>
                 <div>
                   <p className="text-slate-500">Setor</p>
-                  <p className="text-slate-600 font-medium">{sectors.find(s => s.id === formData.sectorId)?.name || "-"}</p>
+                  <p className="text-slate-600 font-medium uppercase">{sectors.find(s => s.id === formData.sectorId)?.name || "-"}</p>
                 </div>
                 <div>
                   <p className="text-slate-500">Congregação</p>
-                  <p className="text-slate-600 font-medium">{churches.find(c => c.id === formData.churchId)?.name || "-"}</p>
+                  <p className="text-slate-600 font-medium uppercase">{churches.find(c => c.id === formData.churchId)?.name || "-"}</p>
                 </div>
                 <div>
                   <p className="text-slate-500">Instrumento</p>
-                  <p className="text-slate-600 font-medium">{instruments.find(i => i.id === formData.instrumentId)?.name || "-"}</p>
+                  <p className="text-slate-600 font-medium uppercase">{instruments.find(i => i.id === formData.instrumentId)?.name || "-"}</p>
                 </div>
                 <div>
                   <p className="text-slate-500">Encarregado Resp.</p>
-                  <p className="text-slate-600 font-medium">{personInCharges.find(p => p.id === formData.personInChargeId)?.fullName || "-"}</p>
+                  <p className="text-slate-600 font-medium uppercase">{personInCharges.find(p => p.id === formData.personInChargeId)?.fullName || "-"}</p>
                 </div>
               </div>
 
@@ -561,11 +561,11 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-200 pb-4">
                   <div>
                     <p className="text-slate-500">Instrutora</p>
-                    <p className="text-slate-600 font-medium">{formData.instructorName || "-"}</p>
+                    <p className="text-slate-600 font-medium uppercase">{formData.instructorName || "-"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-500 uppercase tracking-wider">Igreja da Instrutora</p>
-                    <p className="text-slate-600 font-medium">
+                    <p className="text-slate-600 font-medium uppercase">
                       {formData.instructorChurchId === "OUTRA" 
                         ? formData.instructorChurchName 
                         : churches.find(c => c.id === formData.instructorChurchId)?.name || "-"}
@@ -577,7 +577,7 @@ export default function PreEvaluationForm({ sectors, churches, instruments, pers
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 border-b border-slate-200 pb-4">
                 <div>
                   <p className="text-slate-500">Tipo de Teste</p>
-                  <p className="text-slate-600 font-medium">{testTypes.find(t => t.id === formData.testTypeId)?.name || "-"}</p>
+                  <p className="text-slate-600 font-medium uppercase">{testTypes.find(t => t.id === formData.testTypeId)?.name || "-"}</p>
                 </div>
               </div>
 

@@ -23,7 +23,7 @@ export default async function ImprimirListaTestePage({ params }: { params: Promi
           <h2 className="text-lg mt-2">
             Data: {formattedDate} às {formattedTime}
           </h2>
-          <h3 className="text-md mt-1">Local: {test.church.name} - Setor: {test.church.sector.name}</h3>
+          <h3 className="text-md mt-1 uppercase">Local: {test.church.name} - Setor: {test.church.sector.name}</h3>
         </div>
 
         <div className="mb-4">

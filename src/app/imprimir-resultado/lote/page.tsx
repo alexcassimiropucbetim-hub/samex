@@ -101,7 +101,7 @@ export default async function ImprimirResultadoLotePage({ searchParams }: { sear
                 </div>
                 <div className="col-span-7 border-r-[1.5px] border-black px-2 py-0.5 text-[10px] flex flex-col justify-between">
                   <span>Localidade</span>
-                  <span className="text-center text-xs font-semibold">{testLocality}</span>
+                  <span className="text-center text-xs font-semibold uppercase">{testLocality}</span>
                 </div>
                 <div className="col-span-2 px-1 py-0.5 flex flex-col items-center justify-center">
                   <span className="font-bold text-xs">{aptaLabel}</span>

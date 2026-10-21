@@ -97,13 +97,13 @@ export function CandidateTestRow({ candidate, evaluators, index, isClosed, isSel
         >
           <option value="">Selecione...</option>
           {availableEvaluators.map(ev => (
-            <option key={ev.id} value={ev.id}>{ev.fullName}</option>
+            <option key={ev.id} value={ev.id}>{ev.fullName.toUpperCase()}</option>
           ))}
         </select>
       </div>
       
       <div className="w-24 shrink-0 text-center">
-        <span className="text-sm text-slate-600 truncate block">{candidate.testType.name.split(" ")[0]}</span>
+        <span className="text-sm text-slate-600 truncate block uppercase">{candidate.testType.name.split(" ")[0]}</span>
       </div>
       
       <div className="w-24 shrink-0 flex items-center justify-end gap-2 relative">

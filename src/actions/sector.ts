@@ -8,7 +8,7 @@ export async function createSector(formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado");
 
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   let administrationId = formData.get("administrationId") as string;
 
   if (!name) return;
@@ -45,7 +45,7 @@ export async function updateSector(id: string, formData: FormData) {
   if (!existingSector) throw new Error("Registro não encontrado ou sem permissão.");
   await assertAdministrationAccess(existingSector.administrationId);
 
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   let administrationId = formData.get("administrationId") as string;
 
   if (!name) return;

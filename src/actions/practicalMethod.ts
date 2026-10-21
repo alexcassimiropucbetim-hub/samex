@@ -18,7 +18,7 @@ export async function getPracticalMethods(instrumentId?: string) {
 
 export async function createPracticalMethod(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const instrumentIds = formData.getAll("instrumentIds") as string[];
   if (!name || instrumentIds.length === 0) throw new Error("Nome e ao menos um Instrumento são obrigatórios");
 
@@ -37,7 +37,7 @@ export async function createPracticalMethod(formData: FormData) {
 
 export async function updatePracticalMethod(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const instrumentIds = formData.getAll("instrumentIds") as string[];
   if (!name || instrumentIds.length === 0) throw new Error("Nome e ao menos um Instrumento são obrigatórios");
 

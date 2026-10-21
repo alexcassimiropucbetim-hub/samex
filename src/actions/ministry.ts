@@ -59,8 +59,8 @@ export async function createMinistry(formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado");
 
-  const elderName = formData.get("elderName") as string;
-  const cooperatorName = formData.get("cooperatorName") as string;
+  const elderName = (formData.get("elderName") as string)?.trim().toUpperCase();
+  const cooperatorName = (formData.get("cooperatorName") as string)?.trim().toUpperCase();
   const churchId = formData.get("churchId") as string;
 
   if (!elderName || !cooperatorName || !churchId) {
@@ -95,8 +95,8 @@ export async function updateMinistry(id: string, formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado");
 
-  const elderName = formData.get("elderName") as string;
-  const cooperatorName = formData.get("cooperatorName") as string;
+  const elderName = (formData.get("elderName") as string)?.trim().toUpperCase();
+  const cooperatorName = (formData.get("cooperatorName") as string)?.trim().toUpperCase();
   const churchId = formData.get("churchId") as string;
 
   if (!elderName || !cooperatorName || !churchId) {

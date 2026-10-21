@@ -26,7 +26,7 @@ export async function getActiveAdministrations() {
 
 export async function createAdministration(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const rrmId = formData.get("rrmId") as string;
   
   if (!name || !rrmId) throw new Error("Nome e RRM são obrigatórios.");
@@ -40,7 +40,7 @@ export async function createAdministration(formData: FormData) {
 
 export async function updateAdministration(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const rrmId = formData.get("rrmId") as string;
   const active = formData.get("active") === "true";
 

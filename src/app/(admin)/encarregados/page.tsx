@@ -165,11 +165,11 @@ export default async function EncarregadosPage({
                 name="churchId"
                 required
                 defaultValue={editingPerson?.churchId || ""}
-                className="input-glass"
+                className="input-glass uppercase"
               >
                 <option value="" disabled>Selecione uma comum...</option>
                 {churches.map(church => (
-                  <option key={church.id} value={church.id}>{church.name}</option>
+                  <option key={church.id} value={church.id}>{church.name.toUpperCase()}</option>
                 ))}
               </select>
             </div>
@@ -183,7 +183,7 @@ export default async function EncarregadosPage({
               ) : (
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar border border-slate-100 rounded-lg p-2 bg-slate-50/50">
                   {tiposTeste.map(tipo => (
-                    <label key={tipo.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
+                    <label key={tipo.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors uppercase">
                       <input 
                         type="checkbox" 
                         name="testTypeIds" 
@@ -208,7 +208,7 @@ export default async function EncarregadosPage({
                 <div className="space-y-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar border border-slate-100 rounded-lg p-2 bg-slate-50/50">
                   <p className="text-[11px] text-slate-400 mb-2">Selecione além da Comum Congregação, quais outras igrejas ele gerencia.</p>
                   {churches.map(church => (
-                    <label key={church.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors">
+                    <label key={church.id} className="flex items-center gap-2 text-sm text-slate-600 cursor-pointer hover:text-slate-900 transition-colors uppercase">
                       <input 
                         type="checkbox" 
                         name="managedChurchIds" 

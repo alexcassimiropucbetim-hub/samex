@@ -69,12 +69,12 @@ export default async function CadastroTestePage({
                 name="churchId"
                 defaultValue={defaultChurchId}
                 required
-                className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                className="w-full bg-slate-100 border border-slate-200 rounded-xl p-3 text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500/50 uppercase"
               >
                 <option value="" className="bg-white">Selecione uma congregação...</option>
                 {churches.map((church) => (
                   <option key={church.id} value={church.id} className="bg-white">
-                    {church.name} - {church.sector?.name}
+                    {church.name.toUpperCase()} - {church.sector?.name.toUpperCase()}
                   </option>
                 ))}
               </select>
@@ -168,7 +168,7 @@ export default async function CadastroTestePage({
                   </div>
                 </div>
 
-                <div className="bg-slate-100 rounded-lg p-3 border border-slate-200 mt-2 mx-5 mb-5 relative z-10 pointer-events-none">
+                <div className="bg-slate-100 rounded-lg p-3 border border-slate-200 mt-2 mx-5 mb-5 relative z-10 pointer-events-none uppercase">
                   <p className="text-sm font-medium text-slate-600 flex items-center gap-2">
                     <Church className="w-4 h-4 text-orange-400" />
                     {schedule.church.name}

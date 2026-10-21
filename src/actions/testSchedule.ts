@@ -9,7 +9,7 @@ export async function createTestSchedule(formData: FormData) {
   const testDate = formData.get("testDate") as string;
   const churchId = formData.get("churchId") as string;
   const masterKey = formData.get("masterKey") as string;
-  const elderName = formData.get("elderName") as string;
+  const elderName = (formData.get("elderName") as string)?.trim().toUpperCase() || null;
 
   if (!testDate || !churchId) return;
 
@@ -28,7 +28,7 @@ export async function createTestSchedule(formData: FormData) {
       testDate: new Date(testDate),
       churchId,
       masterKey: masterKey || null,
-      elderName: elderName || null,
+      elderName,
     },
   });
 
@@ -151,7 +151,7 @@ export async function updateTestSchedule(id: string, formData: FormData) {
       testDate: new Date(testDate),
       churchId,
       masterKey: masterKey || null,
-      elderName: elderName || null,
+      elderName: (elderName as string)?.trim().toUpperCase() || null,
     },
   });
 

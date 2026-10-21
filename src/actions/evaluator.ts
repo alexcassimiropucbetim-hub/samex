@@ -8,7 +8,7 @@ export async function createEvaluator(formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado");
 
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   let administrationId = formData.get("administrationId") as string;
 
   if (!name) return;
@@ -57,7 +57,7 @@ export async function updateEvaluator(id: string, formData: FormData) {
   if (!existingEvaluator) throw new Error("Registro não encontrado ou sem permissão.");
   await assertAdministrationAccess(existingEvaluator.administrationId);
 
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   let administrationId = formData.get("administrationId") as string;
   
   if (!name) return;

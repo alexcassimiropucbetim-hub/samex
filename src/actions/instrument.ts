@@ -6,7 +6,7 @@ import { requireSuperAdmin } from "@/lib/auth-scope";
 
 export async function createInstrument(formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const categoryId = formData.get("categoryId") as string;
   if (!name || !categoryId) return;
 
@@ -55,7 +55,7 @@ export async function getInstrumentsPaginated(page: number = 1, pageSize: number
 
 export async function updateInstrument(id: string, formData: FormData) {
   await requireSuperAdmin();
-  const name = formData.get("name") as string;
+  const name = (formData.get("name") as string)?.trim().toUpperCase();
   const categoryId = formData.get("categoryId") as string;
   if (!name || !categoryId) return;
 

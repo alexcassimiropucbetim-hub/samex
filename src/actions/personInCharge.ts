@@ -8,10 +8,10 @@ export async function createPersonInCharge(formData: FormData) {
   const admin = await getAuthenticatedAdmin();
   if (!admin) throw new Error("Acesso negado");
 
-  const login = formData.get("login") as string;
-  const fullName = formData.get("fullName") as string;
+  const login = (formData.get("login") as string)?.trim();
+  const fullName = (formData.get("fullName") as string)?.trim().toUpperCase();
   const gender = formData.get("gender") as string;
-  const cardNumber = formData.get("cardNumber") as string;
+  const cardNumber = (formData.get("cardNumber") as string)?.trim().toUpperCase();
   const churchId = formData.get("churchId") as string;
   const roleTypeId = formData.get("roleTypeId") as string;
   const testTypeIds = formData.getAll("testTypeIds") as string[];
@@ -129,10 +129,10 @@ export async function updatePersonInCharge(id: string, formData: FormData) {
   });
   if (!existingPerson) throw new Error("Registro não encontrado ou sem permissão.");
 
-  const login = formData.get("login") as string;
-  const fullName = formData.get("fullName") as string;
+  const login = (formData.get("login") as string)?.trim();
+  const fullName = (formData.get("fullName") as string)?.trim().toUpperCase();
   const gender = formData.get("gender") as string;
-  const cardNumber = formData.get("cardNumber") as string;
+  const cardNumber = (formData.get("cardNumber") as string)?.trim().toUpperCase();
   const churchId = formData.get("churchId") as string;
   const roleTypeId = formData.get("roleTypeId") as string;
   const testTypeIds = formData.getAll("testTypeIds") as string[];

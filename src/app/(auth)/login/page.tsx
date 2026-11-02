@@ -130,108 +130,19 @@ export default function LoginPage() {
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_40%,rgba(16,43,82,0.7)_0%,rgba(7,27,59,1)_100%)] pointer-events-none"></div>
 
       {/* Main Container Card */}
-      <div className="w-full max-w-[1020px] rounded-[24px] sm:rounded-[28px] overflow-hidden shadow-[0_25px_65px_-12px_rgba(0,0,0,0.85),0_0_35px_rgba(255,101,0,0.12)] border border-[#FF6500]/30 bg-white relative flex flex-col lg:flex-row my-auto z-10">
-        
+      <div 
+        className="w-full max-w-[1000px] rounded-[24px] sm:rounded-[28px] overflow-hidden shadow-[0_25px_65px_-12px_rgba(0,0,0,0.85),0_0_35px_rgba(255,101,0,0.18)] border border-[#FF6500]/30 bg-white relative flex flex-col lg:flex-row my-auto z-10"
+        style={{
+          backgroundImage: "url('/images/samex_card_clean.jpg')",
+          backgroundSize: "100% 100%",
+          backgroundRepeat: "no-repeat",
+          backgroundPosition: "center",
+        }}
+      >
         {/* ========================================================================= */}
-        {/* DESKTOP LEFT COLUMN (42%) */}
+        {/* DESKTOP LEFT COLUMN (41%) - Transparent to reveal background artwork */}
         {/* ========================================================================= */}
-        <div className="hidden lg:flex lg:w-[42%] relative overflow-hidden bg-gradient-to-br from-[#071B3B] via-[#0A2247] to-[#071B3B] p-8 sm:p-10 flex-col justify-between text-white z-0">
-          {/* Background image: instrument of brass & clarinet over sheet music */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/samex_music_bg.jpg"
-              alt="Instrumentos musicais e partitura SAMEX"
-              fill
-              sizes="(max-width: 1024px) 100vw, 42vw"
-              className="object-cover object-bottom opacity-35 mix-blend-luminosity brightness-110 contrast-125"
-              priority
-            />
-            {/* Gradients to blend smoothly with navy brand */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#071B3B] via-[#071B3B]/60 to-[#071B3B]/90" />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#071B3B]/95 via-transparent to-[#071B3B]/90" />
-          </div>
-
-          {/* S-Curve divider transition on the right */}
-          <svg
-            className="absolute top-0 -right-[1px] h-full w-14 z-20 pointer-events-none"
-            viewBox="0 0 50 640"
-            preserveAspectRatio="none"
-            fill="none"
-          >
-            <path
-              d="M 50 0 C 12 140, 12 260, 30 360 C 48 460, 18 540, 50 640"
-              stroke="#FF6500"
-              strokeWidth="3.5"
-              className="drop-shadow-[0_0_8px_rgba(255,101,0,0.9)]"
-            />
-            <path
-              d="M 50 0 C 12 140, 12 260, 30 360 C 48 460, 18 540, 50 640 L 50 640 L 50 0 Z"
-              fill="#FFFFFF"
-            />
-          </svg>
-
-          {/* Top Brand Section */}
-          <div className="relative z-10 flex flex-col items-start">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF8500] to-[#FF5500] p-[1px] shadow-[0_8px_20px_rgba(255,101,0,0.45)] flex items-center justify-center mb-3 ring-1 ring-white/20">
-              <Music className="w-7 h-7 text-white drop-shadow" />
-            </div>
-
-            <div className="flex flex-col items-start">
-              <h1 className="text-4xl font-black italic tracking-wider text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
-                SAMEX
-              </h1>
-              {/* Orange swoosh curve */}
-              <svg className="w-32 h-3.5 -mt-1 text-[#FF6500]" viewBox="0 0 130 14" fill="none">
-                <path d="M2 3C32 10 75 12 128 3C90 8 45 9 2 3Z" fill="currentColor" />
-              </svg>
-            </div>
-
-            <p className="text-xs text-slate-300 font-medium tracking-wide mt-2">
-              Sistema de Administração Musical de Exames
-            </p>
-          </div>
-
-          {/* Middle 3 Features */}
-          <div className="relative z-10 space-y-3.5 my-8">
-            {/* Feature 1 */}
-            <div className="bg-[#071B3B]/75 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center gap-3.5 shadow-sm hover:border-[#FF6500]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#FF6500]/15 border border-[#FF6500]/30 flex items-center justify-center shrink-0">
-                <Calendar className="w-5 h-5 text-[#FF8500]" />
-              </div>
-              <div className="text-left">
-                <h4 className="text-sm font-bold text-white leading-tight">Agendamentos</h4>
-                <p className="text-xs text-slate-300">Exames e Ensaios</p>
-              </div>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="bg-[#071B3B]/75 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center gap-3.5 shadow-sm hover:border-[#FF6500]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#FF6500]/15 border border-[#FF6500]/30 flex items-center justify-center shrink-0">
-                <Users className="w-5 h-5 text-[#FF8500]" />
-              </div>
-              <div className="text-left">
-                <h4 className="text-sm font-bold text-white leading-tight">Organização</h4>
-                <p className="text-xs text-slate-300">por Setor, Administração e Igreja</p>
-              </div>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="bg-[#071B3B]/75 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex items-center gap-3.5 shadow-sm hover:border-[#FF6500]/40 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#FF6500]/15 border border-[#FF6500]/30 flex items-center justify-center shrink-0">
-                <ShieldCheck className="w-5 h-5 text-[#FF8500]" />
-              </div>
-              <div className="text-left">
-                <h4 className="text-sm font-bold text-white leading-tight">Segurança</h4>
-                <p className="text-xs text-slate-300">Controle e acesso exclusivo</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom subtle note */}
-          <div className="relative z-10 text-[11px] text-slate-400">
-            Ambiente ministerial seguro e monitorado.
-          </div>
-        </div>
+        <div className="hidden lg:flex lg:w-[41%] relative z-0 pointer-events-none min-h-[660px]" />
 
         {/* ========================================================================= */}
         {/* MOBILE HEADER (< 1024px) */}
@@ -239,14 +150,14 @@ export default function LoginPage() {
         <div className="lg:hidden relative w-full pt-8 pb-10 px-6 overflow-hidden bg-gradient-to-b from-[#071B3B] via-[#0A2247] to-[#071B3B] text-center flex flex-col items-center">
           <div className="absolute inset-0 z-0">
             <Image
-              src="/images/samex_music_bg.jpg"
+              src="/images/samex_mobile_header.jpg"
               alt="Instrumentos musicais SAMEX"
               fill
               sizes="100vw"
-              className="object-cover object-center opacity-30 mix-blend-luminosity brightness-110"
+              className="object-cover object-top opacity-50 brightness-110"
               priority
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-[#071B3B]/90 via-[#071B3B]/70 to-[#071B3B]/95" />
+            <div className="absolute inset-0 bg-gradient-to-b from-[#071B3B]/80 via-[#071B3B]/50 to-[#071B3B]/95" />
           </div>
 
           <div className="relative z-10 flex flex-col items-center">
@@ -288,9 +199,9 @@ export default function LoginPage() {
         </div>
 
         {/* ========================================================================= */}
-        {/* RIGHT COLUMN (FORM CARD AREA - 58%) */}
+        {/* RIGHT COLUMN (FORM CARD AREA - 59%) */}
         {/* ========================================================================= */}
-        <div className="w-full lg:w-[58%] px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-10 flex flex-col justify-center bg-white relative z-10">
+        <div className="w-full lg:w-[59%] px-6 py-8 sm:px-10 sm:py-10 lg:px-12 lg:py-10 flex flex-col justify-center bg-white lg:bg-transparent relative z-10 lg:ml-auto">
           
           {/* Users Icon Badge */}
           <div className="w-14 h-14 bg-white rounded-full border-2 border-[#FF6500]/25 shadow-[0_6px_20px_rgba(255,101,0,0.18)] flex items-center justify-center -mt-12 sm:-mt-14 lg:mt-0 mb-3 mx-auto z-10 relative">

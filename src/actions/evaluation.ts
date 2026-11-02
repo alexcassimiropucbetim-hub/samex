@@ -35,7 +35,10 @@ export async function saveEvaluation(data: {
 
     const evaluation = await prisma.preEvaluation.findUnique({
       where: { id: preEvaluationId },
-      include: { church: { include: { sector: true } } }
+      include: { 
+        church: { include: { sector: true } },
+        evaluationResult: true
+      }
     });
 
     if (!evaluation) {
@@ -48,9 +51,10 @@ export async function saveEvaluation(data: {
       await assertAdministrationAccess(candAdminId);
     }
 
-    const evaluatorId = session?.type === "encarregado" ? session.id : null;
+    const isEditing = Boolean(evaluation.evaluationResult);
+    const evaluatorId = session?.type === "encarregado" ? session.id : (evaluation.evaluationResult?.evaluatorId || null);
 
-    if (evaluatorId) {
+    if (evaluatorId && session?.type === "encarregado") {
       const pic = await prisma.personInCharge.findUnique({
         where: { id: evaluatorId },
         include: { church: { include: { sector: true } } }
@@ -87,20 +91,28 @@ export async function saveEvaluation(data: {
     let autoAllocatedTestId: string | null = null;
 
     if (isApproved) {
-      const twentyFourHoursFromNow = new Date();
-      twentyFourHoursFromNow.setHours(twentyFourHoursFromNow.getHours() + 24);
+      // Se já possuía um agendamento vinculado, preserva
+      if (evaluation.testScheduleId) {
+        autoAllocatedTestId = evaluation.testScheduleId;
+      } else {
+        const twentyFourHoursFromNow = new Date();
+        twentyFourHoursFromNow.setHours(twentyFourHoursFromNow.getHours() + 24);
 
-      const nextValidTest = await prisma.testSchedule.findFirst({
-        where: {
-          testDate: { gte: twentyFourHoursFromNow },
-          church: { sector: { administrationId: candAdminId } }
-        },
-        orderBy: { testDate: 'asc' }
-      });
+        const nextValidTest = await prisma.testSchedule.findFirst({
+          where: {
+            testDate: { gte: twentyFourHoursFromNow },
+            church: { sector: { administrationId: candAdminId } }
+          },
+          orderBy: { testDate: 'asc' }
+        });
 
-      if (nextValidTest) {
-        autoAllocatedTestId = nextValidTest.id;
+        if (nextValidTest) {
+          autoAllocatedTestId = nextValidTest.id;
+        }
       }
+    } else {
+      // Reprovado não tem teste agendado
+      autoAllocatedTestId = null;
     }
 
     const status = isApproved ? "APROVADO" : "REPROVADO";
@@ -112,23 +124,26 @@ export async function saveEvaluation(data: {
       }
     });
 
+    const notifTitle = isEditing ? "Avaliação Atualizada" : "Resultado de Avaliação";
+    const notifMsg = `A avaliação do candidato ${updatedEval.candidateName} foi ${isEditing ? "atualizada" : "registrada"}. Resultado: ${status}.`;
+
     await prisma.notification.create({
       data: {
         personInChargeId: updatedEval.personInChargeId,
-        title: "Resultado de Avaliação",
-        message: `O candidato ${updatedEval.candidateName} foi avaliado. Resultado: ${status}.`,
+        title: notifTitle,
+        message: notifMsg,
         type: "RESULTADO"
       }
     });
 
     sendNotificationToUser(updatedEval.personInChargeId, {
-      title: "Resultado de Avaliação",
-      message: `O candidato ${updatedEval.candidateName} foi avaliado. Resultado: ${status}.`,
-      link: "/portal/pre-avaliacao"
+      title: notifTitle,
+      message: notifMsg,
+      link: `/portal/pre-avaliacao/resultado?id=${preEvaluationId}`
     }).catch(e => console.error("Erro push RESULTADO", e));
 
     await import("@/lib/audit").then(m => m.logActivity(
-      "AVALIOU_CANDIDATO",
+      isEditing ? "EDITOU_AVALIACAO_CANDIDATO" : "AVALIOU_CANDIDATO",
       "PreEvaluation",
       preEvaluationId,
       { status, observacao, autoAllocatedTestId }
@@ -136,6 +151,8 @@ export async function saveEvaluation(data: {
 
     revalidatePath("/portal");
     revalidatePath("/portal/pre-avaliacao");
+    revalidatePath("/portal/pre-avaliacao/resultado");
+    revalidatePath("/portal/pre-avaliacao/avaliar");
     return { success: true };
   } catch (error: any) {
     console.error("Failed to save evaluation:", error);

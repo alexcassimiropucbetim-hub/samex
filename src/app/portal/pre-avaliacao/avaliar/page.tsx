@@ -31,35 +31,50 @@ export default async function AvaliarPreAvaliacaoPage({
 
   const evalReq = await prisma.preEvaluation.findUnique({
     where: { id },
-    include: { testType: true, church: true, sector: true }
+    include: { 
+      testType: true, 
+      church: true, 
+      sector: true,
+      evaluationResult: true 
+    }
   });
 
   if (!evalReq) {
     redirect("/portal/pre-avaliacao");
   }
 
-  if (!isAdmin) {
+  const isOriginalEvaluator = evalReq.evaluationResult?.evaluatorId === session?.id;
+
+  if (!isAdmin && !isOriginalEvaluator) {
     if (isExaminadora && evalReq.gender !== 'F') {
       redirect("/portal/pre-avaliacao");
     }
-    if (isRegional && evalReq.gender !== 'M') {
+    if (isRegional && !isExaminadora && evalReq.gender !== 'M') {
       redirect("/portal/pre-avaliacao");
     }
   }
 
   const theoryMethods = await getTheoryMethods();
   const practicalMethods = await getPracticalMethods(evalReq.instrumentId);
+  const isEditing = Boolean(evalReq.evaluationResult);
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-5xl mx-auto">
       <div>
-        <Link href="/portal/pre-avaliacao" className="text-slate-500 hover:text-slate-900 flex items-center gap-2 w-fit mb-4 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Voltar para inscrições
+        <Link 
+          href={isEditing ? `/portal/pre-avaliacao/resultado?id=${evalReq.id}` : "/portal/pre-avaliacao"} 
+          className="text-slate-500 hover:text-slate-900 flex items-center gap-2 w-fit mb-4 transition-colors"
+        >
+          <ArrowLeft className="w-4 h-4" /> {isEditing ? "Voltar para o resultado" : "Voltar para inscrições"}
         </Link>
         <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-          Realizar Pré-Avaliação
+          {isEditing ? "Editar Avaliação" : "Realizar Pré-Avaliação"}
         </h1>
-        <p className="text-slate-500 mt-2">Preencha os critérios técnicos e musicais para aprovar ou reprovar o candidato.</p>
+        <p className="text-slate-500 mt-2">
+          {isEditing 
+            ? "Atualize as notas, observações ou programa de estudo dirigido do candidato."
+            : "Preencha os critérios técnicos e musicais para aprovar ou reprovar o candidato."}
+        </p>
       </div>
 
       {/* Info do Candidato */}
@@ -87,6 +102,10 @@ export default async function AvaliarPreAvaliacaoPage({
         candidateName={evalReq.candidateName} 
         theoryMethods={theoryMethods}
         practicalMethods={practicalMethods}
+        initialResult={evalReq.evaluationResult ? {
+          ...evalReq.evaluationResult,
+          status: evalReq.status
+        } : undefined}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { BookOpen, CheckCircle, XCircle, ArrowLeft, ClipboardList, Music, Book } from "lucide-react";
+import { BookOpen, CheckCircle, XCircle, ArrowLeft, ClipboardList, Music, Book, Pencil } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSession } from "@/lib/auth";
@@ -10,8 +10,9 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
   if (!id) return notFound();
 
   const session = await getSession();
-  const isRegional = Boolean(session?.roleName?.toLowerCase().includes("regional"));
-  const isExaminadora = Boolean(session?.roleName?.toLowerCase().includes("examinadora"));
+  const roleName = session?.roleName?.toLowerCase() || "";
+  const isRegional = Boolean(roleName.includes("regional"));
+  const isExaminadora = Boolean(roleName.includes("examinadora"));
   const isAdmin = session?.type === "admin";
   const isLocal = !isRegional && !isExaminadora && !isAdmin;
   const showGrades = !isLocal;
@@ -34,6 +35,14 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
       </div>
     );
   }
+
+  const isOriginalEvaluator = preEvaluation.evaluationResult?.evaluatorId === session?.id;
+  const canEdit = !isLocal && (
+    isAdmin ||
+    isOriginalEvaluator ||
+    (isExaminadora && preEvaluation.gender === 'F') ||
+    (isRegional && preEvaluation.gender === 'M')
+  );
 
   const result = preEvaluation.evaluationResult;
   const isApproved = preEvaluation.status === "APROVADO";
@@ -61,24 +70,50 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 pb-20">
-      <div className="flex items-center gap-4">
-        <Link href="/portal/pre-avaliacao" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-500 hover:text-slate-900">
-          <ArrowLeft className="w-5 h-5" />
-        </Link>
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
-            <BookOpen className="text-blue-500" /> Resultado da Avaliação
-          </h1>
-          <p className="text-slate-500 mt-1">{preEvaluation.candidateName} - {preEvaluation.testType.name}</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/portal/pre-avaliacao" className="p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors text-slate-500 hover:text-slate-900" title="Voltar">
+            <ArrowLeft className="w-5 h-5" />
+          </Link>
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 flex items-center gap-3">
+              <BookOpen className="text-blue-500" /> Resultado da Avaliação
+            </h1>
+            <p className="text-slate-500 mt-1">{preEvaluation.candidateName} - {preEvaluation.testType.name}</p>
+          </div>
         </div>
+
+        {canEdit && (
+          <div className="flex items-center gap-3">
+            <Link
+              href={`/portal/pre-avaliacao/avaliar?id=${preEvaluation.id}`}
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-sm hover:shadow transition-all active:scale-95 text-sm"
+              title="Editar Avaliação"
+            >
+              <Pencil className="w-4 h-4" />
+              Editar Avaliação
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-1 space-y-6">
           <div className="glass-card p-6 border-t-4 border-t-blue-500">
-            <h2 className="text-xl font-bold text-slate-900 mb-4 flex items-center gap-2">
-              <ClipboardList className="w-5 h-5 text-blue-400" /> Parecer
-            </h2>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
+                <ClipboardList className="w-5 h-5 text-blue-400" /> Parecer
+              </h2>
+              {canEdit && (
+                <Link
+                  href={`/portal/pre-avaliacao/avaliar?id=${preEvaluation.id}`}
+                  className="text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+                  title="Editar Avaliação"
+                >
+                  <Pencil className="w-3.5 h-3.5" /> Editar
+                </Link>
+              )}
+            </div>
             
             <div className={`p-4 rounded-xl border flex items-start gap-3 mb-6 ${
               isApproved 
@@ -124,9 +159,20 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
         <div className="lg:col-span-2">
           {isApproved && (msaLessons.length > 0 || methodLessons.length > 0 || hymns.length > 0) ? (
             <div className="glass-card p-6 border-t-4 border-t-orange-500 h-full">
-              <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-2">
-                <Book className="text-orange-400" /> Estudo Dirigido
-              </h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
+                  <Book className="text-orange-400" /> Estudo Dirigido
+                </h2>
+                {canEdit && (
+                  <Link
+                    href={`/portal/pre-avaliacao/avaliar?id=${preEvaluation.id}`}
+                    className="text-xs font-semibold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition-colors"
+                    title="Editar Estudo Dirigido"
+                  >
+                    <Pencil className="w-3.5 h-3.5" /> Editar
+                  </Link>
+                )}
+              </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {msaLessons.length > 0 && (
@@ -199,7 +245,15 @@ export default async function ResultadoPreAvaliacaoPage({ searchParams }: { sear
             <div className="glass-card p-10 h-full flex flex-col items-center justify-center text-center opacity-70">
               <BookOpen className="w-16 h-16 text-slate-500 mb-4" />
               <h2 className="text-xl font-bold text-slate-600">Sem Estudo Dirigido</h2>
-              <p className="text-slate-500 mt-2">Nenhum programa de estudo foi definido para este candidato.</p>
+              <p className="text-slate-500 mt-2 mb-4">Nenhum programa de estudo foi definido para este candidato.</p>
+              {canEdit && (
+                <Link
+                  href={`/portal/pre-avaliacao/avaliar?id=${preEvaluation.id}`}
+                  className="text-sm font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" /> Definir Estudo Dirigido
+                </Link>
+              )}
             </div>
           )}
         </div>

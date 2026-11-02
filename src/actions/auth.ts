@@ -11,14 +11,14 @@ export async function getRecaptchaSiteKey() {
 }
 
 export async function loginEncarregado(formData: FormData) {
-  const cardNumber = formData.get("cardNumber") as string;
-  const login = formData.get("login") as string;
+  const cardNumber = (formData.get("cardNumber") as string)?.trim();
+  const password = ((formData.get("password") as string) || (formData.get("login") as string))?.trim();
   const selectedChurchId = formData.get("selectedChurchId") as string;
 
   const recaptchaToken = formData.get("recaptchaToken") as string;
 
-  if (!cardNumber || !login) {
-    return { error: "Preencha a carteirinha e o login." };
+  if (!cardNumber || !password) {
+    return { error: "Preencha o número da carteirinha e o usuário." };
   }
 
   const headersList = await headers();
@@ -29,7 +29,7 @@ export async function loginEncarregado(formData: FormData) {
   const fifteenMinutesAgo = new Date(Date.now() - 15 * 60 * 1000);
   const recentAttempts = await prisma.loginAttempt.findMany({
     where: {
-      OR: [{ ipAddress }, { login }],
+      OR: [{ ipAddress }, { login: password }, { login: cardNumber }],
       createdAt: { gte: fifteenMinutesAgo }
     },
     orderBy: { createdAt: "desc" }
@@ -76,9 +76,9 @@ export async function loginEncarregado(formData: FormData) {
     include: { roleType: true, church: true, managedChurches: true },
   });
 
-  if (!encarregado || encarregado.login.trim().toLowerCase() !== login.trim().toLowerCase()) {
-    await prisma.loginAttempt.create({ data: { ipAddress, login, success: false } });
-    return { error: "Credenciais inválidas. Verifique sua carteirinha e login." };
+  if (!encarregado || encarregado.login.trim().toLowerCase() !== password.toLowerCase()) {
+    await prisma.loginAttempt.create({ data: { ipAddress, login: cardNumber, success: false } });
+    return { error: "Credenciais inválidas. Verifique sua carteirinha e usuário." };
   }
 
   // Combine primary church and managed churches, removing duplicates
@@ -105,7 +105,7 @@ export async function loginEncarregado(formData: FormData) {
     churchId: finalChurchId,
   });
 
-  await prisma.loginAttempt.create({ data: { ipAddress, login, success: true } });
+  await prisma.loginAttempt.create({ data: { ipAddress, login: encarregado.login, success: true } });
 
   await prisma.accessLog.create({
     data: {
